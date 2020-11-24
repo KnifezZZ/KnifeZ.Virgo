@@ -1,0 +1,60 @@
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using KnifeZ.Virgo.Core;
+using KnifeZ.Virgo.Core.Extensions;
+
+namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkUserVms
+{
+    public class FrameworkUserListVM : BasePagedListVM<FrameworkUser_View, FrameworkUserSearcher>
+    {
+        protected override IEnumerable<IGridColumn<FrameworkUser_View>> InitGridHeader()
+        {
+            return new List<GridColumn<FrameworkUser_View>>{
+                this.MakeGridHeader(x => x.ITCode),
+                this.MakeGridHeader(x => x.Name),
+                this.MakeGridHeader(x => x.Sex),
+                this.MakeGridHeader(x => x.CellPhone),
+                this.MakeGridHeader(x => x.RoleName_view),
+                this.MakeGridHeader(x => x.GroupName_view),
+                this.MakeGridHeader(x=> x.PhotoId),
+                this.MakeGridHeader(x => x.IsValid),
+                this.MakeGridHeaderAction(width: 280)
+            };
+        }
+
+        public override IOrderedQueryable<FrameworkUser_View> GetSearchQuery()
+        {
+            var query = DC.Set<FrameworkUserBase>()
+                .CheckContain(Searcher.ITCode,x=>x.ITCode)
+                .CheckContain(Searcher.Name, x=>x.Name)
+                .CheckEqual(Searcher.IsValid, x=>x.IsValid)
+                .Select(x => new FrameworkUser_View
+                {
+                    ID = x.ID,
+                    ITCode = x.ITCode,
+                    Name = x.Name,
+                    PhotoId = x.PhotoId,
+                    CellPhone = x.CellPhone,
+                    IsValid = x.IsValid,
+                    RoleName_view = x.UserRoles.Select(y => y.Role.RoleName).ToSpratedString(null, ","),
+                    GroupName_view = x.UserGroups.Select(y => y.Group.GroupName).ToSpratedString(null, ","),
+                    Sex = x.Sex
+                })
+                .OrderBy(x => x.ITCode);
+            return query;
+        }
+
+    }
+
+    public class FrameworkUser_View : FrameworkUserBase
+    {
+        [Display(Name = "Role")]
+        public string RoleName_view { get; set; }
+
+        [Display(Name = "Group")]
+        public string GroupName_view { get; set; }
+    }
+}
