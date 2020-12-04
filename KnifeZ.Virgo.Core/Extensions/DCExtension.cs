@@ -36,7 +36,7 @@ namespace KnifeZ.Virgo.Core.Extensions
         /// <param name="ignorDataPrivilege">忽略数据权限判断</param>
         /// <param name="SortByName">是否根据Text字段排序，默认为是</param>
         /// <returns>SelectListItem列表</returns>
-        public static List<TreeSelectListItem> GetTreeSelectListItems<T>(this IQueryable<T> baseQuery
+        public static List<TreeSelectListItem> GetTreeSelectListItems<T> (this IQueryable<T> baseQuery
             , List<DataPrivilege> dps
             , Expression<Func<T, bool>> whereCondition
             , Expression<Func<T, string>> textField
@@ -176,7 +176,7 @@ namespace KnifeZ.Virgo.Core.Extensions
         /// <param name="ignorDataPrivilege">忽略数据权限判断</param>
         /// <param name="SortByName">是否根据Text字段排序，默认为是</param>
         /// <returns>SelectListItem列表</returns>
-        public static List<ComboSelectListItem> GetSelectListItems<T>(this IQueryable<T> baseQuery
+        public static List<ComboSelectListItem> GetSelectListItems<T> (this IQueryable<T> baseQuery
             , List<DataPrivilege> dps
             , Expression<Func<T, bool>> whereCondition
             , Expression<Func<T, string>> textField
@@ -232,7 +232,7 @@ namespace KnifeZ.Virgo.Core.Extensions
             var parentMI = typeof(ComboSelectListItem).GetMember("ParentId")[0];
             if (typeof(ITreeData<T>).IsAssignableFrom(typeof(T)))
             {
-                var parentMember = Expression.MakeMemberAccess(pe, typeof(ITreeData).GetProperty("ParentId"));
+                var parentMember = Expression.MakeMemberAccess(pe, typeof(ITreeData).GetSingleProperty("ParentId"));
                 var p = Expression.Call(parentMember, "ToString", Array.Empty<Type>());
                 var p1 = Expression.Call(p, "ToLower", Array.Empty<Type>());
                 parentBind = Expression.Bind(parentMI, p1);
@@ -272,7 +272,7 @@ namespace KnifeZ.Virgo.Core.Extensions
         /// <param name="query">源query</param>
         /// <param name="dps">数据权限列表</param>
         /// <returns>拼接好where条件的query</returns>
-        private static IQueryable<T> AppendSelfDPWhere<T>(IQueryable<T> query, List<DataPrivilege> dps) where T : TopBasePoco
+        private static IQueryable<T> AppendSelfDPWhere<T> (IQueryable<T> query, List<DataPrivilege> dps) where T : TopBasePoco
         {
             var dpsSetting = GlobalServices.GetService<Configs>().DataPrivilegeSettings;
             ParameterExpression pe = Expression.Parameter(typeof(T));
@@ -313,7 +313,7 @@ namespace KnifeZ.Virgo.Core.Extensions
         /// <param name="dps">数据权限</param>
         /// <param name="IdFields">关联表外键</param>
         /// <returns>修改后的查询语句</returns>
-        public static IQueryable<T> DPWhere<T>(this IQueryable<T> baseQuery, List<DataPrivilege> dps, params Expression<Func<T, object>>[] IdFields)
+        public static IQueryable<T> DPWhere<T> (this IQueryable<T> baseQuery, List<DataPrivilege> dps, params Expression<Func<T, object>>[] IdFields)
         {
             //循环所有关联外键
             List<string> tableNameList = new List<string>();
@@ -328,7 +328,7 @@ namespace KnifeZ.Virgo.Core.Extensions
                 if (fieldName.ToLower() != "id")
                 {
                     fieldName = fieldName.Remove(fieldName.Length - 2);
-                    typename = IdField.GetPropertyInfo().DeclaringType.GetProperty(fieldName).PropertyType.Name;
+                    typename = IdField.GetPropertyInfo().DeclaringType.GetSingleProperty(fieldName).PropertyType.Name;
                 }
                 //如果是 Id，则本身就是关联的类
                 else
@@ -352,7 +352,7 @@ namespace KnifeZ.Virgo.Core.Extensions
         /// <param name="tableName">关联数据权限的表名,如果关联外键为自身，则参数第一个为自身</param>
         /// <param name="IdFields">关联表外键</param>
         /// <returns>修改后的查询语句</returns>
-        public static IQueryable<T> DPWhere<T>(this IQueryable<T> baseQuery, List<DataPrivilege> dps, List<string> tableName, params Expression<Func<T, object>>[] IdFields)
+        public static IQueryable<T> DPWhere<T> (this IQueryable<T> baseQuery, List<DataPrivilege> dps, List<string> tableName, params Expression<Func<T, object>>[] IdFields)
         {
             // var dpsSetting = BaseVM.AllDPS;
             ParameterExpression pe = Expression.Parameter(typeof(T));
@@ -361,7 +361,7 @@ namespace KnifeZ.Virgo.Core.Extensions
             Expression trueExp = Expression.Equal(left1, right1);
             Expression falseExp = Expression.NotEqual(left1, right1);
             Expression finalExp = null;
-            var pePros = pe.Type.GetProperties();
+            int index = 0;
             //循环所有关联外键
             foreach (var IdField in IdFields)
             {
@@ -376,8 +376,7 @@ namespace KnifeZ.Virgo.Core.Extensions
                     mtm = true;
                     splits[0] = splits[0].Substring(0, leftindex);
                 }
-                PropertyInfo pi = pePros.Where(x => x.Name == splits[0]).FirstOrDefault();
-                Expression peid = Expression.MakeMemberAccess(pe, pi);
+                Expression peid = Expression.MakeMemberAccess(pe, pe.Type.GetSingleProperty(splits[0]));
                 Type middletype = null;
                 if (mtm)
                 {
@@ -388,7 +387,7 @@ namespace KnifeZ.Virgo.Core.Extensions
                 {
                     for (int i = 1; i < splits.Length; i++)
                     {
-                        peid = Expression.MakeMemberAccess(peid, peid.Type.GetProperty(splits[i], BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public)); 
+                        peid = Expression.MakeMemberAccess(peid, peid.Type.GetSingleProperty(splits[i]));
                     }
                     middletype = (peid as MemberExpression).Member.DeclaringType;
                 }
@@ -404,7 +403,7 @@ namespace KnifeZ.Virgo.Core.Extensions
                     if (fieldName.ToLower() != "id")
                     {
                         fieldName = fieldName.Remove(fieldName.Length - 2);
-                        var typeinfo = middletype.GetProperty(fieldName);
+                        var typeinfo = middletype.GetSingleProperty(fieldName);
                         //var IsTableName = tableName?.Where(x => x == fieldName).FirstOrDefault();
                         var IsTableName = tableName?.Where(x => x.ToLower() == typeinfo.PropertyType.Name.ToLower()).FirstOrDefault();
                         if (string.IsNullOrEmpty(IsTableName))
@@ -417,7 +416,7 @@ namespace KnifeZ.Virgo.Core.Extensions
                     //如果是Id，则本身就是关联的类
                     else
                     {
-                        fieldName = tableName[0];
+                        fieldName = tableName[index];
                     }
                     var dpsSetting = GlobalServices.GetService<Configs>().DataPrivilegeSettings;
 
@@ -485,6 +484,7 @@ namespace KnifeZ.Virgo.Core.Extensions
                 {
                     finalExp = Expression.OrElse(finalExp, exp);
                 }
+                index++;
             }
             //如果没有进行任何修改，则还返回baseQuery
             if (finalExp == null)
@@ -500,7 +500,7 @@ namespace KnifeZ.Virgo.Core.Extensions
         }
         #endregion
 
-        public static IOrderedQueryable<T> Sort<T>(this IQueryable<T> baseQuery, string sortInfo, params SortInfo[] defaultSorts) where T : TopBasePoco
+        public static IOrderedQueryable<T> Sort<T> (this IQueryable<T> baseQuery, string sortInfo, params SortInfo[] defaultSorts) where T : TopBasePoco
         {
             List<SortInfo> info = new List<SortInfo>();
             IOrderedQueryable<T> rv = null;
@@ -536,7 +536,7 @@ namespace KnifeZ.Virgo.Core.Extensions
                 ParameterExpression pe = Expression.Parameter(typeof(T));
                 var idproperty = typeof(T).GetProperties().Where(x => x.Name == item.Property).FirstOrDefault();
                 Expression pro = Expression.Property(pe, idproperty);
-                Type proType = typeof(T).GetProperty(item.Property).PropertyType;
+                Type proType = typeof(T).GetSingleProperty(item.Property).PropertyType;
                 if (item.Direction == SortDir.Asc)
                 {
                     if (rv == null)
@@ -587,7 +587,7 @@ namespace KnifeZ.Virgo.Core.Extensions
             return rv;
         }
 
-        public static IQueryable<T> CheckID<T>(this IQueryable<T> baseQuery, object val)
+        public static IQueryable<T> CheckID<T> (this IQueryable<T> baseQuery, object val)
         {
             ParameterExpression pe = Expression.Parameter(typeof(T));
             var idproperty = typeof(T).GetProperties().Where(x => x.Name.ToLower() == "id").FirstOrDefault();
@@ -597,7 +597,7 @@ namespace KnifeZ.Virgo.Core.Extensions
 
         }
 
-        public static IQueryable<T> CheckWhere<T, S>(this IQueryable<T> baseQuery, S val, Expression<Func<T, bool>> where)
+        public static IQueryable<T> CheckWhere<T, S> (this IQueryable<T> baseQuery, S val, Expression<Func<T, bool>> where)
         {
             if (val == null)
             {
@@ -616,7 +616,7 @@ namespace KnifeZ.Virgo.Core.Extensions
             }
         }
 
-        public static IQueryable<T> CheckEqual<T>(this IQueryable<T> baseQuery, string val, Expression<Func<T, string>> field)
+        public static IQueryable<T> CheckEqual<T> (this IQueryable<T> baseQuery, string val, Expression<Func<T, string>> field)
         {
             if (val == null || val == "")
             {
@@ -630,7 +630,7 @@ namespace KnifeZ.Virgo.Core.Extensions
             }
         }
 
-        public static IQueryable<T> CheckEqual<T, S>(this IQueryable<T> baseQuery, S? val, Expression<Func<T, S?>> field)
+        public static IQueryable<T> CheckEqual<T, S> (this IQueryable<T> baseQuery, S? val, Expression<Func<T, S?>> field)
             where S : struct
         {
             if (val == null)
@@ -645,7 +645,7 @@ namespace KnifeZ.Virgo.Core.Extensions
             }
         }
 
-        public static IQueryable<T> CheckEqual<T, S>(this IQueryable<T> baseQuery, S val, Expression<Func<T, S?>> field)
+        public static IQueryable<T> CheckEqual<T, S> (this IQueryable<T> baseQuery, S val, Expression<Func<T, S?>> field)
     where S : struct
         {
             S? a = val;
@@ -653,7 +653,7 @@ namespace KnifeZ.Virgo.Core.Extensions
         }
 
 
-        public static IQueryable<T> CheckBetween<T, S>(this IQueryable<T> baseQuery, S? valMin, S? valMax, Expression<Func<T, S?>> field, bool includeMin = true, bool includeMax = true)
+        public static IQueryable<T> CheckBetween<T, S> (this IQueryable<T> baseQuery, S? valMin, S? valMax, Expression<Func<T, S?>> field, bool includeMin = true, bool includeMax = true)
     where S : struct
         {
             if (valMin == null && valMax == null)
@@ -677,7 +677,7 @@ namespace KnifeZ.Virgo.Core.Extensions
             }
         }
 
-        public static IQueryable<T> CheckBetween<T, S>(this IQueryable<T> baseQuery, S valMin, S valMax, Expression<Func<T, S?>> field, bool includeMin = true, bool includeMax = true)
+        public static IQueryable<T> CheckBetween<T, S> (this IQueryable<T> baseQuery, S valMin, S valMax, Expression<Func<T, S?>> field, bool includeMin = true, bool includeMax = true)
 where S : struct
         {
             S? a = valMin;
@@ -685,7 +685,7 @@ where S : struct
             return CheckBetween(baseQuery, a, b, field, includeMin, includeMax);
         }
 
-        public static IQueryable<T> CheckBetween<T, S>(this IQueryable<T> baseQuery, S? valMin, S valMax, Expression<Func<T, S?>> field, bool includeMin = true, bool includeMax = true)
+        public static IQueryable<T> CheckBetween<T, S> (this IQueryable<T> baseQuery, S? valMin, S valMax, Expression<Func<T, S?>> field, bool includeMin = true, bool includeMax = true)
 where S : struct
         {
             S? a = valMin;
@@ -693,7 +693,7 @@ where S : struct
             return CheckBetween(baseQuery, a, b, field, includeMin, includeMax);
         }
 
-        public static IQueryable<T> CheckBetween<T, S>(this IQueryable<T> baseQuery, S valMin, S? valMax, Expression<Func<T, S?>> field, bool includeMin = true, bool includeMax = true)
+        public static IQueryable<T> CheckBetween<T, S> (this IQueryable<T> baseQuery, S valMin, S? valMax, Expression<Func<T, S?>> field, bool includeMin = true, bool includeMax = true)
 where S : struct
         {
             S? a = valMin;
@@ -701,7 +701,7 @@ where S : struct
             return CheckBetween(baseQuery, a, b, field, includeMin, includeMax);
         }
 
-        public static IQueryable<T> CheckContain<T>(this IQueryable<T> baseQuery, string val, Expression<Func<T, string>> field, bool ignoreCase = true)
+        public static IQueryable<T> CheckContain<T> (this IQueryable<T> baseQuery, string val, Expression<Func<T, string>> field, bool ignoreCase = true)
         {
             if (string.IsNullOrEmpty(val))
             {
@@ -725,7 +725,7 @@ where S : struct
             }
         }
 
-        public static IQueryable<T> CheckContain<T, S>(this IQueryable<T> baseQuery, List<S> val, Expression<Func<T, S>> field)
+        public static IQueryable<T> CheckContain<T, S> (this IQueryable<T> baseQuery, List<S> val, Expression<Func<T, S>> field)
         {
             if (val == null || val.Count == 0 || (val.Count == 1 && val[0] == null))
             {
@@ -741,7 +741,7 @@ where S : struct
             }
         }
 
-        public static string GetTableName<T>(this IDataContext self)
+        public static string GetTableName<T> (this IDataContext self)
         {
             return self.GetTableName<T>();
             //if (self.DBType == DBTypeEnum.PgSql)
@@ -761,7 +761,7 @@ where S : struct
         /// <param name="self">DataContext</param>
         /// <param name="listFieldName">主表中的子表List属性名称</param>
         /// <returns>主键名称</returns>
-        public static string GetFKName<T>(this IDataContext self, string listFieldName) where T : class
+        public static string GetFKName<T> (this IDataContext self, string listFieldName) where T : class
         {
             return GetFKName(self, typeof(T), listFieldName);
         }
@@ -773,7 +773,7 @@ where S : struct
         /// <param name="sourceType">主表model类型</param>
         /// <param name="listFieldName">主表中的子表List属性名称</param>
         /// <returns>主键名称</returns>
-        public static string GetFKName(this IDataContext self, Type sourceType, string listFieldName)
+        public static string GetFKName (this IDataContext self, Type sourceType, string listFieldName)
         {
             try
             {
@@ -801,7 +801,7 @@ where S : struct
         /// <param name="self">DataContext</param>
         /// <param name="FieldName">关联主表的属性名称</param>
         /// <returns>主键名称</returns>
-        public static string GetFKName2<T>(this IDataContext self, string FieldName) where T : class
+        public static string GetFKName2<T> (this IDataContext self, string FieldName) where T : class
         {
             return GetFKName2(self, typeof(T), FieldName);
         }
@@ -813,7 +813,7 @@ where S : struct
         /// <param name="sourceType">子表model类型</param>
         /// <param name="FieldName">关联主表的属性名称</param>
         /// <returns>主键名称</returns>
-        public static string GetFKName2(this IDataContext self, Type sourceType, string FieldName)
+        public static string GetFKName2 (this IDataContext self, Type sourceType, string FieldName)
         {
             try
             {
@@ -833,14 +833,14 @@ where S : struct
             }
         }
 
-        public static string GetFieldName<T>(this IDataContext self, Expression<Func<T, object>> field)
+        public static string GetFieldName<T> (this IDataContext self, Expression<Func<T, object>> field)
         {
             string pname = field.GetPropertyName();
             return self.GetFieldName<T>(pname);
         }
 
 
-        public static string GetFieldName<T>(this IDataContext self, string fieldname)
+        public static string GetFieldName<T> (this IDataContext self, string fieldname)
         {
             var rv = self.Model.FindEntityType(typeof(T)).FindProperty(fieldname);
             if (rv == null)
@@ -872,7 +872,7 @@ where S : struct
 
         }
 
-        public static string GetPropertyNameByFk(this IDataContext self, Type sourceType, string fkname)
+        public static string GetPropertyNameByFk (this IDataContext self, Type sourceType, string fkname)
         {
             try
             {
@@ -893,7 +893,7 @@ where S : struct
         }
 
 
-        public static Expression<Func<TModel, bool>> GetContainIdExpression<TModel>(this List<string> Ids, Expression peid = null)
+        public static Expression<Func<TModel, bool>> GetContainIdExpression<TModel> (this List<string> Ids, Expression peid = null)
         {
             //if (Ids == null)
             //{
@@ -919,7 +919,7 @@ where S : struct
             return rv;
         }
 
-        public static LambdaExpression GetContainIdExpression(this List<string> Ids, Type modeltype, ParameterExpression pe, Expression peid = null)
+        public static LambdaExpression GetContainIdExpression (this List<string> Ids, Type modeltype, ParameterExpression pe, Expression peid = null)
         {
             if (Ids == null)
             {
@@ -948,7 +948,7 @@ where S : struct
         /// </summary>
         /// <param name="self">DataContext</param>
         /// <returns>可用的事务实例</returns>
-        public static Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction BeginTransaction(this IDataContext self)
+        public static Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction BeginTransaction (this IDataContext self)
         {
             if (self == null)
                 throw new ArgumentNullException(nameof(self));
@@ -965,7 +965,7 @@ where S : struct
         /// <param name="self">DataContext</param>
         /// <param name="isolationLevel"></param>
         /// <returns>可用的事务实例</returns>
-        public static Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction BeginTransaction(this IDataContext self, System.Data.IsolationLevel isolationLevel)
+        public static Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction BeginTransaction (this IDataContext self, System.Data.IsolationLevel isolationLevel)
         {
             if (self == null)
                 throw new ArgumentNullException(nameof(self));
@@ -979,7 +979,7 @@ where S : struct
 
     public static class DbCommandExtension
     {
-        public static void AddParameter(this DbCommand command)
+        public static void AddParameter (this DbCommand command)
         {
 
         }
@@ -989,17 +989,17 @@ where S : struct
     {
         internal static readonly FakeNestedTransaction DefaultTransaction = new FakeNestedTransaction();
 
-        private FakeNestedTransaction() { }
+        private FakeNestedTransaction () { }
 
-        public void Dispose()
+        public void Dispose ()
         {
         }
 
-        public void Commit()
+        public void Commit ()
         {
         }
 
-        public void Rollback()
+        public void Rollback ()
         {
             throw new TransactionInDoubtException("an exception occurs while executing the nested transaction or processing the results");
         }

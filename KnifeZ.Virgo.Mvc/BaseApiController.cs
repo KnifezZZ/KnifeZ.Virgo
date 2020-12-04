@@ -200,7 +200,7 @@ namespace KnifeZ.Virgo.Mvc
             {
                 try
                 {
-                    if (Request.QueryString != null)
+                    if (Request.QueryString.HasValue)
                     {
                         foreach (var key in Request.Query.Keys)
                         {
@@ -293,7 +293,7 @@ namespace KnifeZ.Virgo.Mvc
                     string namePre = ConfigInfo.CookiePre + "`Searcher" + "`" + rv.VMFullName + "`";
                     Type searcherType = searcher.GetType();
                     var pros = searcherType.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance).ToList();
-                    pros.Add(searcherType.GetProperty("IsValid"));
+                    pros.Add(searcherType.GetSingleProperty("IsValid"));
 
                     Dictionary<string, string> cookieDic = HttpContext.Session.Get<Dictionary<string, string>>("SearchCondition" + searcher.VMFullName);
                     if (cookieDic != null)

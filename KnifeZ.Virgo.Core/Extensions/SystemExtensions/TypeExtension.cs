@@ -12,13 +12,14 @@ namespace KnifeZ.Virgo.Core.Extensions
     /// </summary>
     public static class TypeExtension
     {
+        public static Dictionary<string, List<PropertyInfo>> _propertyCache { get; set; } = new Dictionary<string, List<PropertyInfo>>();
         /// <summary>
         /// 判断是否是泛型
         /// </summary>
         /// <param name="self">Type类</param>
         /// <param name="innerType">泛型类型</param>
         /// <returns>判断结果</returns>
-        public static bool IsGeneric(this Type self, Type innerType)
+        public static bool IsGeneric (this Type self, Type innerType)
         {
             if (self.GetTypeInfo().IsGenericType && self.GetGenericTypeDefinition() == innerType)
             {
@@ -35,7 +36,7 @@ namespace KnifeZ.Virgo.Core.Extensions
         /// </summary>
         /// <param name="self">Type类</param>
         /// <returns>判断结果</returns>
-        public static bool IsNullable(this Type self)
+        public static bool IsNullable (this Type self)
         {
             return self.IsGeneric(typeof(Nullable<>));
         }
@@ -45,7 +46,7 @@ namespace KnifeZ.Virgo.Core.Extensions
         /// </summary>
         /// <param name="self">Type类</param>
         /// <returns>判断结果</returns>
-        public static bool IsList(this Type self)
+        public static bool IsList (this Type self)
         {
             return self.IsGeneric(typeof(List<>));
         }
@@ -57,7 +58,7 @@ namespace KnifeZ.Virgo.Core.Extensions
         /// </summary>
         /// <param name="self">Type类</param>
         /// <returns>判断结果</returns>
-        public static bool IsEnum(this Type self)
+        public static bool IsEnum (this Type self)
         {
             return self.GetTypeInfo().IsEnum;
         }
@@ -67,7 +68,7 @@ namespace KnifeZ.Virgo.Core.Extensions
         /// </summary>
         /// <param name="self"></param>
         /// <returns></returns>
-        public static bool IsEnumOrNullableEnum(this Type self)
+        public static bool IsEnumOrNullableEnum (this Type self)
         {
             if (self == null)
             {
@@ -97,12 +98,12 @@ namespace KnifeZ.Virgo.Core.Extensions
         /// </summary>
         /// <param name="self">Type类</param>
         /// <returns>判断结果</returns>
-        public static bool IsPrimitive(this Type self)
+        public static bool IsPrimitive (this Type self)
         {
             return self.GetTypeInfo().IsPrimitive || self == typeof(decimal);
         }
 
-        public static bool IsNumber(this Type self)
+        public static bool IsNumber (this Type self)
         {
             Type checktype = self;
             if (self.IsNullable())
@@ -122,7 +123,7 @@ namespace KnifeZ.Virgo.Core.Extensions
 
         #region 判断是否是Bool
 
-        public static bool IsBool(this Type self)
+        public static bool IsBool (this Type self)
         {
             return self == typeof(bool);
         }
@@ -132,7 +133,7 @@ namespace KnifeZ.Virgo.Core.Extensions
         /// </summary>
         /// <param name="self"></param>
         /// <returns></returns>
-        public static bool IsBoolOrNullableBool(this Type self)
+        public static bool IsBoolOrNullableBool (this Type self)
         {
             if (self == null)
             {
@@ -150,7 +151,7 @@ namespace KnifeZ.Virgo.Core.Extensions
 
         #endregion
 
-        public static Dictionary<string,string> GetRandomValues(this Type self)
+        public static Dictionary<string, string> GetRandomValues (this Type self)
         {
             Dictionary<string, string> rv = new Dictionary<string, string>();
             string pat = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
@@ -160,8 +161,8 @@ namespace KnifeZ.Virgo.Core.Extensions
                 string key = pro.Name;
                 string val = "";
                 var notmapped = pro.GetCustomAttribute<NotMappedAttribute>();
-                if (pro.IsPropertyRequired() && notmapped == null && 
-                    pro.PropertyType.IsBoolOrNullableBool() == false && 
+                if (pro.IsPropertyRequired() && notmapped == null &&
+                    pro.PropertyType.IsBoolOrNullableBool() == false &&
                     pro.PropertyType.IsEnumOrNullableEnum() == false &&
                     pro.PropertyType.IsList() == false &&
                     pro.PropertyType.IsSubclassOf(typeof(TopBasePoco)) == false)
@@ -181,17 +182,17 @@ namespace KnifeZ.Virgo.Core.Extensions
                             catch { }
                         }
                         Random r = new Random();
-                        val = r.Next(start,end).ToString();
+                        val = r.Next(start, end).ToString();
                     }
                     else if (pro.PropertyType == typeof(string))
                     {
                         var length = pro.GetCustomAttribute<StringLengthAttribute>();
-                        var l = new Random().Next(3,10);
+                        var l = new Random().Next(3, 10);
                         if (length != null && l > length.MaximumLength)
                         {
                             l = length.MaximumLength;
                         }
-                        Random r = new Random();                        
+                        Random r = new Random();
                         for (int i = 0; i < l; i++)
                         {
                             int index = r.Next(pat.Length);
@@ -199,10 +200,10 @@ namespace KnifeZ.Virgo.Core.Extensions
                         }
                         val = "\"" + val + "\"";
                     }
-                        if (pros.Where(x => x.Name.ToLower() + "id" == key.ToLower()).Any())
-                        {
-                            val = "$fk$";
-                        }
+                    if (pros.Where(x => x.Name.ToLower() + "id" == key.ToLower()).Any())
+                    {
+                        val = "$fk$";
+                    }
                     if (val != "")
                     {
                         rv.Add(key, val);
@@ -210,6 +211,15 @@ namespace KnifeZ.Virgo.Core.Extensions
                 }
             }
             return rv;
+        }
+
+        public static PropertyInfo GetSingleProperty (this Type self, string name)
+        {
+            if (_propertyCache.ContainsKey(self.FullName) == false)
+            {
+                _propertyCache.Add(self.FullName, self.GetProperties().ToList());
+            }
+            return _propertyCache[self.FullName].Where(x => x.Name == name).FirstOrDefault();
         }
     }
 }

@@ -18,7 +18,7 @@ namespace KnifeZ.Virgo.Core
 
         Type ModelType { get; set; }
         //获取数据权限的下拉菜单
-        List<ComboSelectListItem> GetItemList(IDataContext dc, LoginUserInfo user, string filter=null);
+        List<ComboSelectListItem> GetItemList (IDataContext dc, LoginUserInfo user, string filter = null);
     }
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace KnifeZ.Virgo.Core
         private Expression<Func<T, bool>> _where;
         public Type ModelType { get; set; }
 
-        public DataPrivilegeInfo(string name, Expression<Func<T, string>> displayField, Expression<Func<T, bool>> where = null)
+        public DataPrivilegeInfo (string name, Expression<Func<T, string>> displayField, Expression<Func<T, bool>> where = null)
         {
             ModelType = typeof(T);
             ModelName = ModelType.Name;
@@ -52,21 +52,20 @@ namespace KnifeZ.Virgo.Core
         /// <param name="dc">dc</param>
         /// <param name="user">user</param>
         /// <returns>数据权限关联表的下拉菜单</returns>
-        public List<ComboSelectListItem> GetItemList(IDataContext dc, LoginUserInfo user,string filter=null)
+        public List<ComboSelectListItem> GetItemList (IDataContext dc, LoginUserInfo user, string filter = null)
         {
             Expression<Func<T, bool>> where = null;
             if (string.IsNullOrEmpty(filter) == false)
             {
                 ChangePara cp = new ChangePara();
                 ParameterExpression pe = Expression.Parameter(typeof(T));
-                var toString = Expression.Call(cp.Change(_displayField.Body, pe), "ToString", new Type[] { });
-                var tolower = Expression.Call(toString, "ToLower", new Type[] { });
+                var tolower = Expression.Call(cp.Change(_displayField.Body, pe), "ToLower", new Type[] { });
                 var exp = Expression.Call(tolower, "Contains", null, Expression.Constant(filter.ToLower()));
                 where = Expression.Lambda<Func<T, bool>>(exp, pe);
-                if(_where != null)
+                if (_where != null)
                 {
                     var temp = cp.Change(_where.Body, pe);
-                    var together = Expression.And(where.Body,temp );
+                    var together = Expression.And(where.Body, temp);
                     where = Expression.Lambda<Func<T, bool>>(together, pe);
                 }
             }
@@ -75,9 +74,9 @@ namespace KnifeZ.Virgo.Core
                 where = _where;
             }
             List<ComboSelectListItem> rv = new List<ComboSelectListItem>();
-            if (user.Roles?.Where(x => x.RoleCode == "001").FirstOrDefault() == null && user.DataPrivileges?.Where(x=>x.RelateId == null).FirstOrDefault() == null)
+            if (user.Roles?.Where(x => x.RoleCode == "001").FirstOrDefault() == null && user.DataPrivileges?.Where(x => x.RelateId == null).FirstOrDefault() == null)
             {
-                rv = dc.Set<T>().Where(x=>user.DataPrivileges.Select(y=>y.RelateId).Contains(x.ID.ToString())).GetSelectListItems(null, where, _displayField, null, ignorDataPrivilege: true);
+                rv = dc.Set<T>().Where(x => user.DataPrivileges.Select(y => y.RelateId).Contains(x.ID.ToString())).GetSelectListItems(null, where, _displayField, null, ignorDataPrivilege: true);
             }
             else
             {

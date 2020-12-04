@@ -178,7 +178,7 @@ namespace KnifeZ.Virgo.Core
             foreach (var f in fa)
             {
                 var fname = DC.GetFKName2<TModel>(f.Name);
-                var fid = typeof(TModel).GetProperty(fname).GetValue(rv) as Guid?;
+                var fid = typeof(TModel).GetSingleProperty(fname).GetValue(rv) as Guid?;
                 var file = DC.Set<FileAttachment>().Where(x => x.ID == fid).Select(x => new FileAttachment {
                     ID = x.ID,
                     CreateBy = x.CreateBy,
@@ -461,7 +461,7 @@ namespace KnifeZ.Virgo.Core
                                 _entity = ndc.Set<TModel>().Include(pro.Name).AsNoTracking().CheckID(Entity.GetID()).FirstOrDefault();
                             }
                             //比较子表原数据和新数据的区别
-                            IEnumerable<TopBasePoco> data = _entity.GetType().GetProperty(pro.Name).GetValue(_entity) as IEnumerable<TopBasePoco>;
+                            IEnumerable<TopBasePoco> data = _entity.GetType().GetSingleProperty(pro.Name).GetValue(_entity) as IEnumerable<TopBasePoco>;
                             Utils.CheckDifference(data, list, out IEnumerable<TopBasePoco> toremove, out IEnumerable<TopBasePoco> toadd);
                             //设定子表应该更新的字段
                             List<string> setnames = new List<string>();
@@ -553,7 +553,7 @@ namespace KnifeZ.Virgo.Core
                             var _entity = DC.Set<TModel>().Include(pro.Name).AsNoTracking().CheckID(Entity.GetID()).FirstOrDefault();
                             if (_entity != null)
                             {
-                                IEnumerable<TopBasePoco> removeData = _entity.GetType().GetProperty(pro.Name).GetValue(_entity) as IEnumerable<TopBasePoco>;
+                                IEnumerable<TopBasePoco> removeData = _entity.GetType().GetSingleProperty(pro.Name).GetValue(_entity) as IEnumerable<TopBasePoco>;
                                 //如果是PersistPoco，则把IsValid设为false，并不进行物理删除
                                 if (removeData is IEnumerable<PersistPoco> removePersistPocoData)
                                 {
