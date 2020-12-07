@@ -93,7 +93,7 @@ namespace KnifeZ.Virgo.Mvc.Filters
                                 model.FC.Add(key, f[key]);
                             }
                         }
-                        if (context.HttpContext.Request.QueryString != null)
+                        if (context.HttpContext.Request.QueryString.HasValue)
                         {
                             foreach (var key in context.HttpContext.Request.Query.Keys)
                             {

@@ -694,28 +694,28 @@ namespace KnifeZ.Virgo.Core
         }
         #endregion
 
-        public static string GetNugetVersion(string start = null, bool pre = false)
-        {
-            var Cache = GlobalServices.GetRequiredService<IDistributedCache>() as IDistributedCache;
-            if (Cache.TryGetValue("nugetversion", out NugetInfo rv) == false || rv == null)
-            {
-                NugetInfo v = APIHelper.CallAPI<NugetInfo>($"https://api-v2v3search-0.nuget.org/query?q=KnifeZ.Virgo.Mvc&prerelease={pre.ToString().ToLower()}").Result;
-                var data = v;
-                    Cache.Add("nugetversion", data, new DistributedCacheEntryOptions()
-                    {
-                        SlidingExpiration = new TimeSpan(0, 0, 36000)
-                    });
-                rv = data;
-            }
+        //public static string GetNugetVersion(string start = null, bool pre = false)
+        //{
+        //    var Cache = GlobalServices.GetRequiredService<IDistributedCache>() as IDistributedCache;
+        //    if (Cache.TryGetValue("nugetversion", out NugetInfo rv) == false || rv == null)
+        //    {
+        //        NugetInfo v = APIHelper.CallAPI<NugetInfo>($"https://api-v2v3search-0.nuget.org/query?q=KnifeZ.Virgo.Mvc&prerelease={pre.ToString().ToLower()}").Result;
+        //        var data = v;
+        //            Cache.Add("nugetversion", data, new DistributedCacheEntryOptions()
+        //            {
+        //                SlidingExpiration = new TimeSpan(0, 0, 36000)
+        //            });
+        //        rv = data;
+        //    }
 
-            if (string.IsNullOrEmpty(start))
-            {
-                return rv.data[0]?.version;
-            }
-            else
-            {
-                return rv.data[0].versions.Select(x => x.version).Where(x => x.StartsWith(start)).Last();
-            }
-        }
+        //    if (string.IsNullOrEmpty(start))
+        //    {
+        //        return rv.data[0]?.version;
+        //    }
+        //    else
+        //    {
+        //        return rv.data[0].versions.Select(x => x.version).Where(x => x.StartsWith(start)).Last();
+        //    }
+        //}
     }
 }

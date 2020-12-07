@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging.Debug;
 using Microsoft.Extensions.Options;
 using Npgsql;
 //using Oracle.ManagedDataAccess.Client;
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -83,7 +82,7 @@ namespace KnifeZ.Virgo.Core
         /// <param name="allModules"></param>
         /// <param name="IsSpa"></param>
         /// <returns>返回true表示需要进行初始化数据操作，返回false即数据库已经存在或不需要初始化数据</returns>
-        public async override Task<bool> DataInit(object allModules, bool IsSpa)
+        public async override Task<bool> DataInit(object allModules)
         {
             bool rv = await Database.EnsureCreatedAsync();
             //判断是否存在初始数据
@@ -115,12 +114,12 @@ namespace KnifeZ.Virgo.Core
                 if (Set<FrameworkMenu>().Any() == false)
                 {
                     var systemManagement = GetFolderMenu("SystemManagement", new List<FrameworkRole> { adminRole }, null);
-                    var logList = IsSpa ? GetMenu2(AllModules, "ActionLog", new List<FrameworkRole> { adminRole }, null, 1) : GetMenu(AllModules, "_Admin", "ActionLog", "Index", new List<FrameworkRole> { adminRole }, null, 1);
-                    var userList = IsSpa ? GetMenu2(AllModules, "FrameworkUser", new List<FrameworkRole> { adminRole }, null, 2) : GetMenu(AllModules, "_Admin", "FrameworkUser", "Index", new List<FrameworkRole> { adminRole }, null, 2);
-                    var roleList = IsSpa ? GetMenu2(AllModules, "FrameworkRole", new List<FrameworkRole> { adminRole }, null, 3) : GetMenu(AllModules, "_Admin", "FrameworkRole", "Index", new List<FrameworkRole> { adminRole }, null, 3);
-                    var groupList = IsSpa ? GetMenu2(AllModules, "FrameworkGroup", new List<FrameworkRole> { adminRole }, null, 4) : GetMenu(AllModules, "_Admin", "FrameworkGroup", "Index", new List<FrameworkRole> { adminRole }, null, 4);
-                    var menuList = IsSpa ? GetMenu2(AllModules, "FrameworkMenu", new List<FrameworkRole> { adminRole }, null, 5) : GetMenu(AllModules, "_Admin", "FrameworkMenu", "Index", new List<FrameworkRole> { adminRole }, null, 5);
-                    var dpList = IsSpa ? GetMenu2(AllModules, "DataPrivilege", new List<FrameworkRole> { adminRole }, null, 6) : GetMenu(AllModules, "_Admin", "DataPrivilege", "Index", new List<FrameworkRole> { adminRole }, null, 6);
+                    var logList = GetMenu2(AllModules, "ActionLog", new List<FrameworkRole> { adminRole }, null, 1);
+                    var userList = GetMenu2(AllModules, "FrameworkUser", new List<FrameworkRole> { adminRole }, null, 2);
+                    var roleList = GetMenu2(AllModules, "FrameworkRole", new List<FrameworkRole> { adminRole }, null, 3);
+                    var groupList = GetMenu2(AllModules, "FrameworkGroup", new List<FrameworkRole> { adminRole }, null, 4);
+                    var menuList = GetMenu2(AllModules, "FrameworkMenu", new List<FrameworkRole> { adminRole }, null, 5);
+                    var dpList = GetMenu2(AllModules, "DataPrivilege", new List<FrameworkRole> { adminRole }, null, 6);
                     if (logList != null)
                     {
                         var menus = new FrameworkMenu[] { logList, userList, roleList, groupList, menuList, dpList };
@@ -132,49 +131,13 @@ namespace KnifeZ.Virgo.Core
                             }
                         }
                         Set<FrameworkMenu>().Add(systemManagement);
-
-                        if (IsSpa == false)
-                        {
-                            systemManagement.ICon = "layui-icon layui-icon-set";
-                            logList.ICon = "layui-icon layui-icon-form";
-                            userList.ICon = "layui-icon layui-icon-friends";
-                            roleList.ICon = "layui-icon layui-icon-user";
-                            groupList.ICon = "layui-icon layui-icon-group";
-                            menuList.ICon = "layui-icon layui-icon-menu-fill";
-                            dpList.ICon = "layui-icon layui-icon-auz";
-
-                            var apifolder = GetFolderMenu("Api", new List<FrameworkRole> { adminRole }, null);
-                            apifolder.ShowOnMenu = false;
-                            apifolder.DisplayOrder = 100;
-                            var logList2 = GetMenu2(AllModules, "ActionLog", new List<FrameworkRole> { adminRole }, null, 1);
-                            var userList2 = GetMenu2(AllModules, "FrameworkUser", new List<FrameworkRole> { adminRole }, null, 2);
-                            var roleList2 = GetMenu2(AllModules, "FrameworkRole", new List<FrameworkRole> { adminRole }, null, 3);
-                            var groupList2 = GetMenu2(AllModules, "FrameworkGroup", new List<FrameworkRole> { adminRole }, null, 4);
-                            var menuList2 = GetMenu2(AllModules, "FrameworkMenu", new List<FrameworkRole> { adminRole }, null, 5);
-                            var dpList2 = GetMenu2(AllModules, "DataPrivilege", new List<FrameworkRole> { adminRole }, null, 6);
-                            var apis = new FrameworkMenu[] { logList2, userList2, roleList2, groupList2, menuList2, dpList2 };
-                            //apis.ToList().ForEach(x => { x.ShowOnMenu = false;x.PageName += $"({Program._localizer["BuildinApi"]})"; });
-                            foreach (var item in apis)
-                            {
-                                if(item != null)
-                                {
-                                    apifolder.Children.Add(item);
-
-                                }
-                            }
-                            Set<FrameworkMenu>().Add(apifolder);
-                        }
-                        else
-                        {
-                            systemManagement.ICon = " _wtmicon _wtmicon-icon_shezhi";
-                            logList.ICon = " _wtmicon _wtmicon-chaxun";
-                            userList.ICon = " _wtmicon _wtmicon-zhanghaoquanxianguanli";
-                            roleList.ICon = " _wtmicon _wtmicon-quanxianshenpi";
-                            groupList.ICon = " _wtmicon _wtmicon-zuzhiqunzu";
-                            menuList.ICon = " _wtmicon _wtmicon--lumingpai";
-                            dpList.ICon = " _wtmicon _wtmicon-anquan";
-
-                        }
+                        systemManagement.ICon = "settings-4-line";
+                        logList.ICon = "ghost-line";
+                        userList.ICon = "user-line";
+                        roleList.ICon = "lock-2-line";
+                        groupList.ICon = "group-line";
+                        menuList.ICon = "menu-line";
+                        dpList.ICon = "shield-line";
                     }
 
                 }
@@ -611,9 +574,8 @@ namespace KnifeZ.Virgo.Core
         /// 数据初始化
         /// </summary>
         /// <param name="allModules"></param>
-        /// <param name="IsSpa"></param>
         /// <returns>返回true表示需要进行初始化数据操作，返回false即数据库已经存在或不需要初始化数据</returns>
-        public async virtual Task<bool> DataInit(object allModules, bool IsSpa)
+        public async virtual Task<bool> DataInit(object allModules)
         {
             bool rv = await Database.EnsureCreatedAsync();
             return rv;

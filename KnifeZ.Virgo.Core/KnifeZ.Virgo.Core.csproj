@@ -4,7 +4,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Version>0.0.1</Version>
-    <Description>修改自WTM 3.7.7框架，移除layui版相关代码，升级.net 5.0</Description>
+    <Description>KnifeZ's .NET5 Frameowrk</Description>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,7 +31,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="5.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.0" />
-    <PackageReference Include="NPOI" Version="2.5.1" />
+    <PackageReference Include="NPOI" Version="2.5.2" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="5.0.0-alpha.2" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>

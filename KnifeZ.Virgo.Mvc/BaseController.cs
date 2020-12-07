@@ -331,7 +331,7 @@ namespace KnifeZ.Virgo.Mvc
             {
                 try
                 {
-                    if (Request.QueryString != null)
+                    if (Request.QueryString.HasValue)
                     {
                         foreach (var key in Request.Query.Keys)
                         {

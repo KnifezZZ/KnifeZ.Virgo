@@ -107,9 +107,8 @@ namespace KnifeZ.Virgo.Core
         /// 初始化
         /// </summary>
         /// <param name="AllModel"></param>
-        /// <param name="IsSpa"></param>
         /// <returns>返回true即数据新建完成，进入初始化操作，返回false即数据库已经存在</returns>
-        Task<bool> DataInit(object AllModel, bool IsSpa);
+        Task<bool> DataInit(object AllModel);
 
         IDataContext CreateNew();
         IDataContext ReCreate();

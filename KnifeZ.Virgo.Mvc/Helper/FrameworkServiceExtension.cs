@@ -178,6 +178,7 @@ namespace KnifeZ.Virgo.Mvc
                 // ModelBinderProviders
                 options.ModelBinderProviders.Insert(0, new StringBinderProvider());
 
+                options.EnableEndpointRouting = false;
                 // Filters
                 //options.Filters.Add(new AuthorizeFilter());
                 options.Filters.Add(new DataContextFilter(CsSector));
@@ -423,15 +424,13 @@ namespace KnifeZ.Virgo.Mvc
                         }
                         //}
                     }
-
-                    var test = app.ApplicationServices.GetService<ISpaStaticFileProvider>();
                     var cs = configs.ConnectionStrings;
                     foreach (var item in cs)
                     {
                         try
                         {
                             var dc = item.CreateDC();
-                            dc.DataInit(gd.AllModule, test != null).Wait();
+                            dc.DataInit(gd.AllModule).Wait();
                         }
                         catch {
                             int a = 0;
@@ -474,18 +473,18 @@ namespace KnifeZ.Virgo.Mvc
             {
                 app.UseMvc(customRoutes);
             }
-            //else
-            //{
-            //    app.UseMvc(routes =>
-            //    {
-            //        routes.MapRoute(
-            //            name: "areaRoute",
-            //            template: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
-            //        routes.MapRoute(
-            //            name: "default",
-            //            template: "{controller=Home}/{action=Index}/{id?}");
-            //    });
-            //}
+            else
+            {
+                app.UseMvc(routes =>
+                {
+                    routes.MapRoute(
+                        name: "areaRoute",
+                        template: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+                    routes.MapRoute(
+                        name: "default",
+                        template: "{controller=Home}/{action=Index}/{id?}");
+                });
+            }
 
             return app;
         }

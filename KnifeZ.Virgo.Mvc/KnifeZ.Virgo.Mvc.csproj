@@ -3,9 +3,15 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Description>修改自WTM 3.7.7框架，移除layui版相关代码，升级.net 5.0</Description>
+    <Description>KnifeZ's .NET5 Frameowrk</Description>
     <Version>0.0.1</Version>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="GeneratorFiles\**" />
+    <EmbeddedResource Remove="GeneratorFiles\**" />
+    <None Remove="GeneratorFiles\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <Compile Remove="_CodeGenController.cs" />

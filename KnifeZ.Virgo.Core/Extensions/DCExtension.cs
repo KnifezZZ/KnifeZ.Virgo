@@ -528,7 +528,7 @@ namespace KnifeZ.Virgo.Core.Extensions
             }
             else
             {
-                var temp = APIHelper.JsonDeserialize<List<SortInfo>>(sortInfo);
+                var temp = System.Text.Json.JsonSerializer.Deserialize<List<SortInfo>>(sortInfo);
                 info.AddRange(temp);
             }
             foreach (var item in info)

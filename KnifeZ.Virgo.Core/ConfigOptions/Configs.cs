@@ -198,8 +198,6 @@ namespace KnifeZ.Virgo.Core
             }
         }
 
-        public bool IsOldSqlServer { get; set; }
-
         #endregion
 
         #region PageMode

@@ -26,7 +26,6 @@ namespace KnifeZ.Virgo.Admin.Api
     [AuthorizeJwtWithCookie]
     [ApiController]
     [Route("api/_[controller]")]
-    [Route("api/_login")]
     [ActionDescription("Login")]
     [AllRights]
     public class AccountController : BaseApiController
