@@ -47,6 +47,8 @@ using KnifeZ.Virgo.Mvc.Binders;
 using KnifeZ.Virgo.Mvc.Filters;
 using KnifeZ.Virgo.Mvc.Json;
 using Microsoft.AspNetCore.SpaServices.StaticFiles;
+using System.Text.Json.Serialization;
+using System.Text.Unicode;
 
 namespace KnifeZ.Virgo.Mvc
 {
@@ -191,6 +193,12 @@ namespace KnifeZ.Virgo.Mvc
             })
             .AddJsonOptions(options =>
             {
+                //options.JsonSerializerOptions.WriteIndented = true;
+                options.JsonSerializerOptions.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(UnicodeRanges.All);
+                options.JsonSerializerOptions.NumberHandling =
+                    JsonNumberHandling.AllowReadingFromString |
+                    JsonNumberHandling.WriteAsString;
+                //options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
                 //custom ContractResolver
                 options.JsonSerializerOptions.Converters.Add(new StringIgnoreLTGTConvert());
                 options.JsonSerializerOptions.Converters.Add(new StringNeedLTGTConvert());

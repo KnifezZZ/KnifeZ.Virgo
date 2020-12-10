@@ -61,23 +61,6 @@ namespace KnifeZ.Virgo.Mvc
             }
         }
 
-        private IUIService _uiservice;
-        public IUIService UIService
-        {
-            get
-            {
-                if (_uiservice == null)
-                {
-                    _uiservice = (IUIService)HttpContext.RequestServices.GetService(typeof(IUIService));
-                }
-                return _uiservice;
-            }
-            set
-            {
-                _uiservice = value;
-            }
-        }
-
         private IDistributedCache _cache;
         public IDistributedCache Cache
         {

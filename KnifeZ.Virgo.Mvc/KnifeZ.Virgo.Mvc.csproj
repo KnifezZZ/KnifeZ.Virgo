@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <Compile Remove="_CodeGenController.cs" />
+    <Compile Remove="_FrameworkController.cs" />
   </ItemGroup>
 
   <ItemGroup>
