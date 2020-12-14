@@ -145,11 +145,11 @@ namespace KnifeZ.Virgo.Core
             //如果是1，直接下载Excel，如果是多个，下载ZIP包
             if (ExportExcelCount == 1)
             {
-                return DownLoadExcel();
+                return DownloadExcel();
             }
             else
             {
-                return DownLoadZipPackage(typeof(TModel).Name + "_" + DateTime.Now.ToString("yyyyMMddHHmmssffff"));
+                return DownloadZipPackage(typeof(TModel).Name + "_" + DateTime.Now.ToString("yyyyMMddHHmmssffff"));
             }
         }
 
@@ -242,7 +242,7 @@ namespace KnifeZ.Virgo.Core
             return book;
         }
 
-        private byte[] DownLoadExcel()
+        private byte[] DownloadExcel()
         {
             var book = GenerateWorkBook(EntityList);
             byte[] rv = Array.Empty<byte>();
@@ -254,7 +254,7 @@ namespace KnifeZ.Virgo.Core
             return rv;
         }
 
-        private byte[] DownLoadZipPackage(string FileName)
+        private byte[] DownloadZipPackage(string FileName)
         {
             //文件根目录
             string RootPath = $"{GlobalServices.GetRequiredService<IWebHostEnvironment>().WebRootPath}\\{FileName}";
@@ -352,7 +352,7 @@ namespace KnifeZ.Virgo.Core
                     rowspan = maxLevel - col.MaxLevel;
                 }
                 var cellRangeAddress = new CellRangeAddress(rowIndex, rowIndex + rowspan, colIndex, colIndex + bcount - 1);
-                sheet.AddMergedRegion(cellRangeAddress);
+                //sheet.AddMergedRegion(cellRangeAddress); TODO 暂时注释，生成excel出错
                 if (rowspan > 0 || bcount > 1)
                 {
                     cell.CellStyle.Alignment = HorizontalAlignment.Center;
@@ -398,12 +398,6 @@ namespace KnifeZ.Virgo.Core
         ///记录批量操作时列表中选择的Id
         /// </summary>
         public List<string> Ids { get; set; }
-
-        /// <summary>
-        /// 每页行数
-        /// </summary>
-        [Obsolete("弃用，改用 DataTableHelper上的Limit")]
-        public int RecordsPerPage { get; set; }
 
         /// <summary>
         /// 是否已经搜索过
