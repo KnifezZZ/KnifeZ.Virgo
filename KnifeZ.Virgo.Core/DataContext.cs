@@ -131,13 +131,13 @@ namespace KnifeZ.Virgo.Core
                             }
                         }
                         Set<FrameworkMenu>().Add(systemManagement);
-                        systemManagement.ICon = "settings-4-line";
-                        logList.ICon = "ghost-line";
-                        userList.ICon = "user-line";
-                        roleList.ICon = "lock-2-line";
-                        groupList.ICon = "group-line";
-                        menuList.ICon = "menu-line";
-                        dpList.ICon = "shield-line";
+                        systemManagement.ICon = "settings-4";
+                        logList.ICon = "ghost";
+                        userList.ICon = "user";
+                        roleList.ICon = "lock-2";
+                        groupList.ICon = "group";
+                        menuList.ICon = "menu";
+                        dpList.ICon = "shield";
                     }
 
                 }
