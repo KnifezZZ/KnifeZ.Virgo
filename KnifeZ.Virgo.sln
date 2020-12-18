@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KnifeZ.Virgo", "KnifeZ.Virg
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KnifeZ.Virgo.Core", "KnifeZ.Virgo.Core\KnifeZ.Virgo.Core.csproj", "{D272DE1E-A616-40FE-A3A2-AF53CE6F2312}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{8AA74D47-2C2C-4BDC-8D80-EAA1F7EBAB98}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KnifeZ.Virgo.Mvc", "KnifeZ.Virgo.Mvc\KnifeZ.Virgo.Mvc.csproj", "{AA395995-B478-4D25-A7E2-3F44BA1F6D39}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KnifeZ.Virgo.Mvc.Admin", "KnifeZ.Virgo.Admin\KnifeZ.Virgo.Mvc.Admin.csproj", "{2D932A14-5C16-4BBC-B412-47206CF4E2A5}"

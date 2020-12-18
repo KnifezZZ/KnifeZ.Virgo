@@ -12,5 +12,9 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkUserVms
         [Display(Name = "Name")]
         public string Name { get; set; }
 
+        //[Display(Name = "Role")]
+        //public string RoleName { get; set; }
+        //[Display(Name = "Group")]
+        //public Guid? GroupID { get; set; }
     }
 }

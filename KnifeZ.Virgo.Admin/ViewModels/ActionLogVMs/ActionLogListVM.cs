@@ -31,7 +31,6 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.ActionLogVMs
             var query = DC.Set<ActionLog>()
                 .CheckContain(Searcher.ITCode, x=>x.ITCode)
                 .CheckContain(Searcher.ActionUrl, x=>x.ActionUrl)
-                //.CheckEqual(Searcher.LogType, x=>x.LogType)
                 .CheckContain(Searcher.LogType, x=>x.LogType)
                 .CheckContain(Searcher.IP, x=>x.IP)
                 .CheckBetween(Searcher.ActionTime?.GetStartTime(), Searcher.ActionTime?.GetEndTime(), x=>x.ActionTime, includeMax:false)
