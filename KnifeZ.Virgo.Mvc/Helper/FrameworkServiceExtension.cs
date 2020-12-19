@@ -193,7 +193,7 @@ namespace KnifeZ.Virgo.Mvc
             })
             .AddJsonOptions(options =>
             {
-                //options.JsonSerializerOptions.WriteIndented = true;
+                options.JsonSerializerOptions.PropertyNamingPolicy = null;
                 options.JsonSerializerOptions.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(UnicodeRanges.All);
                 options.JsonSerializerOptions.NumberHandling =
                     JsonNumberHandling.AllowReadingFromString |
