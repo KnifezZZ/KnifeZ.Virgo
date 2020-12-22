@@ -39,7 +39,8 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkUserVms
 
         protected override void InitVM()
         {
-            if (ControllerName.Contains("KnifeZ.Virgo.Mvc.Admin.Controllers"))
+            
+            if (ControllerName.Contains("KnifeZ.Virgo.Admin.Api"))
             {
                 SelectedRolesIDs = Entity.UserRoles.Select(x => x.RoleId).ToList();
                 AllRoles = DC.Set<FrameworkRole>().GetSelectListItems(LoginUserInfo.DataPrivileges, null, y => y.RoleName);
@@ -51,7 +52,7 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkUserVms
 
         protected override void ReInitVM()
         {
-            if (ControllerName.Contains("KnifeZ.Virgo.Mvc.Admin.Controllers"))
+            if (ControllerName.Contains("KnifeZ.Virgo.Admin.Api"))
             {
                 AllRoles = DC.Set<FrameworkRole>().GetSelectListItems(LoginUserInfo.DataPrivileges, null, y => y.RoleName);
                 AllGroups = DC.Set<FrameworkGroup>().GetSelectListItems(LoginUserInfo.DataPrivileges, null, y => y.GroupName);
@@ -60,7 +61,7 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkUserVms
 
         public override async Task DoAddAsync()
         {
-            if (ControllerName.Contains("KnifeZ.Virgo.Mvc.Admin.Controllers"))
+            if (ControllerName.Contains("KnifeZ.Virgo.Admin.Api"))
             {
                 Entity.UserRoles = new List<FrameworkUserRole>();
                 Entity.UserGroups = new List<FrameworkUserGroup>();
@@ -86,7 +87,7 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkUserVms
 
         public override async Task DoEditAsync(bool updateAllFields = false)
         {
-            if (ControllerName.Contains("KnifeZ.Virgo.Mvc.Admin.Controllers"))
+            if (ControllerName.Contains("KnifeZ.Virgo.Admin.Api"))
             {
                 FC.TryAdd("Entity.UserRoles", 0);
                 FC.TryAdd("Entity.UserGroups", 0);

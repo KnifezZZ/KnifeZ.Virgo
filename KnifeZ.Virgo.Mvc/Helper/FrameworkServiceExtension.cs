@@ -453,15 +453,34 @@ namespace KnifeZ.Virgo.Mvc
                     context.Response.Cookies.Append("pagemode", configs.PageMode.ToString());
                     context.Response.Cookies.Append("tabmode", configs.TabMode.ToString());
                 }
-                try
+                if (context.Request.ContentLength > 1024 * 1024 * 5)
                 {
-                    await next.Invoke();
+                    context.Features.Get<IHttpMaxRequestBodySizeFeature>().MaxRequestBodySize = null;
                 }
-                catch (ConnectionResetException) { }
-                if (context.Response.StatusCode == 404)
+                else
                 {
-                    await context.Response.WriteAsync(string.Empty);
+                    context.Request.EnableBuffering();
+                    context.Request.Body.Position = 0;
+                    StreamReader tr = new StreamReader(context.Request.Body);
+                    string body = tr.ReadToEndAsync().Result;
+                    context.Request.Body.Position = 0;
+                    if (context.Items.ContainsKey("DONOTUSE_REQUESTBODY") == false)
+                    {
+                        context.Items.Add("DONOTUSE_REQUESTBODY", body);
+                    }
+                    else
+                    {
+                        context.Items["DONOTUSE_REQUESTBODY"] = body;
+                    }
+
                 }
+
+                await next.Invoke();
+                // 移除404处理
+                //if (context.Response.StatusCode == 404)
+                //{
+                //    await context.Response.WriteAsync(string.Empty);
+                //}
             });
 
             app.UseSession();

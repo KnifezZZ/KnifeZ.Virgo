@@ -34,7 +34,7 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
             var newdc = DC as FrameworkContext;
             List<FrameworkAction_ListView> actions = new List<FrameworkAction_ListView>();
             var urls = newdc.BaseFrameworkMenus.Where(y => y.IsInside == true && y.FolderOnly == false).Select(y => y.Url).Distinct().ToList();
-            if (ControllerName == "KnifeZ.Virgo.Mvc.Admin.Controllers.FrameworkMenuController")
+            if (ControllerName == "KnifeZ.Virgo.Admin.Api.FrameworkMenuController")
             {
                  actions = GlobalServices.GetRequiredService<GlobalData>().AllModule.SelectMany(x=>x.Actions)
                     .Where(x => urls.Contains(x.Url) == false)
