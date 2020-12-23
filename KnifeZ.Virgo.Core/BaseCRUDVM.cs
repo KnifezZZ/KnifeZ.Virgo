@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using KnifeZ.Virgo.Core.Extensions;
 using System.Text.Json.Serialization;
+using System.ComponentModel.DataAnnotations;
 
 namespace KnifeZ.Virgo.Core
 {
@@ -591,12 +592,18 @@ namespace KnifeZ.Virgo.Core
 
 
             if (updateAllFields == false)
-            {
+            { 
+                //排除更新主键
+                PropertyInfo pkProp = typeof(TModel).GetProperties().Where(p => p.GetCustomAttributes(typeof(KeyAttribute), false).Length > 0).FirstOrDefault();
                 foreach (var field in FC.Keys)
                 {
                     if (field.StartsWith("Entity.") && !field.Contains("["))
                     {
                         string name = field.Replace("Entity.", "");
+                        if (name == pkProp.Name)
+                        {
+                            continue;
+                        }
                         try
                         {
                             DC.UpdateProperty(Entity, name);
