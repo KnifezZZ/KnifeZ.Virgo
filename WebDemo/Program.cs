@@ -8,7 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using KnifeZ.Virgo.Core;
 
-namespace KnifeZ.Virgo
+namespace WebDemo
 {
     public class Program
     {

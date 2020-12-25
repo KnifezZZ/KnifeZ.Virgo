@@ -4,9 +4,12 @@
     <TargetFramework>net5.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>KnifeZ's .NET5 Frameowrk</Description>
-    <Version>0.0.1</Version>
-    <PackageIcon>TIM图片20191228141022 (2).png</PackageIcon>
+    <Version>0.0.2</Version>
+    <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://gitee.com/KnifeZ/KnifeZ.Virgo</RepositoryUrl>
+    <PackageTags>knifez,mvvm,.net5</PackageTags>
+    <NeutralLanguage>zh-CN</NeutralLanguage>
+    <Authors>KnifeZ</Authors>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,7 +22,7 @@
     <None Remove="Controllers\**" />
     <None Remove="GeneratorFiles\**" />
     <None Remove="新文件夹\**" />
-    <None Include="C:\Users\Knife\Pictures\TIM图片20191228141022 (2).png">
+    <None Include="C:\Users\Knife\Pictures\icon.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>

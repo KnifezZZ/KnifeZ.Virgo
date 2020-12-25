@@ -3,10 +3,14 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.0.1</Version>
+    <Version>0.0.2</Version>
     <Description>KnifeZ's .NET5 Frameowrk</Description>
     <RepositoryUrl>https://gitee.com/KnifeZ/KnifeZ.Virgo</RepositoryUrl>
-    <PackageIcon>TIM图片20191228141022 (2).png</PackageIcon>
+    <PackageIcon>icon.png</PackageIcon>
+    <Authors>KnifeZ</Authors>
+    <PackageTags>knifez,mvvm,.net5</PackageTags>
+    <NeutralLanguage>zh-CN</NeutralLanguage>
+    <PackageReleaseNotes>基于.net5和WTM修改而来的框架，移除了layui\react版本无用代码，删除了原本的代码生成方法，完全使用System.Text.Json处理内容，部分语法代码优化</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -38,7 +42,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="C:\Users\Knife\Pictures\TIM图片20191228141022 (2).png">
+    <None Include="C:\Users\Knife\Pictures\icon.png" Link="Resources\icon.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>

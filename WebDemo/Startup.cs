@@ -13,7 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 
-namespace KnifeZ.Virgo
+namespace WebDemo
 {
     public class Startup
     {
@@ -36,13 +36,10 @@ namespace KnifeZ.Virgo
 
             services.AddFrameworkService();
 
-            //Razor模板修改实时更新
-            services.AddRazorPages().AddRazorRuntimeCompilation();
-
             //集承swagger
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "KnifeZ-Virgo API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebDemo API", Version = "v1" });
                 var bearer = new OpenApiSecurityScheme()
                 {
                     Description = "JWT Bearer",
@@ -76,7 +73,7 @@ namespace KnifeZ.Virgo
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "KnifeZ-Virgo API V1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "WebDemo API V1");
             });
 
             app.UseHttpsRedirection();

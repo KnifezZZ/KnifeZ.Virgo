@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\KnifeZ.Virgo.Core\KnifeZ.Virgo.Core.csproj" />
+    <PackageReference Include="KnifeZ.Virgo.Core" Version="0.0.2" />
   </ItemGroup>
 
 </Project>
