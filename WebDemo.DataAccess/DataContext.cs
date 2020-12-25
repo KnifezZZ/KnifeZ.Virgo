@@ -26,7 +26,7 @@ namespace WebDemo.DataAccess
     {
         public DataContext CreateDbContext (string[] args)
         {
-            return new DataContext("Server=172.16.0.123;Database=VirgoDb;User ID=sa;Password=hU7NDBFG;", DBTypeEnum.SqlServer);
+            return new DataContext("Data Source=demoDb.db", DBTypeEnum.SQLite);
         }
     }
 }
