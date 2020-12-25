@@ -1,4 +1,3 @@
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -7,6 +6,7 @@ using System.Threading.Tasks;
 using KnifeZ.Virgo.Core;
 using KnifeZ.Virgo.Core.Extensions;
 using KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs;
+using System.Text.Json.Serialization;
 
 namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkRoleVMs
 {

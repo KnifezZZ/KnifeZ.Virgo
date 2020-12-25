@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Newtonsoft.Json;
 using KnifeZ.Virgo.Core.Extensions;
 
 namespace KnifeZ.Virgo.Core
@@ -412,7 +411,7 @@ namespace KnifeZ.Virgo.Core
                 {
                     if (needFormat == false)
                     {
-                        rv = JsonConvert.SerializeObject(col);
+                        rv = System.Text.Json.JsonSerializer.Serialize(col);
                     }
                     else
                     {

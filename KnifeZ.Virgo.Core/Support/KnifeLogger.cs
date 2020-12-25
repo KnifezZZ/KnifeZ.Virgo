@@ -9,15 +9,15 @@ using System.Text;
 namespace KnifeZ.Virgo.Core
 {
 
-    public static class WTMeLoggerExtensions
+    public static class KnifeLoggerExtensions
     {
-        public static ILoggingBuilder AddWTMLogger(this ILoggingBuilder builder)
+        public static ILoggingBuilder AddKnifeLogger(this ILoggingBuilder builder)
         {
-            return builder.AddProvider(new WTMLoggerProvider());
+            return builder.AddProvider(new KnifeLoggerProvider());
         }
     }
 
-    public class WTMLoggerProvider : ILoggerProvider
+    public class KnifeLoggerProvider : ILoggerProvider
     {
         private CS cs = null;
         public ILogger CreateLogger(string categoryName)
@@ -35,17 +35,17 @@ namespace KnifeZ.Virgo.Core
                     cs = config.ConnectionStrings.FirstOrDefault();
                 }
             }
-            return new WTMLogger(categoryName, cs);
+            return new KnifeLogger(categoryName, cs);
         }
         public void Dispose() { }
     }
 
-    public class WTMLogger : ILogger
+    public class KnifeLogger : ILogger
     {
         private readonly string categoryName;
         private CS cs;
 
-        public WTMLogger(string categoryName, CS cs)
+        public KnifeLogger(string categoryName, CS cs)
         {
             this.categoryName = categoryName;
             this.cs = cs;
@@ -58,7 +58,7 @@ namespace KnifeZ.Virgo.Core
                 return false;
             }
             var levels = GlobalServices.GetRequiredService<IOptionsMonitor<LoggerFilterOptions>>();
-            var l = levels.CurrentValue.Rules.Where(x => x.ProviderName == "WTM").Select(x => x.LogLevel).FirstOrDefault();
+            var l = levels.CurrentValue.Rules.Where(x => x.ProviderName == "KnifeZ").Select(x => x.LogLevel).FirstOrDefault();
             if (l == null)
             {
                 l = levels.CurrentValue.MinLevel;

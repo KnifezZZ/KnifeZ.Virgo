@@ -517,11 +517,11 @@ namespace KnifeZ.Virgo.Mvc
             }
             GlobalServices.GetRequiredService<ILogger<ActionLog>>().Log<ActionLog>(ll, new EventId(), log, null, (a, b) => {
                 return $@"
-===WTM Log===
+===Log Start===
 内容:{a.Remark}
 地址:{a.ActionUrl}
 时间:{a.ActionTime}
-===WTM Log===
+===Log End===
 ";
             });
         }

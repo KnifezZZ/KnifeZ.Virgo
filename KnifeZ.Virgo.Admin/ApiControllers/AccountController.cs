@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-using Newtonsoft.Json;
 
 using KnifeZ.Virgo.Admin.ViewModels;
 using KnifeZ.Virgo.Core;
@@ -20,6 +19,7 @@ using KnifeZ.Virgo.Core.Auth;
 using KnifeZ.Virgo.Core.Auth.Attribute;
 using KnifeZ.Virgo.Core.Extensions;
 using KnifeZ.Virgo.Mvc;
+using System.Text.Json;
 
 namespace KnifeZ.Virgo.Admin.Api
 {
@@ -137,7 +137,8 @@ namespace KnifeZ.Virgo.Admin.Api
                 var authService = HttpContext.RequestServices.GetService(typeof(ITokenService)) as ITokenService;
 
                 var token = await authService.IssueTokenAsync(LoginUserInfo);
-                return Content(JsonConvert.SerializeObject(token), "application/json");
+                string json = JsonSerializer.Serialize(token);
+                return Content(json, "application/json");
             }
         }
 

@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -8,6 +7,7 @@ using KnifeZ.Virgo.Core;
 using KnifeZ.Virgo.Core.Extensions;
 using KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkRoleVMs;
 using KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkUserVms;
+using System.Text.Json.Serialization;
 
 namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
 {
@@ -39,9 +39,6 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
         public FrameworkUserBaseListVM UserListVM { get; set; }
         [JsonIgnore]
         public FrameworkRoleListVM RoleListVM { get; set; }
-
-        public List<ComboSelectListItem> IConSelectItems { get; set; }
-
         public FrameworkMenuVM()
         {
             UserListVM = new FrameworkUserBaseListVM();
@@ -60,18 +57,6 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
                 IconFont = res[0];
                 IconFontItem = res[1];
             }
-            IConSelectItems = !string.IsNullOrEmpty(IconFont) && IconFontsHelper
-                                .IconFontDicItems
-                                .ContainsKey(IconFont)
-                                ? IconFontsHelper
-                                    .IconFontDicItems[IconFont]
-                                    .Select(x => new ComboSelectListItem()
-                                    {
-                                        Text = x.Text,
-                                        Value = x.Value,
-                                        ICon = x.ICon
-                                    }).ToList()
-                                : new List<ComboSelectListItem>();
 
             SelectedRolesIDs.AddRange(DC.Set<FunctionPrivilege>().Where(x => x.MenuItemId == Entity.ID && x.RoleId != null && x.Allowed == true).Select(x => x.RoleId.Value).ToList());
 

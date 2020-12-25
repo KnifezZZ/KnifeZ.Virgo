@@ -12,12 +12,12 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
 using KnifeZ.Virgo.Core;
 using KnifeZ.Virgo.Core.Auth;
 using KnifeZ.Virgo.Core.Extensions;
 using KnifeZ.Virgo.Core.Support.Json;
+using System.Text.Json;
 
 namespace KnifeZ.Virgo.Mvc
 {
@@ -696,11 +696,11 @@ namespace KnifeZ.Virgo.Mvc
             }
             GlobalServices.GetRequiredService<ILogger<ActionLog>>().Log<ActionLog>(ll, new EventId(), log, null, (a, b) => {
                 return $@"
-===WTM Log===
+===Log Start===
 内容:{a.Remark}
 地址:{a.ActionUrl}
 时间:{a.ActionTime}
-===WTM Log===
+===Log End===
 ";
             });
         }
@@ -782,7 +782,7 @@ namespace KnifeZ.Virgo.Mvc
         /// <returns>The created Microsoft.AspNetCore.Mvc.JsonResult that serializes the specified
         /// data to JSON format for the response.</returns>
         [NonAction]
-        public virtual JsonResult JsonCustom(object data, JsonSerializerSettings serializerSettings)
+        public virtual JsonResult JsonCustom(object data, JsonSerializerOptions serializerSettings)
         {
             return base.Json(data, serializerSettings);
         }
@@ -810,7 +810,7 @@ namespace KnifeZ.Virgo.Mvc
         [NonAction]
         public override JsonResult Json (object data, object serializerSettings)
         {
-            return Json(data, StatusCodes.Status200OK, SUCCESS, serializerSettings as JsonSerializerSettings);
+            return Json(data, StatusCodes.Status200OK, SUCCESS, serializerSettings as JsonSerializerOptions);
         }
 
         /// <summary>
@@ -824,7 +824,7 @@ namespace KnifeZ.Virgo.Mvc
         /// <returns>The created Microsoft.AspNetCore.Mvc.JsonResult that serializes the specified
         /// data to JSON format for the response.</returns>
         [NonAction]
-        public virtual JsonResult Json(object data, int statusCode = StatusCodes.Status200OK, string msg = SUCCESS, JsonSerializerSettings serializerSettings = null)
+        public virtual JsonResult Json(object data, int statusCode = StatusCodes.Status200OK, string msg = SUCCESS, JsonSerializerOptions serializerSettings = null)
         {
             return new JsonResult(new JsonResultT<object> { Msg = msg, Code = statusCode, Data = data }) { SerializerSettings = serializerSettings };
         }

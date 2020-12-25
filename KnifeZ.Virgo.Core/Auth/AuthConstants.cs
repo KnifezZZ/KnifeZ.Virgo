@@ -3,8 +3,8 @@ namespace KnifeZ.Virgo.Core.Auth
     public static class AuthConstants
     {
         public const string JwtTokenType = "Bearer";
-        public const string AuthenticationType = "WTMAuthentication";
-        public const string CookieAuthName = "WTM.CookieWithJwtAuth";
+        public const string AuthenticationType = "VirgoAuthentication";
+        public const string CookieAuthName = "Virgo.CookieWithJwtAuth";
 
         public static class JwtClaimTypes
         {

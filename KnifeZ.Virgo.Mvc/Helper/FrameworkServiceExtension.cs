@@ -198,23 +198,10 @@ namespace KnifeZ.Virgo.Mvc
                 options.JsonSerializerOptions.NumberHandling =
                     JsonNumberHandling.AllowReadingFromString |
                     JsonNumberHandling.WriteAsString;
-                //options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
-                //custom ContractResolver
                 options.JsonSerializerOptions.Converters.Add(new StringIgnoreLTGTConvert());
                 options.JsonSerializerOptions.Converters.Add(new StringNeedLTGTConvert());
                 options.JsonSerializerOptions.Converters.Add(new DateRangeConvert());
             })
-            //.AddJsonOptions(options =>
-            //{
-            //    //忽略循环引用
-            //    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-
-            //    //custom ContractResolver
-            //    options.SerializerSettings.ContractResolver = new WTMContractResolver()
-            //    {
-            //        NamingStrategy = new CamelCaseNamingStrategy()
-            //    };
-            //})
             .ConfigureApplicationPartManager(m =>
             {
                 var feature = new ControllerFeature();
@@ -382,7 +369,6 @@ namespace KnifeZ.Virgo.Mvc
 
         public static IApplicationBuilder UseFrameworkService(this IApplicationBuilder app, Action<IRouteBuilder> customRoutes = null)
         {
-            IconFontsHelper.GenerateIconFont();
             var configs = app.ApplicationServices.GetRequiredService<Configs>();
             var gd = app.ApplicationServices.GetRequiredService<GlobalData>();
 
@@ -435,14 +421,8 @@ namespace KnifeZ.Virgo.Mvc
                     var cs = configs.ConnectionStrings;
                     foreach (var item in cs)
                     {
-                        try
-                        {
-                            var dc = item.CreateDC();
-                            dc.DataInit(gd.AllModule).Wait();
-                        }
-                        catch {
-                            int a = 0;
-                        }
+                        var dc = item.CreateDC();
+                        dc.DataInit(gd.AllModule).Wait();
                     }
                     GlobalServices.SetServiceProvider(app.ApplicationServices);
                     InitDataBase = true;

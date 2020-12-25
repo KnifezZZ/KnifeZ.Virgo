@@ -9,16 +9,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="5.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="5.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\KnifeZ.Virgo.Admin\KnifeZ.Virgo.Mvc.Admin.csproj" />
+    <ProjectReference Include="..\KnifeZ.Virgo.DataAccess\KnifeZ.Virgo.DataAccess.csproj" />
+    <ProjectReference Include="..\KnifeZ.Virgo.Model\KnifeZ.Virgo.Model.csproj" />
+    <ProjectReference Include="..\KnifeZ.Virgo.ViewModel\KnifeZ.Virgo.ViewModel.csproj" />
   </ItemGroup>
 
 </Project>

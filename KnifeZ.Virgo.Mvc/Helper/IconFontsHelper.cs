@@ -22,38 +22,6 @@ namespace KnifeZ.Virgo.Mvc
         private static Dictionary<string, List<MenuItem>> _iconFontDicItems;
         public static Dictionary<string, List<MenuItem>> IconFontDicItems => _iconFontDicItems;
 
-        public static void GenerateIconFont()
-        {
-            var baseDirs = new string[] { "wwwroot/font", "wwwroot/layui" };
-
-            var iconFontHashSet = new HashSet<string>();
-            var IconFontDic = new Dictionary<string, string[]>();
-            foreach (var dir in baseDirs)
-            {
-                if (Directory.Exists(dir))
-                {
-                    RecursiveDir(dir, iconFontHashSet, IconFontDic);
-                }
-            }
-            var iconFonts = iconFontHashSet.ToArray();
-
-            _iconFontItems = iconFontHashSet.Select(x => new ComboSelectListItem
-            {
-                Text = x,
-                Value = x
-            }).ToList();
-
-            _iconFontDicItems = new Dictionary<string, List<MenuItem>>();
-            foreach (var key in IconFontDic.Keys)
-            {
-                IconFontDicItems.Add(key, IconFontDic[key].Select(x => new MenuItem
-                {
-                    Text = x,
-                    Value = x,
-                    ICon = $"{key} {x}"
-                }).ToList());
-            }
-        }
 
         private static void RecursiveDir(string dirPath, HashSet<string> iconFonts, Dictionary<string, string[]> iconFontDic)
         {

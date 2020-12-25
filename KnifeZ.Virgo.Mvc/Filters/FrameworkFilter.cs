@@ -8,8 +8,7 @@ using KnifeZ.Virgo.Core;
 using System.Collections.Generic;
 using System.Reflection;
 using System.IO;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Text;
 using Microsoft.Extensions.Localization;
@@ -112,12 +111,13 @@ namespace KnifeZ.Virgo.Mvc.Filters
                         if (context.HttpContext.Items.ContainsKey("DONOTUSE_REQUESTBODY"))
                         {
                             string body = context.HttpContext.Items["DONOTUSE_REQUESTBODY"].ToString();
-                            var obj = JsonConvert.DeserializeObject(body) as JObject;
-                            var fields = GetJsonFields(obj);
-                            foreach (var field in fields)
-                            {
-                                model.FC.Add(field, null);
-                            }
+                            var obj = JsonSerializer.Deserialize<JsonElement>(body);                                
+                            //var fields = 
+                            //    //GetJsonFields(obj);
+                            //foreach (var field in fields)
+                            //{
+                            //    model.FC.Add(field, null);
+                            //}
                         }
                     }
                     //if (model is IBaseCRUDVM<TopBasePoco> crud)
@@ -396,36 +396,36 @@ namespace KnifeZ.Virgo.Mvc.Filters
             base.OnResultExecuted(context);
         }
 
-        private IEnumerable<string> GetJsonFields(JObject j)
-        {
-            var children = j.Children();
-            foreach (var item in children)
-            {
-                var rv = GetTokenFields(item);
-                foreach (var i in rv)
-                {
-                    yield return i;
-                }
-            }
-            yield break;
-        }
+        //private IEnumerable<string> GetJsonFields(JsonElement j)
+        //{
+        //    var children = j.Children();
+        //    foreach (var item in children)
+        //    {
+        //        var rv = GetTokenFields(item);
+        //        foreach (var i in rv)
+        //        {
+        //            yield return i;
+        //        }
+        //    }
+        //    yield break;
+        //}
 
-        private IEnumerable<string> GetTokenFields(JToken j)
-        {
-            if (j.Type == JTokenType.Property)
-            {
-                yield return j.Path;
-            }
-            var children = j.Children();
-            foreach (var item in children)
-            {
-                var rv = GetTokenFields(item);
-                foreach (var i in rv)
-                {
-                    yield return i;
-                }
-            }
-            yield break;
-        }
+        //private IEnumerable<string> GetTokenFields(JToken j)
+        //{
+        //    if (j.Type == JTokenType.Property)
+        //    {
+        //        yield return j.Path;
+        //    }
+        //    var children = j.Children();
+        //    foreach (var item in children)
+        //    {
+        //        var rv = GetTokenFields(item);
+        //        foreach (var i in rv)
+        //        {
+        //            yield return i;
+        //        }
+        //    }
+        //    yield break;
+        //}
     }
 }

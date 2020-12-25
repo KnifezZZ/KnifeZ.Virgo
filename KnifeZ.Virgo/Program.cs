@@ -23,7 +23,7 @@ namespace KnifeZ.Virgo
                 logging.ClearProviders();
                 logging.AddConsole();
                 logging.AddDebug();
-                logging.AddWTMLogger();
+                logging.AddKnifeLogger();
             })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {

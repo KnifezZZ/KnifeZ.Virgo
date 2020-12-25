@@ -5,10 +5,19 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Version>0.0.1</Version>
     <Description>KnifeZ's .NET5 Frameowrk</Description>
+    <PackageIcon>TIM图片20191228141022 (2).png</PackageIcon>
+    <RepositoryUrl>https://gitee.com/KnifeZ/KnifeZ.Virgo</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\KnifeZ.Virgo.Mvc\KnifeZ.Virgo.Mvc.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="C:\Users\Knife\Pictures\TIM图片20191228141022 (2).png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

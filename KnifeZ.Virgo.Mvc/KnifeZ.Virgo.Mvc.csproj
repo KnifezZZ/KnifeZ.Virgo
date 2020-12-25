@@ -5,12 +5,24 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>KnifeZ's .NET5 Frameowrk</Description>
     <Version>0.0.1</Version>
+    <PackageIcon>TIM图片20191228141022 (2).png</PackageIcon>
+    <RepositoryUrl>https://gitee.com/KnifeZ/KnifeZ.Virgo</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Controllers\**" />
     <Compile Remove="GeneratorFiles\**" />
+    <Compile Remove="新文件夹\**" />
+    <EmbeddedResource Remove="Controllers\**" />
     <EmbeddedResource Remove="GeneratorFiles\**" />
+    <EmbeddedResource Remove="新文件夹\**" />
+    <None Remove="Controllers\**" />
     <None Remove="GeneratorFiles\**" />
+    <None Remove="新文件夹\**" />
+    <None Include="C:\Users\Knife\Pictures\TIM图片20191228141022 (2).png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -19,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.1" />
   </ItemGroup>
 
   <ItemGroup>
