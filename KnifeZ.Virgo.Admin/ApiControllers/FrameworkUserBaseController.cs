@@ -86,7 +86,7 @@ namespace KnifeZ.Virgo.Admin.Api
         public async Task<IActionResult> BatchDelete(string[] ids)
         {
             var vm = CreateVM<FrameworkUserBatchVM>();
-            if (ids != null && ids.Count() > 0)
+            if (ids != null && ids.Length > 0)
             {
                 vm.Ids = ids;
             }
@@ -107,7 +107,7 @@ namespace KnifeZ.Virgo.Admin.Api
                 }
                 var userids = DC.Set<FrameworkUserBase>().Where(x => tempids.Contains(x.ID)).Select(x => x.ID.ToString()).ToArray();
                 await LoginUserInfo.RemoveUserCache(userids);
-                return Ok(ids.Count());
+                return Ok(ids.Length);
             }
         }
 
@@ -126,7 +126,7 @@ namespace KnifeZ.Virgo.Admin.Api
         public IActionResult ExportExcelByIds(string[] ids)
         {
             var vm = CreateVM<FrameworkUserListVM>();
-            if (ids != null && ids.Count() > 0)
+            if (ids != null && ids.Length > 0)
             {
                 vm.Ids = new List<string>(ids);
                 vm.SearcherMode = ListVMSearchModeEnum.CheckExport;
@@ -206,14 +206,16 @@ namespace KnifeZ.Virgo.Admin.Api
                 .ToList();
 
             //生成并返回登录用户信息
-            LoginUserInfo rv = new LoginUserInfo();
-            rv.Id = user.ID;
-            rv.ITCode = user.ITCode;
-            rv.Name = user.Name;
-            rv.Roles = DC.Set<FrameworkRole>().Where(x => user.UserRoles.Select(y => y.RoleId).Contains(x.ID)).ToList();
-            rv.Groups = DC.Set<FrameworkGroup>().Where(x => user.UserGroups.Select(y => y.GroupId).Contains(x.ID)).ToList();
-            rv.DataPrivileges = dpris;
-            rv.PhotoId = user.PhotoId;
+            LoginUserInfo rv = new LoginUserInfo
+            {
+                Id = user.ID,
+                ITCode = user.ITCode,
+                Name = user.Name,
+                Roles = DC.Set<FrameworkRole>().Where(x => user.UserRoles.Select(y => y.RoleId).Contains(x.ID)).ToList(),
+                Groups = DC.Set<FrameworkGroup>().Where(x => user.UserGroups.Select(y => y.GroupId).Contains(x.ID)).ToList(),
+                DataPrivileges = dpris,
+                PhotoId = user.PhotoId
+            };
             //查找登录用户的页面权限
             var pris = DC.Set<FunctionPrivilege>()
                 .Where(x => x.UserId == user.ID || (x.RoleId != null && roleIDs.Contains(x.RoleId.Value)))
@@ -221,13 +223,15 @@ namespace KnifeZ.Virgo.Admin.Api
             rv.FunctionPrivileges = pris;
             LoginUserInfo = rv;
 
-            LoginUserInfo forapi = new LoginUserInfo();
-            forapi.Id = user.ID;
-            forapi.ITCode = user.ITCode;
-            forapi.Name = user.Name;
-            forapi.Roles = rv.Roles;
-            forapi.Groups = rv.Groups;
-            forapi.PhotoId = rv.PhotoId;
+            LoginUserInfo forapi = new LoginUserInfo
+            {
+                Id = user.ID,
+                ITCode = user.ITCode,
+                Name = user.Name,
+                Roles = rv.Roles,
+                Groups = rv.Groups,
+                PhotoId = rv.PhotoId
+            };
             List<SimpleMenu> ms = new List<SimpleMenu>();
 
             var menus = DC.Set<FunctionPrivilege>()
@@ -269,9 +273,11 @@ namespace KnifeZ.Virgo.Admin.Api
                 .Select(x => x.Url)
                 );
             urls.AddRange(GlobaInfo.AllModule.Where(x => x.IsApi == true).SelectMany(x => x.Actions).Where(x => (x.IgnorePrivillege == true || x.Module.IgnorePrivillege == true) && x.Url != null).Select(x => x.Url));
-            forapi.Attributes = new Dictionary<string, object>();
-            forapi.Attributes.Add("Menus", ms);
-            forapi.Attributes.Add("Actions", urls);
+            forapi.Attributes = new Dictionary<string, object>
+            {
+                { "Menus", ms },
+                { "Actions", urls }
+            };
             return Ok(forapi);
         }
 

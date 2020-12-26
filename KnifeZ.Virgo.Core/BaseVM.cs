@@ -58,31 +58,6 @@ namespace KnifeZ.Virgo.Core
             }
         }
 
-
-        /// <summary>
-        /// 前台传递过来的弹出窗口ID，多层弹出窗口用逗号分隔
-        /// </summary>
-        [JsonIgnore]
-        public string WindowIds { get; set; }
-
-        private string _viewdivid;
-        /// <summary>
-        /// PartialView中主Div的Id
-        /// </summary>
-        [JsonIgnore]
-        public string ViewDivId
-        {
-            set { _viewdivid = value; }
-            get
-            {
-                if (string.IsNullOrEmpty(_viewdivid))
-                {
-                    _viewdivid = "ViewDiv" + UniqueId;
-                }
-                return _viewdivid;
-            }
-        }
-
         /// <summary>
         /// 数据库环境
         /// </summary>
@@ -148,46 +123,6 @@ namespace KnifeZ.Virgo.Core
         [JsonIgnore]
         [BindNever]
         public ConstructorInfo DataContextCI { get; set; }
-
-        /// <summary>
-        /// 当前弹出层ID
-        /// </summary>
-        [JsonIgnore]
-        public string CurrentWindowId
-        {
-            get
-            {
-                string rv = null;
-                if (WindowIds != null)
-                {
-                    rv = WindowIds.Split(',').LastOrDefault();
-                }
-
-                return rv ?? "";
-            }
-        }
-
-        /// <summary>
-        /// 父级弹出层ID
-        /// </summary>
-        [JsonIgnore]
-        public string ParentWindowId
-        {
-            get
-            {
-                string rv = null;
-                if (WindowIds != null)
-                {
-                    var ids = WindowIds.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (ids.Length > 1)
-                    {
-                        rv = ids[^2];
-                    }
-                }
-
-                return rv ?? string.Empty;
-            }
-        }
 
         [JsonIgnore]
         [BindNever]

@@ -63,13 +63,15 @@ namespace KnifeZ.Virgo.Admin.Api
                 .ToList();
             ProcessTreeDp(dpris);
             //生成并返回登录用户信息
-            var rv = new LoginUserInfo();
-            rv.Id = user.ID;
-            rv.ITCode = user.ITCode;
-            rv.Name = user.Name;
-            rv.Roles = DC.Set<FrameworkRole>().Where(x => user.UserRoles.Select(y => y.RoleId).Contains(x.ID)).ToList();
-            rv.Groups = DC.Set<FrameworkGroup>().Where(x => user.UserGroups.Select(y => y.GroupId).Contains(x.ID)).ToList();
-            rv.DataPrivileges = dpris;
+            var rv = new LoginUserInfo
+            {
+                Id = user.ID,
+                ITCode = user.ITCode,
+                Name = user.Name,
+                Roles = DC.Set<FrameworkRole>().Where(x => user.UserRoles.Select(y => y.RoleId).Contains(x.ID)).ToList(),
+                Groups = DC.Set<FrameworkGroup>().Where(x => user.UserGroups.Select(y => y.GroupId).Contains(x.ID)).ToList(),
+                DataPrivileges = dpris
+            };
             //查找登录用户的页面权限
             var pris = DC.Set<FunctionPrivilege>()
                             .Where(x => x.UserId == user.ID || (x.RoleId != null && roleIDs.Contains(x.RoleId.Value)))
@@ -95,13 +97,15 @@ namespace KnifeZ.Virgo.Admin.Api
                 // 在上面注册AddAuthentication时，指定了默认的Scheme，在这里便可以不再指定Scheme。
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, properties);
                 List<SimpleMenu> ms = new List<SimpleMenu>();
-                LoginUserInfo forapi = new LoginUserInfo();
-                forapi.Id = LoginUserInfo.Id;
-                forapi.ITCode = LoginUserInfo.ITCode;
-                forapi.Name = LoginUserInfo.Name;
-                forapi.Roles = LoginUserInfo.Roles;
-                forapi.Groups = LoginUserInfo.Groups;
-                forapi.PhotoId = LoginUserInfo.PhotoId;
+                LoginUserInfo forapi = new LoginUserInfo
+                {
+                    Id = LoginUserInfo.Id,
+                    ITCode = LoginUserInfo.ITCode,
+                    Name = LoginUserInfo.Name,
+                    Roles = LoginUserInfo.Roles,
+                    Groups = LoginUserInfo.Groups,
+                    PhotoId = LoginUserInfo.PhotoId
+                };
                 var menus = DC.Set<FunctionPrivilege>()
                     .Where(x => x.UserId == user.ID || (x.RoleId != null && roleIDs.Contains(x.RoleId.Value)))
                     .Select(x => x.MenuItem)
@@ -126,9 +130,11 @@ namespace KnifeZ.Virgo.Admin.Api
                     .Select(x => x.Url)
                     );
                 urls.AddRange(GlobaInfo.AllModule.Where(x => x.IsApi == true).SelectMany(x => x.Actions).Where(x => (x.IgnorePrivillege == true || x.Module.IgnorePrivillege == true) && x.Url != null).Select(x => x.Url));
-                forapi.Attributes = new Dictionary<string, object>();
-                forapi.Attributes.Add("Menus", menus);
-                forapi.Attributes.Add("Actions", urls);
+                forapi.Attributes = new Dictionary<string, object>
+                {
+                    { "Menus", menus },
+                    { "Actions", urls }
+                };
 
                 return Ok(forapi);
             }
@@ -143,7 +149,7 @@ namespace KnifeZ.Virgo.Admin.Api
         }
 
 
-        private void LocalizeMenu(List<SimpleMenu> menus)
+        private static void LocalizeMenu(List<SimpleMenu> menus)
         {
             if (menus == null)
             {
@@ -185,13 +191,15 @@ namespace KnifeZ.Virgo.Admin.Api
             }
             else
             {
-                var forapi = new LoginUserInfo();
-                forapi.Id = LoginUserInfo.Id;
-                forapi.ITCode = LoginUserInfo.ITCode;
-                forapi.Name = LoginUserInfo.Name;
-                forapi.Roles = LoginUserInfo.Roles;
-                forapi.Groups = LoginUserInfo.Groups;
-                forapi.PhotoId = LoginUserInfo.PhotoId;
+                var forapi = new LoginUserInfo
+                {
+                    Id = LoginUserInfo.Id,
+                    ITCode = LoginUserInfo.ITCode,
+                    Name = LoginUserInfo.Name,
+                    Roles = LoginUserInfo.Roles,
+                    Groups = LoginUserInfo.Groups,
+                    PhotoId = LoginUserInfo.PhotoId
+                };
 
                 var ms = new List<SimpleMenu>();
                 var roleIDs = LoginUserInfo.Roles.Select(x => x.ID).ToList();
@@ -222,9 +230,11 @@ namespace KnifeZ.Virgo.Admin.Api
                 List<string> urls = new List<string>();
                 urls.AddRange(allowed.Select(x=>x.Url).Distinct());
                 urls.AddRange(GlobaInfo.AllModule.Where(x => x.IsApi == true).SelectMany(x => x.Actions).Where(x => (x.IgnorePrivillege == true || x.Module.IgnorePrivillege == true) && x.Url != null).Select(x => x.Url));
-                forapi.Attributes = new Dictionary<string, object>();
-                forapi.Attributes.Add("Menus", ms);
-                forapi.Attributes.Add("Actions", urls);
+                forapi.Attributes = new Dictionary<string, object>
+                {
+                    { "Menus", ms },
+                    { "Actions", urls }
+                };
                 return Ok(forapi);
             }
         }
@@ -239,13 +249,15 @@ namespace KnifeZ.Virgo.Admin.Api
             }
             else
             {
-                var forapi = new LoginUserInfo();
-                forapi.Id = LoginUserInfo.Id;
-                forapi.ITCode = LoginUserInfo.ITCode;
-                forapi.Name = LoginUserInfo.Name;
-                forapi.Roles = LoginUserInfo.Roles;
-                forapi.Groups = LoginUserInfo.Groups;
-                forapi.PhotoId = LoginUserInfo.PhotoId;
+                var forapi = new LoginUserInfo
+                {
+                    Id = LoginUserInfo.Id,
+                    ITCode = LoginUserInfo.ITCode,
+                    Name = LoginUserInfo.Name,
+                    Roles = LoginUserInfo.Roles,
+                    Groups = LoginUserInfo.Groups,
+                    PhotoId = LoginUserInfo.PhotoId
+                };
 
                 var ms = new List<SimpleMenu>();
                 var roleIDs = LoginUserInfo.Roles.Select(x => x.ID).ToList();
@@ -278,9 +290,11 @@ namespace KnifeZ.Virgo.Admin.Api
                 List<string> urls = new List<string>();
                 urls.AddRange(allowed.Select(x => x.Url).Distinct());
                 urls.AddRange(GlobaInfo.AllModule.Where(x => x.IsApi == true).SelectMany(x => x.Actions).Where(x => (x.IgnorePrivillege == true || x.Module.IgnorePrivillege == true) && x.Url != null).Select(x => x.Url));
-                forapi.Attributes = new Dictionary<string, object>();
-                forapi.Attributes.Add("Menus", ms);
-                forapi.Attributes.Add("Actions", urls);
+                forapi.Attributes = new Dictionary<string, object>
+                {
+                    { "Menus", ms },
+                    { "Actions", urls }
+                };
                 return Ok(forapi);
             }
         }

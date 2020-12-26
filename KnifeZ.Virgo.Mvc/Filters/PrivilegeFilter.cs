@@ -45,7 +45,7 @@ namespace KnifeZ.Virgo.Mvc.Filters
                 u = u.Substring(0, u.Length - 2);
                 if (controller is BaseApiController)
                 {
-                    u = u + "/{id}";
+                    u += "/{id}";
                 }
             }
             controller.BaseUrl = u + context.HttpContext.Request.QueryString.ToUriComponent(); ;

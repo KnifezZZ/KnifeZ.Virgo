@@ -47,7 +47,7 @@ namespace KnifeZ.Virgo.Admin.Api
         public IActionResult BatchDelete(string[] ids)
         {
             var vm = CreateVM<ActionLogBatchVM>();
-            if (ids != null && ids.Count() > 0)
+            if (ids != null && ids.Length > 0)
             {
                 vm.Ids = ids;
             }
@@ -61,7 +61,7 @@ namespace KnifeZ.Virgo.Admin.Api
             }
             else
             {
-                return Ok(ids.Count());
+                return Ok(ids.Length);
             }
         }
 
@@ -81,7 +81,7 @@ namespace KnifeZ.Virgo.Admin.Api
         public IActionResult ExportExcelByIds(string[] ids)
         {
             var vm = CreateVM<ActionLogListVM>();
-            if (ids != null && ids.Count() > 0)
+            if (ids != null && ids.Length > 0)
             {
                 vm.Ids = new List<string>(ids);
                 vm.SearcherMode = ListVMSearchModeEnum.CheckExport;

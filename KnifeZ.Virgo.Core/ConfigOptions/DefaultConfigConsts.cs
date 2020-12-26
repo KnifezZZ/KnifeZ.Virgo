@@ -13,7 +13,7 @@ namespace KnifeZ.Virgo.Core.ConfigOptions
         /// <summary>
         /// 默认列表行数
         /// </summary>
-        public const int DEFAULT_RPP = 20;
+        public const int DEFAULT_PAGESIZE = 20;
 
         /// <summary>
         /// 默认上传文件限制

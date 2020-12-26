@@ -412,7 +412,7 @@ namespace KnifeZ.Virgo.Mvc
                             if (u != null && u.EndsWith("/0"))
                             {
                                 u = u.Substring(0, u.Length - 2);
-                                u = u + "/{id}";
+                                u += "/{id}";
                             }
                             a.Url = u;
                         }
@@ -428,11 +428,6 @@ namespace KnifeZ.Virgo.Mvc
                     InitDataBase = true;
                 }
 
-                if (context.Request.Path == "/")
-                {
-                    context.Response.Cookies.Append("pagemode", configs.PageMode.ToString());
-                    context.Response.Cookies.Append("tabmode", configs.TabMode.ToString());
-                }
                 if (context.Request.ContentLength > 1024 * 1024 * 5)
                 {
                     context.Features.Get<IHttpMaxRequestBodySizeFeature>().MaxRequestBodySize = null;
@@ -498,10 +493,11 @@ namespace KnifeZ.Virgo.Mvc
 
         private static GlobalData GetGlobalData()
         {
-            var gd = new GlobalData();
-
-            //获取所有程序集
-            gd.AllAssembly = Utils.GetAllAssembly();
+            var gd = new GlobalData
+            {
+                //获取所有程序集
+                AllAssembly = Utils.GetAllAssembly()
+            };
             var admin = GetRuntimeAssembly("KnifeZ.Virgo.Mvc.Admin");
             if (admin != null && gd.AllAssembly.Contains(admin) == false)
             {
@@ -837,7 +833,7 @@ namespace KnifeZ.Virgo.Mvc
                         model.Actions.Add(action);
                     }
                 }
-                if (model.Actions != null && model.Actions.Count() > 0)
+                if (model.Actions != null && model.Actions.Count > 0)
                 {
                     if (areaattr.Length > 0)
                     {
@@ -1097,7 +1093,7 @@ namespace KnifeZ.Virgo.Mvc
 
 
 
-                    IISConfigurationData configurationData = default(IISConfigurationData);
+                    IISConfigurationData configurationData = default;
 
                     if (http_get_application_properties(ref configurationData) != 0)
 

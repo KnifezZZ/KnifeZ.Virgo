@@ -82,63 +82,6 @@ namespace KnifeZ.Virgo.Mvc
 
         public DBTypeEnum? CurrentDbType { get; set; }
 
-        public string ParentWindowId
-        {
-            get
-            {
-                string rv = null;
-                if (WindowIds != null)
-                {
-                    var ids = WindowIds.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (ids.Length > 1)
-                    {
-                        rv = ids[ids.Length - 2];
-                    }
-                }
-
-                return rv ?? string.Empty;
-            }
-        }
-
-        public string CurrentWindowId
-        {
-            get
-            {
-                string rv = null;
-                if (WindowIds != null)
-                {
-                    var ids = WindowIds.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (ids.Length > 0)
-                    {
-                        rv = ids[ids.Length - 1];
-                    }
-                }
-
-                return rv ?? string.Empty;
-            }
-        }
-
-        public string WindowIds
-        {
-            get
-            {
-                string rv = string.Empty;
-                try
-                {
-                    if (HttpContext.Request.Cookies.TryGetValue($"{ConfigInfo?.CookiePre}windowguid", out string windowguid) == true)
-                    {
-
-                        if (HttpContext.Request.Cookies.TryGetValue($"{ConfigInfo?.CookiePre}{windowguid}windowids", out string windowid) == true)
-                        {
-                            rv = windowid;
-                        }
-                    }
-                }
-                catch { }
-                return rv;
-            }
-        }
-
         #region DataContext
 
         private IDataContext _dc;
@@ -305,7 +248,6 @@ namespace KnifeZ.Virgo.Mvc
             rv.CreatorAssembly = this.GetType().AssemblyQualifiedName;
             rv.CurrentCS = CurrentCS;
             rv.CurrentUrl = this.BaseUrl;
-            rv.WindowIds = this.WindowIds;
             rv.Log = this.Log;
             rv.Controller = this;
             rv.ControllerName = this.GetType().FullName;
@@ -354,7 +296,7 @@ namespace KnifeZ.Virgo.Mvc
             //if viewmodel is derrived from IBaseBatchVM<>，set ViewMode's Ids property,and init it's ListVM and EditModel properties
             if (rv is IBaseBatchVM<BaseVM> temp)
             {
-                temp.Ids = new string[] { };
+                temp.Ids = Array.Empty<string>();
                 if (Ids != null)
                 {
                     var tempids = new List<string>();
@@ -438,7 +380,7 @@ namespace KnifeZ.Virgo.Mvc
         {
             SetValuesParser p = new SetValuesParser();
             var dir = p.Parse(values);
-            return CreateVM(typeof(T), null, new object[] { }, dir, passInit) as T;
+            return CreateVM(typeof(T), null, Array.Empty<object>(), dir, passInit) as T;
         }
 
         /// <summary>
@@ -453,7 +395,7 @@ namespace KnifeZ.Virgo.Mvc
         {
             SetValuesParser p = new SetValuesParser();
             var dir = p.Parse(values);
-            return CreateVM(typeof(T), Id, new object[] { }, dir, passInit) as T;
+            return CreateVM(typeof(T), Id, Array.Empty<object>(), dir, passInit) as T;
         }
 
         /// <summary>

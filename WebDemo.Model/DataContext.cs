@@ -2,7 +2,7 @@
 using KnifeZ.Virgo.Core;
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace WebDemo.DataAccess
+namespace WebDemo.Model
 {
     public class DataContext: FrameworkContext
     {

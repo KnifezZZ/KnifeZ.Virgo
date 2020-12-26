@@ -1,0 +1,7 @@
+﻿[*.cs]
+
+# IDE1006: 命名样式
+dotnet_diagnostic.IDE1006.severity = none
+
+# IDE0058: 永远不会使用表达式值
+dotnet_diagnostic.IDE0058.severity = none

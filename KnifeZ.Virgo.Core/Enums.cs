@@ -30,30 +30,6 @@ namespace KnifeZ.Virgo.Core
     public enum DBTypeEnum { SqlServer, MySql, PgSql, Memory, SQLite, Oracle }
 
     /// <summary>
-    /// 页面显示方式
-    /// </summary>
-    public enum PageModeEnum { Single, Tab }
-
-    /// <summary>
-    /// Tab页的显示方式
-    /// </summary>
-    public enum TabModeEnum { Default, Simple }
-
-    /// <summary>
-    /// Notification出现的位置
-    /// </summary>
-    public enum ExtPosition
-    {
-        b = 0, //下
-        bl = 1,//左下
-        br = 2,//右下
-        t = 3,//上
-        tl = 4,//左上
-        tr = 5,//右上
-        l = 6,//左
-        r = 7//右
-    }
-    /// <summary>
     /// Grid的选择模式
     /// </summary>
     public enum SelectionModeEnum

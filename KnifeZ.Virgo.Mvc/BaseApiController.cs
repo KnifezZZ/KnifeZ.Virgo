@@ -192,7 +192,6 @@ namespace KnifeZ.Virgo.Mvc
             rv.CreatorAssembly = this.GetType().AssemblyQualifiedName;
             rv.CurrentCS = CurrentCS;
             rv.CurrentUrl = this.BaseUrl;
-            rv.WindowIds = "";
             rv.Log = this.Log;
             rv.ControllerName = this.GetType().FullName;
             rv.Localizer = this.Localizer;
@@ -237,7 +236,7 @@ namespace KnifeZ.Virgo.Mvc
             //如果ViewModel T继承自IBaseBatchVM<BaseVM>，则自动为其中的ListVM和EditModel初始化数据
             if (rv is IBaseBatchVM<BaseVM> temp)
             {
-                temp.Ids = new string[] { };
+                temp.Ids = Array.Empty<string>();
                 if (Ids != null)
                 {
                     var tempids = new List<string>();

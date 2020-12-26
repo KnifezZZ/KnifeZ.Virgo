@@ -68,63 +68,6 @@ namespace KnifeZ.Virgo.Core
 
         public DBTypeEnum? CurrentDbType { get; set; }
 
-        public string ParentWindowId
-        {
-            get
-            {
-                string rv = null;
-                if (WindowIds != null)
-                {
-                    var ids = WindowIds.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (ids.Length > 1)
-                    {
-                        rv = ids[^2];
-                    }
-                }
-
-                return rv ?? string.Empty;
-            }
-        }
-
-        public string CurrentWindowId
-        {
-            get
-            {
-                string rv = null;
-                if (WindowIds != null)
-                {
-                    var ids = WindowIds.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (ids.Length > 0)
-                    {
-                        rv = ids[^1];
-                    }
-                }
-
-                return rv ?? string.Empty;
-            }
-        }
-
-        public string WindowIds
-        {
-            get
-            {
-                string rv = string.Empty;
-                try
-                {
-                    if (HttpContext.Request.Cookies.TryGetValue($"{ConfigInfo?.CookiePre}windowguid", out string windowguid) == true)
-                    {
-
-                        if (HttpContext.Request.Cookies.TryGetValue($"{ConfigInfo?.CookiePre}{windowguid}windowids", out string windowid) == true)
-                        {
-                            rv = windowid;
-                        }
-                    }
-                }
-                catch { }
-                return rv;
-            }
-        }
-
         #region DataContext
 
         private IDataContext _dc;

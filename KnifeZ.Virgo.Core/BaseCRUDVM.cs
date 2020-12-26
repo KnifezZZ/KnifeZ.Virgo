@@ -597,7 +597,7 @@ namespace KnifeZ.Virgo.Core
                 PropertyInfo pkProp = typeof(TModel).GetProperties().Where(p => p.GetCustomAttributes(typeof(KeyAttribute), false).Length > 0).FirstOrDefault();
                 foreach (var field in FC.Keys)
                 {
-                    if (field.StartsWith("Entity.") && !field.Contains("["))
+                    if (field.StartsWith("Entity."))
                     {
                         string name = field.Replace("Entity.", "");
                         if (name == pkProp.Name)
@@ -941,7 +941,7 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <param name="pi">属性信息</param>
         /// <returns>验证字段名称数组，用于ValidationResult</returns>
-        private string[] GetValidationFieldName(PropertyInfo pi)
+        private static string[] GetValidationFieldName(PropertyInfo pi)
         {
             return new[] { "Entity." + pi.Name };
         }

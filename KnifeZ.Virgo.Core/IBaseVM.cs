@@ -15,14 +15,6 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         string UniqueId { get; }
         /// <summary>
-        /// WindowIds
-        /// </summary>
-        string WindowIds { get; set; }
-        /// <summary>
-        /// ViewDivId
-        /// </summary>
-        string ViewDivId { get; set; }
-        /// <summary>
         /// DC
         /// </summary>
         IDataContext DC { get; set; }

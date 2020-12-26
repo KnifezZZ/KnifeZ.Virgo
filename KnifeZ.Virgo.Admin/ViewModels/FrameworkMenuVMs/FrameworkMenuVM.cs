@@ -160,9 +160,11 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
                     {
                         var model = modules.Where(x => x.FullName == this.SelectedModule)
                                             .FirstOrDefault();
-                        mainAction = new FrameworkAction();
-                        mainAction.Module = model;
-                        mainAction.MethodName = null;
+                        mainAction = new FrameworkAction
+                        {
+                            Module = model,
+                            MethodName = null
+                        };
                     }
 
                     Entity.Url = mainAction.Url;
@@ -192,24 +194,26 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
                             {
                                 guids.Add(aid);
                             }
-                            var menu = new FrameworkMenu();
-                            menu.FolderOnly = false;
-                            menu.IsPublic = false;
-                            menu.Parent = Entity;
-                            menu.ShowOnMenu = false;
-                            menu.DisplayOrder = order++;
-                            menu.Privileges = new List<FunctionPrivilege>();
-                            menu.CreateBy = LoginUserInfo.ITCode;
-                            menu.CreateTime = DateTime.Now;
-                            menu.IsInside = true;
-                            menu.DomainId = Entity.DomainId;
-                            menu.PageName = action.ActionDes?.Description ?? action.ActionName;
-                            menu.ModuleName = action.Module.ModuleName;
-                            menu.ActionName = action.ActionDes?.Description ?? action.ActionName;
-                            menu.ClassName = action.Module.FullName;
-                            menu.MethodName = action.MethodName;
-                            menu.Url = action.Url;
-                            menu.ID = aid;
+                            var menu = new FrameworkMenu
+                            {
+                                FolderOnly = false,
+                                IsPublic = false,
+                                Parent = Entity,
+                                ShowOnMenu = false,
+                                DisplayOrder = order++,
+                                Privileges = new List<FunctionPrivilege>(),
+                                CreateBy = LoginUserInfo.ITCode,
+                                CreateTime = DateTime.Now,
+                                IsInside = true,
+                                DomainId = Entity.DomainId,
+                                PageName = action.ActionDes?.Description ?? action.ActionName,
+                                ModuleName = action.Module.ModuleName,
+                                ActionName = action.ActionDes?.Description ?? action.ActionName,
+                                ClassName = action.Module.FullName,
+                                MethodName = action.MethodName,
+                                Url = action.Url,
+                                ID = aid
+                            };
                             Entity.Children.Add(menu);
                         }
                     }
@@ -262,9 +266,11 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
                     if (mainAction == null && Entity.ShowOnMenu == false)
                     {
                         var model = modules.Where(x => x.FullName == this.SelectedModule).FirstOrDefault();
-                        mainAction = new FrameworkAction();
-                        mainAction.Module = model;
-                        mainAction.MethodName = null;
+                        mainAction = new FrameworkAction
+                        {
+                            Module = model,
+                            MethodName = null
+                        };
                     }
                     Entity.Url = mainAction.Url;
                     Entity.ModuleName = mainAction.Module.ModuleName;
@@ -279,23 +285,25 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
                     {
                         if (SelectedActionIDs?.Contains(action.Url) == true)
                         {
-                            FrameworkMenu menu = new FrameworkMenu();
-                            menu.FolderOnly = false;
-                            menu.IsPublic = false;
-                            menu.Parent = Entity;
-                            menu.ShowOnMenu = false;
-                            menu.DisplayOrder = order++;
-                            menu.Privileges = new List<FunctionPrivilege>();
-                            menu.CreateBy = LoginUserInfo.ITCode;
-                            menu.CreateTime = DateTime.Now;
-                            menu.IsInside = true;
-                            menu.DomainId = Entity.DomainId;
-                            menu.PageName = action.ActionDes?.Description ?? action.ActionName;
-                            menu.ModuleName = action.Module.ModuleName;
-                            menu.ActionName = action.ActionDes?.Description ?? action.ActionName;
-                            menu.ClassName = action.Module.FullName;
-                            menu.MethodName = action.MethodName;
-                            menu.Url = action.Url;
+                            FrameworkMenu menu = new FrameworkMenu
+                            {
+                                FolderOnly = false,
+                                IsPublic = false,
+                                Parent = Entity,
+                                ShowOnMenu = false,
+                                DisplayOrder = order++,
+                                Privileges = new List<FunctionPrivilege>(),
+                                CreateBy = LoginUserInfo.ITCode,
+                                CreateTime = DateTime.Now,
+                                IsInside = true,
+                                DomainId = Entity.DomainId,
+                                PageName = action.ActionDes?.Description ?? action.ActionName,
+                                ModuleName = action.Module.ModuleName,
+                                ActionName = action.ActionDes?.Description ?? action.ActionName,
+                                ClassName = action.Module.FullName,
+                                MethodName = action.MethodName,
+                                Url = action.Url
+                            };
                             Entity.Children.Add(menu);
                         }
                     }
@@ -309,8 +317,10 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
 
             }
             base.DoAdd();
-            List<Guid> guids = new List<Guid>();
-            guids.Add(Entity.ID);
+            List<Guid> guids = new List<Guid>
+            {
+                Entity.ID
+            };
             if (Entity.Children != null)
             {
                 guids.AddRange(Entity.Children?.Select(x => x.ID).ToList());
@@ -343,11 +353,13 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
                 {
                     foreach (var id in SelectedRolesIDs)
                     {
-                        FunctionPrivilege fp = new FunctionPrivilege();
-                        fp.MenuItemId = menuid;
-                        fp.RoleId = id;
-                        fp.UserId = null;
-                        fp.Allowed = true;
+                        FunctionPrivilege fp = new FunctionPrivilege
+                        {
+                            MenuItemId = menuid,
+                            RoleId = id,
+                            UserId = null,
+                            Allowed = true
+                        };
                         DC.Set<FunctionPrivilege>().Add(fp);
                     }
                 }

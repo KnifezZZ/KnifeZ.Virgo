@@ -10,7 +10,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="KnifeZ.Virgo.Mvc.Admin" Version="0.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.1" NoWarn="NU1605" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="5.0.1" NoWarn="NU1605" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.1">
@@ -21,7 +20,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WebDemo.DataAccess\WebDemo.DataAccess.csproj" />
+    <ProjectReference Include="..\KnifeZ.Virgo.Admin\KnifeZ.Virgo.Mvc.Admin.csproj" />
+    <ProjectReference Include="..\KnifeZ.Virgo.Mvc\KnifeZ.Virgo.Mvc.csproj" />
+    <ProjectReference Include="..\WebDemo.ViewModel\WebDemo.ViewModel.csproj" />
   </ItemGroup>
 
   <ItemGroup>

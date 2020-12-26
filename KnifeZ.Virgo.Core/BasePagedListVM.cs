@@ -187,12 +187,10 @@ namespace KnifeZ.Virgo.Core
 
             //生成表头
             int max = MakeExcelHeader(sheet, GridHeaders, 0, 0, headerStyle);
-
-            //放入数据
-            var ColIndex = 0;
             for (int i = 0; i < List.Count; i++)
             {
-                ColIndex = 0;
+                //放入数据
+                int ColIndex = 0;
                 var DR = sheet.CreateRow(i + max);
                 foreach (var baseCol in GridHeaders)
                 {
@@ -665,7 +663,7 @@ namespace KnifeZ.Virgo.Core
                         }
                         if (Searcher.Limit == 0)
                         {
-                            Searcher.Limit = ConfigInfo?.UiOptions.DataTable.RPP ?? 20;
+                            Searcher.Limit = ConfigInfo?.UiOptions.PageSize ?? 20;
                         }
                         //根据返回数据的数量，以及预先设定的每页行数来设定数据量和总页数
                         Searcher.Count = count;

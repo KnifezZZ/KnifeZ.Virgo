@@ -200,54 +200,6 @@ namespace KnifeZ.Virgo.Core
 
         #endregion
 
-        #region PageMode
-
-        private PageModeEnum? _pageMode;
-
-        /// <summary>
-        /// PageMode
-        /// </summary>
-        public PageModeEnum PageMode
-        {
-            get
-            {
-                if (_pageMode == null)
-                {
-                    _pageMode = PageModeEnum.Single;
-                }
-                return _pageMode.Value;
-            }
-            set
-            {
-                _pageMode = value;
-            }
-        }
-        #endregion
-
-        #region TabMode
-
-        private TabModeEnum? _tabMode;
-
-        /// <summary>
-        /// TabMode
-        /// </summary>
-        public TabModeEnum TabMode
-        {
-            get
-            {
-                if (_tabMode == null)
-                {
-                    _tabMode = TabModeEnum.Default;
-                }
-                return _tabMode.Value;
-            }
-            set
-            {
-                _tabMode = value;
-            }
-        }
-        #endregion
-
         #region EncryptKey
 
         private string _encryptKey;
@@ -404,29 +356,10 @@ namespace KnifeZ.Virgo.Core
                 if (_uiOptions == null)
                 {
                     _uiOptions = new UIOptions();
-                    if (_uiOptions.DataTable == null)
-                        _uiOptions.DataTable = new UIOptions.DataTableOptions
-                        {
-                            RPP = DefaultConfigConsts.DEFAULT_RPP
-                        };
-
-                    if (_uiOptions.ComboBox == null)
-                        _uiOptions.ComboBox = new UIOptions.ComboBoxOptions
-                        {
-                            DefaultEnableSearch = DefaultConfigConsts.DEFAULT_COMBOBOX_DEFAULT_ENABLE_SEARCH
-                        };
-
-                    if (_uiOptions.DateTime == null)
-                        _uiOptions.DateTime = new UIOptions.DateTimeOptions
-                        {
-                            DefaultReadonly = DefaultConfigConsts.DEFAULT_DATETIME_DEFAULT_READONLY
-                        };
-
-                    if (_uiOptions.SearchPanel == null)
-                        _uiOptions.SearchPanel = new UIOptions.SearchPanelOptions
-                        {
-                            DefaultExpand = DefaultConfigConsts.DEFAULT_SEARCHPANEL_DEFAULT_EXPAND
-                        };
+                    if (_uiOptions.PageSize == 0)
+                    {
+                        _uiOptions.PageSize = DefaultConfigConsts.DEFAULT_PAGESIZE;
+                    }
                 }
                 return _uiOptions;
             }

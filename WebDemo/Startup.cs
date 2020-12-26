@@ -49,15 +49,20 @@ namespace WebDemo
 
                 };
                 c.AddSecurityDefinition("Bearer", bearer);
-                var sr = new OpenApiSecurityRequirement();
-                sr.Add(new OpenApiSecurityScheme
+                var sr = new OpenApiSecurityRequirement
                 {
-                    Reference = new OpenApiReference
                     {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer"
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
                     }
-                }, Array.Empty<string>());
+                };
                 c.AddSecurityRequirement(sr);
             });
         }
