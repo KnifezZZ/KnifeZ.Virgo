@@ -1,10 +1,11 @@
 ﻿import request from '@/utils/request'
 import config from '@/configs/index'
 import contentType from '@/configs/content-type'
-const reqPath = config.headerApi + '/$modelName$/'
+const reqPath = config.headerApi + '/$name$/'
 import {
 	bSearch,
 	bBatchDelete,
+	bAdd,
 	bEdit,
 	bDetail,
 	bExportExcel,
@@ -21,6 +22,10 @@ const API = {
 	BatchDelete(data) {
 		return bBatchDelete(reqPath, data)
 	},
+	// 新增
+	Add(data) {
+		return bAdd(reqPath, data)
+	},
 	// 修改
 	Edit(data) {
 		return bEdit(reqPath, data)
@@ -31,12 +36,7 @@ const API = {
 	},
 	//导出excel
 	ExportExcel(data) {
-		return bExportExcel({
-			url: reqPath + 'ExportExcel',
-			method: 'post',
-			contentType: contentType.stream,
-			data: data,
-		})
+		return bExportExcel(reqPath,data)
 	},
 	ExportExcelByIds(data) {
 		return bExportExcelByIds(reqPath, data)
@@ -48,7 +48,6 @@ const API = {
 	Imported(data) {
 		return bImported(reqPath, data)
 	},
-
 	$extAPIs$
 }
 export default API

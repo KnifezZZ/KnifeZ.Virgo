@@ -4,12 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using KnifeZ.Virgo.Core;
+using Microsoft.AspNetCore.Mvc;
 
 namespace KnifeZ.Virgo.Mvc
 {
     [AllRights]
     [ActionDescription("VFramework")]
-    public class VFrameworkController : BaseController
+    [Route("api/_[controller]")]
+    public class VFrameworkController : BaseApiController
     {
 
 

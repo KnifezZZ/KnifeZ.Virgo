@@ -13,15 +13,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Areas\templates\**" />
     <Compile Remove="Controllers\**" />
     <Compile Remove="GeneratorFiles\**" />
-    <Compile Remove="新文件夹\**" />
+    <EmbeddedResource Remove="Areas\templates\**" />
     <EmbeddedResource Remove="Controllers\**" />
     <EmbeddedResource Remove="GeneratorFiles\**" />
-    <EmbeddedResource Remove="新文件夹\**" />
+    <None Remove="Areas\templates\**" />
     <None Remove="Controllers\**" />
     <None Remove="GeneratorFiles\**" />
-    <None Remove="新文件夹\**" />
     <None Include="C:\Users\Knife\Pictures\icon.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
@@ -38,6 +38,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\KnifeZ.Virgo.Core\KnifeZ.Virgo.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Areas\" />
   </ItemGroup>
 
 </Project>

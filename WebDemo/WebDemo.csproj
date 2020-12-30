@@ -5,7 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="demoDb.db" />
     <None Remove="demoDb.db-shm" />
   </ItemGroup>
 

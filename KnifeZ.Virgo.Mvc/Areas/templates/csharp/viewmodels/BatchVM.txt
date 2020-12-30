@@ -1,1 +1,18 @@
-﻿
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using KnifeZ.Virgo.Core;
+using $modelnamespace$;
+
+namespace VMnamespace
+{
+    public class KClasssNameVBatchVM : BaseBatchVM<$name$, BaseVM>
+    {
+        public KClasssNameVBatchVM()
+        {
+            ListVM = new $classname$ListVM();
+        }
+
+    }
+}

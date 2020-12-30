@@ -40,21 +40,14 @@ namespace KnifeZ.Virgo.Core
             var dlls = dir.GetFiles("*.dll", SearchOption.AllDirectories);
             string[] systemdll = new string[]
             {
-                "Microsoft.",
-                "System.",
-                "Swashbuckle.",
-                "ICSharpCode",
-                "Newtonsoft.",
-                "Oracle.",
-                "Pomelo.",
-                "SQLitePCLRaw."
+                "KnifeZ.Virgo",
+                Assembly.GetEntryAssembly().GetName().Name
             };
-
             foreach (var dll in dlls)
             {
                 try
                 {
-                    if (systemdll.Any(x => dll.Name.StartsWith(x)) == false)
+                    if (systemdll.Any(x => dll.Name.StartsWith(x)) == true)
                     {
                         rv.Add(AssemblyLoadContext.Default.LoadFromAssemblyPath(dll.FullName));
                     }

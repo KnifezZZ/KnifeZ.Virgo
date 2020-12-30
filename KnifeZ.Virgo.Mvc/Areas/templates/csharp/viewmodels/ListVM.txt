@@ -1,1 +1,27 @@
-﻿
+﻿using System.Collections.Generic;
+using System.Linq;
+using KnifeZ.Virgo.Core;
+using KnifeZ.Virgo.Core.Extensions;
+
+namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.$name$VMs
+{
+    public class $name$ListVM : BasePagedListVM<$name$, $name$Searcher>
+    {
+        protected override IEnumerable<IGridColumn<$name$>> InitGridHeader()
+        {
+            return new List<GridColumn<$name$>>{
+                $gridHeaders$
+                this.MakeGridHeaderAction(width: 300)
+            };
+        }
+
+        public override IOrderedQueryable<$name$> GetSearchQuery()
+        {
+            var query = DC.Set<$name$>()
+                $queryChecks$
+                .OrderBy(x => x.ID);
+            return query;
+        }
+
+    }
+}

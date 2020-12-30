@@ -1,14 +1,18 @@
 ﻿using System;
 using KnifeZ.Virgo.Core;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
 namespace WebDemo.Model
 {
-    public class DataContext: FrameworkContext
+    public class DataContext : FrameworkContext
     {
+        public DbSet<Blog> Blogs { get; set; }
+        public DbSet<BlogCategory> BlogCategories { get; set; }
+        public DbSet<BlogClassification> BlogClassifications { get; set; }
+        public DbSet<BlogClassificationMiddle> BlogClassificationMiddles { get; set; }
 
-        public DataContext (CS cs)
-     : base(cs)
+        public DataContext (CS cs) : base(cs)
         {
         }
 

@@ -1,1 +1,18 @@
-﻿
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using KnifeZ.Virgo.Core;
+
+namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.$name$VMs
+{
+    public class $name$VM : BaseCRUDVM<$name$>
+    {
+        public override DuplicatedInfo<$name$> SetDuplicatedCheck()
+        {
+            var rv = CreateFieldsInfo(SimpleField(x => x.GroupName));
+            rv.AddGroup(SimpleField(x => x.GroupCode));
+            return rv;
+        }
+    }
+}

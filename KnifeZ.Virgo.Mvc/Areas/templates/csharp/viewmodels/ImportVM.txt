@@ -1,1 +1,14 @@
-﻿
+﻿using KnifeZ.Virgo.Core;
+
+namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.$name$VMs
+{
+    public class $name$TemplateVM : BaseTemplateVM
+    {
+        $importProperties$
+    }
+
+    public class $name$ImportVM : BaseImportVM<$name$TemplateVM, $name$>
+    {
+
+    }
+}
