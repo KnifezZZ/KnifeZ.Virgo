@@ -36,10 +36,18 @@
     <None Remove="Areas\templates\ImportVM.txt" />
     <None Remove="Areas\templates\ListVM.txt" />
     <None Remove="Areas\templates\Searcher.txt" />
+    <None Remove="Areas\templates\vue\api\index.txt" />
+    <None Remove="Areas\templates\vue\index.txt" />
+    <None Remove="Areas\templates\vue\json.txt" />
+    <None Remove="Areas\templates\vue\views\dialog-form.txt" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Areas\templates\Searcher.txt" />
+    <EmbeddedResource Include="Areas\templates\vue\api\index.txt" />
+    <EmbeddedResource Include="Areas\templates\vue\index.txt" />
+    <EmbeddedResource Include="Areas\templates\vue\json.txt" />
+    <EmbeddedResource Include="Areas\templates\vue\views\dialog-form.txt" />
   </ItemGroup>
 
   <ItemGroup>
