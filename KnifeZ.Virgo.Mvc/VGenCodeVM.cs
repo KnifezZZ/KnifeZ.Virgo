@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using KnifeZ.Virgo.Core;
@@ -12,22 +14,592 @@ using KnifeZ.Virgo.Mvc.Model;
 
 namespace KnifeZ.Virgo.Mvc
 {
-    public class VGenCodeVM:BaseVM
+    public class VGenCodeVM : BaseVM
     {
         public VGenCodeModel CodeModel { get; set; }
-        public VGenCodeVM ()
+
+        public string ModelName => CodeModel.ModelType?.Split(',').FirstOrDefault()?.Split('.').LastOrDefault() ?? "";
+        /// <summary>
+        /// Model namespace
+        /// </summary>
+        public string ModelNS => CodeModel.ModelType?.Split(',').FirstOrDefault()?.Split('.').SkipLast(1).ToSpratedString(seperator: ".");
+        /// <summary>
+        /// 基础路径
+        /// </summary>
+        public string BaseDir { get; set; } = AppDomain.CurrentDomain.BaseDirectory;
+        public string _mainDir;
+        /// <summary>
+        /// 项目根目录
+        /// </summary>
+        public string MainDir
         {
+            get
+            {
+                if (_mainDir == null)
+                {
+                    int? index = BaseDir?.IndexOf($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}Debug{Path.DirectorySeparatorChar}");
+                    if (index == null || index < 0)
+                    {
+                        index = BaseDir?.IndexOf($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}Release{Path.DirectorySeparatorChar}") ?? 0;
+                    }
+
+                    _mainDir = BaseDir?.Substring(0, index.Value);
+                }
+                return _mainDir;
+            }
+            set
+            {
+                _mainDir = value;
+            }
         }
-        public VGenCodeVM (VGenCodeModel _model)
+
+        private string _mainNs;
+        public string MainNS
         {
-            CodeModel = _model;
+            get
+            {
+                int index = MainDir.LastIndexOf(Path.DirectorySeparatorChar);
+                if (index > 0)
+                {
+                    _mainNs = MainDir.Substring(index + 1);
+                }
+                else
+                {
+                    _mainNs = MainDir;
+                }
+                return _mainNs;
+            }
+            set
+            {
+                _mainNs = value;
+            }
+
+        }
+
+        private string _controllerNs;
+        public string ControllerNs
+        {
+            get
+            {
+                if (_controllerNs == null)
+                {
+                    _controllerNs = MainNS + ".Controllers";
+                }
+                return _controllerNs;
+            }
+            set
+            {
+                _controllerNs = value;
+            }
+        }
+
+        public string _controllerdir;
+        public string ControllerDir
+        {
+            get
+            {
+                if (_controllerdir == null)
+                {
+                    if (string.IsNullOrEmpty(CodeModel.Area))
+                    {
+                        _controllerdir = Directory.CreateDirectory(MainDir + $"{Path.DirectorySeparatorChar}Controllers").FullName;
+                    }
+                    else
+                    {
+                        _controllerdir = Directory.CreateDirectory(MainDir + $"{Path.DirectorySeparatorChar}Areas{Path.DirectorySeparatorChar}{CodeModel.Area}{Path.DirectorySeparatorChar}Controllers").FullName;
+                    }
+                }
+                return _controllerdir;
+            }
+        }
+
+        public string _vmdir;
+        /// <summary>
+        /// ViewModel项目根目录
+        /// </summary>
+        public string VmDir
+        {
+            get
+            {
+                if (_vmdir == null)
+                {
+                    var up = Directory.GetParent(MainDir);
+                    var vmdir = up.GetDirectories().Where(x => x.Name.ToLower().EndsWith(".viewmodel")).FirstOrDefault();
+                    if (vmdir == null)
+                    {
+                        if (string.IsNullOrEmpty(CodeModel.Area))
+                        {
+                            vmdir = Directory.CreateDirectory(MainDir + $"{Path.DirectorySeparatorChar}ViewModels{Path.DirectorySeparatorChar}{ModelName}VMs");
+                        }
+                        else
+                        {
+                            vmdir = Directory.CreateDirectory(MainDir + $"{Path.DirectorySeparatorChar}CodeModel.Areas{Path.DirectorySeparatorChar}{CodeModel.Area}{Path.DirectorySeparatorChar}ViewModels{Path.DirectorySeparatorChar}{ModelName}VMs");
+                        }
+                    }
+                    else
+                    {
+                        if (string.IsNullOrEmpty(CodeModel.Area))
+                        {
+                            vmdir = Directory.CreateDirectory(vmdir.FullName + $"{Path.DirectorySeparatorChar}{ModelName}VMs");
+                        }
+                        else
+                        {
+                            vmdir = Directory.CreateDirectory(vmdir.FullName + $"{Path.DirectorySeparatorChar}{CodeModel.Area}{Path.DirectorySeparatorChar}{ModelName}VMs");
+                        }
+
+                    }
+                    _vmdir = vmdir.FullName;
+                }
+                return _vmdir;
+            }
+        }
+
+        private string _vmNs;
+        /// <summary>
+        /// ViewModel namespace
+        /// </summary>
+        public string VMNs
+        {
+            get
+            {
+                if (_vmNs == null)
+                {
+                    var up = Directory.GetParent(MainDir);
+                    var vmdir = up.GetDirectories().Where(x => x.Name.ToLower().EndsWith(".viewmodel")).FirstOrDefault();
+                    if (vmdir == null)
+                    {
+                        if (string.IsNullOrEmpty(CodeModel.Area))
+                        {
+                            _vmNs = MainNS + $".ViewModels.{ModelName}VMs";
+                        }
+                        else
+                        {
+                            _vmNs = MainNS + $".{CodeModel.Area}.ViewModels.{ModelName}VMs";
+                        }
+                    }
+                    else
+                    {
+                        int index = vmdir.FullName.LastIndexOf(Path.DirectorySeparatorChar);
+                        if (index > 0)
+                        {
+                            _vmNs = vmdir.FullName.Substring(index + 1);
+                        }
+                        else
+                        {
+                            _vmNs = vmdir.FullName;
+                        }
+                        if (string.IsNullOrEmpty(CodeModel.Area))
+                        {
+                            _vmNs += $".{ModelName}VMs";
+                        }
+                        else
+                        {
+                            _vmNs += $".{CodeModel.Area}.{ModelName}VMs";
+                        }
+                    }
+                }
+                return _vmNs;
+            }
+            set
+            {
+                _vmNs = value;
+            }
         }
 
         public string GenTemplates ()
         {
+            var genList = new Dictionary<string, string>
+            {
+                //生成Controller
+                { $"{ControllerDir}{Path.DirectorySeparatorChar}{ModelName}Controller.cs", GenApiController() },
+                //生成ViewModel
+                { $"{VmDir}{Path.DirectorySeparatorChar}{ModelName}VM.cs", GenerateVM("CurdVm") },
+                { $"{VmDir}{Path.DirectorySeparatorChar}{ModelName}ListVM.cs", GenerateVM("ListVM") },
+                { $"{VmDir}{Path.DirectorySeparatorChar}{ModelName}BatchVM.cs", GenerateVM("BatchVM") },
+                { $"{VmDir}{Path.DirectorySeparatorChar}{ModelName}ImportVM.cs", GenerateVM("ImportVM") },
+                { $"{VmDir}{Path.DirectorySeparatorChar}{ModelName}Searcher.cs", GenerateVM("Searcher") }
+            };
+            //生成Vue
+            var up = Directory.GetParent(MainDir);
+            genList.Add($"{up}{Path.DirectorySeparatorChar}ClientApp{Path.DirectorySeparatorChar}src{Path.DirectorySeparatorChar}views{Path.DirectorySeparatorChar}{ModelName.ToLower()}{Path.DirectorySeparatorChar}index.vue"
+                , GenerateVue("index", "vue"));
+            //GenerateVue();
+
+            foreach (var item in genList)
+            {
+                File.WriteAllText(item.Key, item.Value, Encoding.UTF8);
+            }
             return "success";
         }
-        public IOrderedQueryable<CodeGenListView> GetFieldInfos (string modelFullName)
+
+        #region 生成模板代码
+        public string GenApiController ()
+        {
+            string rv = GetResource("Controller.txt")
+                .Replace("$vmnamespace$", VMNs)
+                .Replace("$namespace$", ControllerNs)
+                .Replace("$des$", CodeModel.ModelName)
+                .Replace("$modelname$", ModelName)
+                .Replace("$modelnamespace$", ModelNS)
+                .Replace("$controllername$", $"{ModelName}");
+            if (string.IsNullOrEmpty(CodeModel.Area))
+            {
+                rv = rv.Replace("$area$", "");
+            }
+            else
+            {
+                rv = rv.Replace("$area$", $"[Area(\"{CodeModel.Area}\")]");
+            }
+            #region 附加方法
+
+            StringBuilder other = new StringBuilder();
+            List<VFieldInfo> pros =CodeModel.FieldInfos.Where(x => x.IsSearcherField == true || x.IsFormField == true).ToList();
+            List<string> existSubPro = new List<string>();
+            for (int i = 0; i < pros.Count; i++)
+            {
+                var item = pros[i];
+                if ((item.InfoType == FieldInfoType.One2Many || item.InfoType == FieldInfoType.Many2Many) && item.SubField != "`file")
+                {
+                    var subtype = Type.GetType(item.LinkedType);
+                    var subpro = subtype.GetProperties().Where(x => x.Name == item.SubField).FirstOrDefault();
+                    var key = subtype.FullName + ":" + subpro.Name;
+                    existSubPro.Add(key);
+                    int count = existSubPro.Where(x => x == key).Count();
+                    if (count == 1)
+                    {
+
+                        other.AppendLine($@"
+        [HttpGet(""[action]"")]
+        public ActionResult Get{subtype.Name}s()
+        {{
+            return Ok(DC.Set<{subtype.Name}>().GetSelectListItems(LoginUserInfo?.DataPrivileges, null, x => x.{item.SubField}));
+        }}");
+                    }
+                }
+            }
+            rv = rv.Replace("$other$", other.ToString());
+            #endregion
+            return rv;
+        }
+
+        public string GenerateVM (string name)
+        {
+            var rv = GetResource($"{name}.txt")
+                .Replace("$modelnamespace$", ModelNS)
+                .Replace("$vmnamespace$", VMNs)
+                .Replace("$modelname$", ModelName)
+                .Replace("$area$", $"{CodeModel.Area ?? ""}")
+                .Replace("$classname$", $"{ModelName}");
+            if (name == "Searcher" || name == "BatchVM")
+            {
+                string prostring = "";
+                string initstr = "";
+                Type modelType = Type.GetType(CodeModel.ModelType);
+                List<VFieldInfo> pros = null;
+                if (name == "Searcher")
+                {
+                    pros = CodeModel.FieldInfos.Where(x => x.IsSearcherField == true).ToList();
+                }
+                if (name == "BatchVM")
+                {
+                    pros = CodeModel.FieldInfos.Where(x => x.IsBatchField == true).ToList();
+                }
+                foreach (var pro in pros)
+                {
+                    //对于一对一或者一对多的搜索和批量修改字段，需要在vm中生成对应的变量来获取关联表的数据
+                    if (pro.InfoType != FieldInfoType.Normal)
+                    {
+                        var subtype = Type.GetType(pro.LinkedType);
+                        if (typeof(TopBasePoco).IsAssignableFrom(subtype) == false || subtype == typeof(FileAttachment))
+                        {
+                            continue;
+                        }
+                    }
+
+                    //生成普通字段定义
+                    var proType = modelType.GetProperties().Where(x => x.Name == pro.FieldName).FirstOrDefault();
+                    var display = proType.GetCustomAttribute<DisplayAttribute>();
+                    if (display != null)
+                    {
+                        prostring += $@"
+        [Display(Name = ""{display.Name}"")]";
+                    }
+                    string typename = proType.PropertyType.Name;
+                    string proname = pro.GetField(DC, modelType);
+
+                    switch (pro.InfoType)
+                    {
+                        case FieldInfoType.Normal:
+                            if (proType.PropertyType.IsNullable())
+                            {
+                                typename = proType.PropertyType.GetGenericArguments()[0].Name + "?";
+                            }
+                            else if (proType.PropertyType != typeof(string))
+                            {
+                                typename = proType.PropertyType.Name + "?";
+                            }
+                            break;
+                        case FieldInfoType.One2Many:
+                            typename = pro.GetFKType(DC, modelType);
+                            if (typename != "string")
+                            {
+                                typename += "?";
+                            }
+                            break;
+                        case FieldInfoType.Many2Many:
+                            proname = $@"Selected{pro.FieldName}IDs";
+                            typename = $"List<{pro.GetFKType(DC, modelType)}>";
+                            break;
+                        default:
+                            break;
+                    }
+                    if (typename == "DateTime" || typename == "DateTime?")
+                    {
+                        typename = "DateRange";
+                    }
+                    prostring += $@"
+        public {typename} {proname} {{ get; set; }}";
+                }
+                rv = rv.Replace("$pros$", prostring).Replace("$init$", initstr);
+                rv = GetRelatedNamespace(pros, rv);
+            }
+            if (name == "ListVM")
+            {
+                string headerstring = "";
+                string selectstring = "";
+                string wherestring = "";
+                string subprostring = "";
+                string formatstring = "";
+                string actionstring = "";
+
+                var pros = CodeModel.FieldInfos.Where(x => x.IsListField == true).ToList();
+                Type modelType = Type.GetType(CodeModel.ModelType);
+                List<PropertyInfo> existSubPro = new List<PropertyInfo>();
+                foreach (var pro in pros)
+                {
+                    if (pro.InfoType == FieldInfoType.Normal)
+                    {
+                        headerstring += $@"
+                this.MakeGridHeader(x => x.{pro.FieldName}),";
+                        if (pro.FieldName.ToLower() != "id")
+                        {
+                            selectstring += $@"
+                    {pro.FieldName} = x.{pro.FieldName},";
+                        }
+                    }
+                    else
+                    {
+                        var subtype = Type.GetType(pro.LinkedType);
+                        if (subtype == typeof(FileAttachment))
+                        {
+                            var filefk = DC.GetFKName2(modelType, pro.FieldName);
+                            headerstring += $@"
+                this.MakeGridHeader(x => x.{filefk}).SetFormat({filefk}Format),";
+                            selectstring += $@"
+                    {filefk} = x.{filefk},";
+                            formatstring += GetResource("HeaderFormat.txt").Replace("$modelname$", ModelName).Replace("$field$", filefk).Replace("$classname$", $"{ModelName}");
+                        }
+                        else
+                        {
+                            var subpro = subtype.GetProperties().Where(x => x.Name == pro.SubField).FirstOrDefault();
+                            existSubPro.Add(subpro);
+                            string prefix = "";
+                            int count = existSubPro.Where(x => x.Name == subpro.Name).Count();
+                            if (count > 1)
+                            {
+                                prefix = count + "";
+                            }
+                            string subtypename = subpro.PropertyType.Name;
+                            if (subpro.PropertyType.IsNullable())
+                            {
+                                subtypename = subpro.PropertyType.GetGenericArguments()[0].Name + "?";
+                            }
+
+                            var subdisplay = subpro.GetCustomAttribute<DisplayAttribute>();
+                            headerstring += $@"
+                this.MakeGridHeader(x => x.{pro.SubField + "_view" + prefix}),";
+                            if (pro.InfoType == FieldInfoType.One2Many)
+                            {
+                                selectstring += $@"
+                    {pro.SubField + "_view" + prefix} = x.{pro.FieldName}.{pro.SubField},";
+                            }
+                            else
+                            {
+                                var middleType = modelType.GetSingleProperty(pro.FieldName).PropertyType.GenericTypeArguments[0];
+                                var middlename = DC.GetPropertyNameByFk(middleType, pro.SubIdField);
+                                selectstring += $@"
+                    {pro.SubField + "_view" + prefix} = x.{pro.FieldName}.Select(y=>y.{middlename}.{pro.SubField}).ToSpratedString(null,"",""), ";
+                            }
+                            if (subdisplay?.Name != null)
+                            {
+                                subprostring += $@"
+        [Display(Name = ""{subdisplay.Name}"")]";
+                            }
+                            subprostring += $@"
+        public {subtypename} {pro.SubField + "_view" + prefix} {{ get; set; }}";
+                        }
+                    }
+
+                }
+                var wherepros = CodeModel.FieldInfos.Where(x => x.IsSearcherField == true).ToList();
+                foreach (var pro in wherepros)
+                {
+                    if (pro.SubField == "`file")
+                    {
+                        continue;
+                    }
+                    var proType = modelType.GetProperties().Where(x => x.Name == pro.FieldName).Select(x => x.PropertyType).FirstOrDefault();
+
+                    switch (pro.InfoType)
+                    {
+                        case FieldInfoType.Normal:
+                            if (proType == typeof(string))
+                            {
+                                wherestring += $@"
+                .CheckContain(Searcher.{pro.FieldName}, x=>x.{pro.FieldName})";
+                            }
+                            else if (proType == typeof(DateTime) || proType == typeof(DateTime?))
+                            {
+                                wherestring += $@"
+                .CheckBetween(Searcher.{pro.FieldName}?.GetStartTime(), Searcher.{pro.FieldName}?.GetEndTime(), x => x.{pro.FieldName}, includeMax: false)";
+                            }
+                            else
+                            {
+                                wherestring += $@"
+                .CheckEqual(Searcher.{pro.FieldName}, x=>x.{pro.FieldName})";
+                            }
+                            break;
+                        case FieldInfoType.One2Many:
+                            var fk = DC.GetFKName2(modelType, pro.FieldName);
+                            wherestring += $@"
+                .CheckEqual(Searcher.{fk}, x=>x.{fk})";
+                            break;
+                        case FieldInfoType.Many2Many:
+                            var subtype = Type.GetType(pro.LinkedType);
+                            var fk2 = DC.GetFKName(modelType, pro.FieldName);
+                            wherestring += $@"
+                .CheckWhere(Searcher.Selected{pro.FieldName}IDs,x=>DC.Set<{proType.GetGenericArguments()[0].Name}>().Where(y=>Searcher.Selected{pro.FieldName}IDs.Contains(y.{pro.SubIdField})).Select(z=>z.{fk2}).Contains(x.ID))";
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                rv = rv.Replace("$headers$", headerstring).Replace("$where$", wherestring).Replace("$select$", selectstring).Replace("$subpros$", subprostring).Replace("$format$", formatstring).Replace("$actions$", actionstring);
+                rv = GetRelatedNamespace(pros, rv);
+            }
+            if (name == "CrudVM")
+            {
+                string prostr = "";
+                string initstr = "";
+                string includestr = "";
+                string addstr = "";
+                string editstr = "";
+                var pros =CodeModel.FieldInfos.Where(x => x.IsFormField == true && string.IsNullOrEmpty(x.LinkedType) == false).ToList();
+                foreach (var pro in pros)
+                {
+                    var subtype = Type.GetType(pro.LinkedType);
+                    if (typeof(TopBasePoco).IsAssignableFrom(subtype) == false || subtype == typeof(FileAttachment))
+                    {
+                        continue;
+                    }
+                    var fname = "All" + pro.FieldName + "s";
+                    prostr += $@"
+        public List<ComboSelectListItem> {fname} {{ get; set; }}";
+                    initstr += $@"
+            {fname} = DC.Set<{subtype.Name}>().GetSelectListItems(LoginUserInfo?.DataPrivileges, null, y => y.{pro.SubField});";
+                    includestr += $@"
+            SetInclude(x => x.{pro.FieldName});";
+
+                    if (pro.InfoType == FieldInfoType.Many2Many)
+                    {
+                        Type modelType = Type.GetType(CodeModel.ModelType);
+                        var protype = modelType.GetProperties().Where(x => x.Name == pro.FieldName).FirstOrDefault();
+                        prostr += $@"
+        [Display(Name = ""{protype.GetPropertyDisplayName()}"")]
+        public List<{pro.GetFKType(DC, modelType)}> Selected{pro.FieldName}IDs {{ get; set; }}";
+                        initstr += $@"
+            Selected{pro.FieldName}IDs = Entity.{pro.FieldName}?.Select(x => x.{pro.SubIdField}).ToList();";
+                        addstr += $@"
+            Entity.{pro.FieldName} = new List<{protype.PropertyType.GetGenericArguments()[0].Name}>();
+            if (Selected{pro.FieldName}IDs != null)
+            {{
+                foreach (var id in Selected{pro.FieldName}IDs)
+                {{
+                    Entity.{pro.FieldName}.Add(new {protype.PropertyType.GetGenericArguments()[0].Name} {{ {pro.SubIdField} = id }});
+                }}
+            }}
+";
+                        editstr += $@"
+            Entity.{pro.FieldName} = new List<{protype.PropertyType.GetGenericArguments()[0].Name}>();
+            if(Selected{pro.FieldName}IDs != null )
+            {{
+                Selected{pro.FieldName}IDs.ForEach(x => Entity.{pro.FieldName}.Add(new {protype.PropertyType.GetGenericArguments()[0].Name} {{ ID = Guid.NewGuid(), {pro.SubIdField} = x }}));
+            }}
+";
+                    }
+                }
+                    
+                rv = rv.Replace("$pros$", "").Replace("$init$", "").Replace("$include$", includestr).Replace("$add$", "").Replace("$edit$", "");
+                rv = GetRelatedNamespace(pros, rv);
+            }
+            if (name == "ImportVM")
+            {
+                string prostring = "";
+                string initstr = "";
+                Type modelType = Type.GetType(CodeModel.ModelType);
+                List<VFieldInfo> pros = CodeModel.FieldInfos.Where(x => x.IsImportField == true).ToList();
+                foreach (var pro in pros)
+                {
+                    if (pro.InfoType == FieldInfoType.Many2Many)
+                    {
+                        continue;
+                    }
+
+                    if (string.IsNullOrEmpty(pro.LinkedType) == false)
+                    {
+                        var subtype = Type.GetType(pro.LinkedType);
+                        if (typeof(TopBasePoco).IsAssignableFrom(subtype) == false || subtype == typeof(FileAttachment))
+                        {
+                            continue;
+                        }
+                        initstr += $@"
+            {pro.FieldName + "_Excel"}.DataType = ColumnDataType.ComboBox;
+            {pro.FieldName + "_Excel"}.ListItems = DC.Set<{subtype.Name}>().GetSelectListItems(LoginUserInfo?.DataPrivileges, null, y => y.{pro.SubField});";
+                    }
+                    var proType = modelType.GetProperties().Where(x => x.Name == pro.FieldName).FirstOrDefault();
+                    var display = proType.GetCustomAttribute<DisplayAttribute>();
+                    var filefk = DC.GetFKName2(modelType, pro.FieldName);
+                    if (display != null)
+                    {
+                        prostring += $@"
+        [Display(Name = ""{display.Name}"")]";
+                    }
+                    if (string.IsNullOrEmpty(pro.LinkedType) == false)
+                    {
+                        prostring += $@"
+        public ExcelPropety {pro.FieldName + "_Excel"} = ExcelPropety.CreateProperty<{ModelName}>(x => x.{filefk});";
+                    }
+                    else
+                    {
+                        prostring += $@"
+        public ExcelPropety {pro.FieldName + "_Excel"} = ExcelPropety.CreateProperty<{ModelName}>(x => x.{pro.FieldName});";
+                    }
+                }
+                rv = rv.Replace("$pros$", prostring).Replace("$init$", initstr);
+                rv = GetRelatedNamespace(pros, rv);
+
+            }
+            return rv;
+        }
+
+        public string GenerateVue (string name,string subDir)
+        {
+            var rv = GetResource($"{name}.txt",subDir);
+            return rv;
+        }
+        #endregion
+
+        public List<CodeGenListView> GetFieldInfos (string modelFullName)
         {
             Type modeltype = Type.GetType(modelFullName);
             var pros = modeltype.GetProperties();
@@ -90,6 +662,7 @@ namespace KnifeZ.Virgo.Mvc
                             view.FieldDes += $"({Program._localizer["OneToMany"]})";
                         }
                         view.LinkedType = checktype.AssemblyQualifiedName;
+                        view.SubSelectItems = GetLinkFields(checktype.AssemblyQualifiedName);
                     }
                     if (checktype.IsList())
                     {
@@ -116,6 +689,7 @@ namespace KnifeZ.Virgo.Mvc
                                     if (typeof(TopBasePoco).IsAssignableFrom(subchecktype) && subchecktype != modeltype)
                                     {
                                         view.LinkedType = subchecktype.AssemblyQualifiedName;
+                                        view.SubSelectItems = GetLinkFields(subchecktype.AssemblyQualifiedName);
                                         var fk = DC.GetFKName2(checktype, spro.Name);
                                         view.SubIdField = fk;
                                         show = true;
@@ -153,10 +727,54 @@ namespace KnifeZ.Virgo.Mvc
                     i--;
                 }
             }
-
-            return lv.AsQueryable().OrderBy(x => x.FieldName);
+            var res = lv.AsQueryable().OrderBy(x => x.FieldName).ToList();
+            return res;
         }
-        private string GetRelatedNamespace (List<FieldInfo> pros, string s)
+        //获取关联表字段
+        private List<ComboSelectListItem> GetLinkFields (string linkedType)
+        {
+            if (string.IsNullOrEmpty(linkedType) == false)
+            {
+                var linktype = Type.GetType(linkedType);
+                if (linktype != typeof(FileAttachment))
+                {
+                    var subpros = linktype.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance).Where(x => x.GetMemberType() == typeof(string) && x.Name != "BatchError").OrderBy(x => x.Name).ToList().ToListItems(x => x.Name, x => x.Name);
+                    var subproswithname = subpros.Where(x => x.Text.ToLower().Contains("name")).ToList();
+                    var subproswithoutname = subpros.Where(x => x.Text.ToLower().Contains("name") == false).ToList();
+                    subpros = new List<ComboSelectListItem>();
+                    subpros.AddRange(subproswithname);
+                    subpros.AddRange(subproswithoutname);
+                    if (subpros.Count == 0)
+                    {
+                        subpros.Add(new ComboSelectListItem { Text = "Id", Value = "Id" });
+                    }
+                    return subpros;
+                }
+            }
+            return new List<ComboSelectListItem>();
+
+        }
+
+
+        public static string GetResource (string fileName, string subdir = "")
+        {
+            //获取编译在程序中的Controller原始代码文本
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            string loc;
+            if (string.IsNullOrEmpty(subdir))
+            {
+                loc = $"KnifeZ.Virgo.Mvc.Areas.templates.{fileName}";
+            }
+            else
+            {
+                loc = $"KnifeZ.Virgo.Mvc.Areas.templates.{subdir}.{fileName}";
+            }
+            var textStreamReader = new StreamReader(assembly.GetManifestResourceStream(loc));
+            string content = textStreamReader.ReadToEnd();
+            textStreamReader.Close();
+            return content;
+        }
+        private string GetRelatedNamespace (List<VFieldInfo> pros, string s)
         {
             string otherns = @"";
             Type modelType = Type.GetType(CodeModel.ModelName);
@@ -164,13 +782,13 @@ namespace KnifeZ.Virgo.Mvc
             {
                 Type proType = null;
 
-                if (string.IsNullOrEmpty(pro.RelatedField))
+                if (string.IsNullOrEmpty(pro.LinkedType))
                 {
                     proType = modelType.GetProperties().Where(x => x.Name == pro.FieldName).Select(x => x.PropertyType).FirstOrDefault();
                 }
                 else
                 {
-                    proType = Type.GetType(pro.RelatedField);
+                    proType = Type.GetType(pro.LinkedType);
                 }
                 string prons = proType.Namespace;
                 if (proType.IsNullable())
@@ -188,13 +806,18 @@ namespace KnifeZ.Virgo.Mvc
             return s.Replace("$othernamespace$", otherns);
         }
 
-
     }
 
-    public class VGenCodeModel { 
-    
+    public class VGenCodeModel
+    {
         public string ModelName { get; set; }
-        public List<FieldInfo> FieldInfos { get; set; }
+        public List<VFieldInfo> FieldInfos { get; set; }
+        public List<CodeGenListView> ConfigFields { get; set; }
+        public bool IsInsertMenu { get; set; }
+
+        public string Area { get; set; }
+
+        public string ModelType { get; set; }
 
     }
 
@@ -222,6 +845,8 @@ namespace KnifeZ.Virgo.Mvc
         public string SubField { get; set; }
 
         public string SubIdField { get; set; }
+
+        public List<ComboSelectListItem> SubSelectItems { get; set; }
 
         [Display(Name = "IsImportField")]
         public bool IsImportField { get; set; }

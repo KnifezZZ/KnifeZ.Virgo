@@ -1,19 +1,6 @@
 namespace KnifeZ.Virgo.Core
 {
     /// <summary>
-    /// 列表操作列类型
-    /// </summary>
-    public enum ColumnFormatTypeEnum
-    {
-        Dialog,//弹出窗口
-        Button,//按钮
-        Download,//下载
-        ViewPic,//查看图片
-        Script,//脚本
-        Html
-    }
-
-    /// <summary>
     /// 上传图片存储方式
     /// </summary>
     public enum SaveFileModeEnum
@@ -29,51 +16,6 @@ namespace KnifeZ.Virgo.Core
     /// </summary>
     public enum DBTypeEnum { SqlServer, MySql, PgSql, Memory, SQLite, Oracle }
 
-    /// <summary>
-    /// Grid的选择模式
-    /// </summary>
-    public enum SelectionModeEnum
-    {
-        SINGLE,
-        SIMPLE,
-        MULTI
-    };
-
-    public enum SortType
-    {
-        Local,
-        Remote,
-        Disable
-    }
-    /// <summary>
-    /// 按钮
-    /// </summary>
-    public enum ButtonTypesEnum
-    {
-        Button,
-        Link
-    };
-
-    /// <summary>
-    /// 按钮
-    /// </summary>
-    public enum RedirectTypesEnum
-    {
-        Layer,
-        Self,
-        NewWindow,
-        NewTab,
-    };
-
-
-    /// <summary>
-    /// 按钮类型
-    /// </summary>
-    public enum ButtonOperationEnum
-    {
-        Submit,
-        Button
-    };
 
     ///// <summary>
     ///// 上传类型
@@ -122,55 +64,6 @@ namespace KnifeZ.Virgo.Core
         Time
     };
 
-    /// <summary>
-    /// 图形枚举
-    /// </summary>
-    public enum ChartEnum
-    {
-        line,
-        pie,
-        column,
-        bubble,
-        barcolumn
-    }
-
-    /// <summary>
-    /// 图形统计值类型
-    /// </summary>
-    public enum ChartValueType
-    {
-        sum,
-        count,
-        sumpct,
-        countpct
-    }
-    /// <summary>
-    /// 图形统计分区类型
-    /// </summary>
-    public enum PartitionType
-    {
-        year,
-        month,
-        day,
-        hour,
-        minute,
-        second
-    }
-
-    public enum UIEnum
-    { LayUI, React, VUE }
-
-    public enum NoRightEnum
-    {
-        /// <summary>
-        /// 隐藏
-        /// </summary>
-        Invisible,
-        /// <summary>
-        /// 禁用
-        /// </summary>
-        Disable
-    }
 
     public enum VTypeEnum { url, email, Date, Time, IPaddress, Int, UInt, Double, UDouble, Color, Phone, Tel }
     public enum HiddenModeEnum { Display, Visibility, Offsets }

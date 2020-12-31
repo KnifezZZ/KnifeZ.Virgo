@@ -10,10 +10,10 @@ namespace KnifeZ.Virgo.Mvc.Model
 {
     public enum FieldInfoType { Normal, One2Many, Many2Many }
 
-    public class FieldInfo
+    public class VFieldInfo
     {
         public string FieldName { get; set; }
-        public string RelatedField { get; set; }
+        public string LinkedType { get; set; }
 
         public bool IsSearcherField { get; set; }
 
@@ -28,7 +28,7 @@ namespace KnifeZ.Virgo.Mvc.Model
         {
             get
             {
-                if (string.IsNullOrEmpty(RelatedField))
+                if (string.IsNullOrEmpty(LinkedType))
                 {
                     return FieldInfoType.Normal;
                 }

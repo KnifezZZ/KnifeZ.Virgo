@@ -4,7 +4,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>KnifeZ's .NET5 Frameowrk</Description>
-    <Version>0.0.3</Version>
+    <Version>0.0.4</Version>
     <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://gitee.com/KnifeZ/KnifeZ.Virgo</RepositoryUrl>
     <PackageTags>knifez,mvvm,.net5</PackageTags>
@@ -13,13 +13,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Areas\templates\**" />
     <Compile Remove="Controllers\**" />
     <Compile Remove="GeneratorFiles\**" />
-    <EmbeddedResource Remove="Areas\templates\**" />
     <EmbeddedResource Remove="Controllers\**" />
     <EmbeddedResource Remove="GeneratorFiles\**" />
-    <None Remove="Areas\templates\**" />
     <None Remove="Controllers\**" />
     <None Remove="GeneratorFiles\**" />
     <None Include="C:\Users\Knife\Pictures\icon.png">
@@ -33,6 +30,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Areas\templates\BatchVM.txt" />
+    <None Remove="Areas\templates\Controller.txt" />
+    <None Remove="Areas\templates\CurdVM.txt" />
+    <None Remove="Areas\templates\ImportVM.txt" />
+    <None Remove="Areas\templates\ListVM.txt" />
+    <None Remove="Areas\templates\Searcher.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Areas\templates\Searcher.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.1" />
   </ItemGroup>
 
@@ -41,7 +51,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Areas\" />
+    <EmbeddedResource Include="Areas\templates\Controller.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Areas\templates\BatchVM.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Areas\templates\CurdVM.txt" />
+    <EmbeddedResource Include="Areas\templates\ImportVM.txt" />
+    <EmbeddedResource Include="Areas\templates\ListVM.txt" />
   </ItemGroup>
 
 </Project>

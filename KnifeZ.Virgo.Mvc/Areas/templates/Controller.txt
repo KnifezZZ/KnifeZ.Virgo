@@ -8,39 +8,41 @@ using KnifeZ.Virgo.Core;
 using KnifeZ.Virgo.Core.Auth.Attribute;
 using KnifeZ.Virgo.Core.Extensions;
 using KnifeZ.Virgo.Mvc;
-using Kmodel_namespaceV;
-using Kother_namespaceV;
 
-namespace Kcontroller_namespaceV
+using $vmnamespace$;
+using $modelnamespace$;
+
+namespace $namespace$
 {
+    $area$
     [AuthorizeJwtWithCookie]
-    [ActionDescription("KdescV")]
+    [ActionDescription("$des$")]
     [ApiController]
     [Route("api/[controller]")]
-    public class Kcontroller_nameVController : BaseApiController
+    public class $controllername$Controller : BaseApiController
     {
         #region 基础增删改查
 
         [ActionDescription("Search")]
         [HttpPost("[action]")]
-        public string Search (Kmodel_nameVSearcher searcher)
+        public string Search ($controllername$Searcher searcher)
         {
-            var vm = CreateVM <Kmodel_nameVListVM > ();
+            var vm = CreateVM <$controllername$ListVM > ();
             vm.Searcher = searcher;
             return vm.GetJson();
         }
 
         [ActionDescription("Get")]
         [HttpGet("{id}")]
-        public Kmodel_nameVVM Get (Guid id)
+        public $controllername$VM Get (Guid id)
         {
-            var vm = CreateVM <Kmodel_nameVVM > (id);
+            var vm = CreateVM <$controllername$VM > (id);
             return vm;
         }
 
         [ActionDescription("Create")]
         [HttpPost("[action]")]
-        public IActionResult Add (Kmodel_nameVVM vm)
+        public IActionResult Add ($controllername$VM vm)
         {
             if (!ModelState.IsValid)
             {
@@ -63,7 +65,7 @@ namespace Kcontroller_namespaceV
 
         [ActionDescription("Edit")]
         [HttpPut("[action]")]
-        public IActionResult Edit (Kmodel_nameVVM vm)
+        public IActionResult Edit ($controllername$VM vm)
         {
             if (!ModelState.IsValid)
             {
@@ -87,7 +89,7 @@ namespace Kcontroller_namespaceV
         [ActionDescription("Delete")]
         public async Task<IActionResult> BatchDelete (string[] ids)
         {
-            var vm = CreateVM <Kmodel_nameVBatchVM > ();
+            var vm = CreateVM <$controllername$BatchVM > ();
             if (ids != null && ids.Length > 0)
             {
                 vm.Ids = ids;
@@ -115,9 +117,9 @@ namespace Kcontroller_namespaceV
 
         [ActionDescription("Export")]
         [HttpPost("[action]")]
-        public IActionResult ExportExcel (Kmodel_nameVSearcher searcher)
+        public IActionResult ExportExcel ($controllername$Searcher searcher)
         {
-            var vm = CreateVM <Kmodel_nameVListVM > ();
+            var vm = CreateVM <$controllername$ListVM > ();
             vm.Searcher = searcher;
             vm.SearcherMode = ListVMSearchModeEnum.Export;
             return vm.GetExportData();
@@ -127,7 +129,7 @@ namespace Kcontroller_namespaceV
         [HttpPost("[action]")]
         public IActionResult ExportExcelByIds (string[] ids)
         {
-            var vm = CreateVM <Kmodel_nameVListVM > ();
+            var vm = CreateVM <$controllername$ListVM > ();
             if (ids != null && ids.Length > 0)
             {
                 vm.Ids = new List<string>(ids);
@@ -140,7 +142,7 @@ namespace Kcontroller_namespaceV
         [HttpGet("[action]")]
         public IActionResult GetExcelTemplate ()
         {
-            var vm = CreateVM <Kmodel_nameVImportVM > ();
+            var vm = CreateVM <$controllername$ImportVM > ();
             var qs = new Dictionary<string, string>();
             foreach (var item in Request.Query.Keys)
             {
@@ -153,7 +155,7 @@ namespace Kcontroller_namespaceV
 
         [ActionDescription("Import")]
         [HttpPost("[action]")]
-        public ActionResult Import (Kmodel_nameVImportVM vm)
+        public ActionResult Import ($controllername$ImportVM vm)
         {
 
             if (vm.ErrorListVM.EntityList.Count > 0 || !vm.BatchSaveData())
@@ -167,7 +169,7 @@ namespace Kcontroller_namespaceV
         }
 
         #endregion
-
-        Kext_actionsV
+        
+        $other$
     }
 }

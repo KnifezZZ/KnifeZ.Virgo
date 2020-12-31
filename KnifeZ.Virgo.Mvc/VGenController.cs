@@ -32,11 +32,12 @@ namespace KnifeZ.Virgo.Mvc
 
         [ActionDescription("生成代码")]
         [HttpPost("[action]")]
-        public IActionResult GenerateCodes (VGenCodeModel model)
+        public IActionResult GenerateCodes ([FromBody]VGenCodeModel model)
         {
-            var vm = CreateVM<VGenCodeVM>(model);
+            var vm = CreateVM<VGenCodeVM>();
+            vm.CodeModel = model;
             string res = vm.GenTemplates();
-            return Ok("OK");
+            return Ok(res);
         }
     }
 }
