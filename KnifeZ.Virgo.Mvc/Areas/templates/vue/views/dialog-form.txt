@@ -9,7 +9,7 @@ import VFormDialog from '@/components/page/v-form-dialog'
 import VForm from '@/components/page/v-form'
 import API from '../api/index'
 export default {
-	name: '$name$-dialog',
+	name: '$modelname$-dialog',
 	components: {
 		VForm,
 		VFormDialog,
@@ -17,12 +17,14 @@ export default {
 	data() {
 		return {
 			events: API,
+			fields: [$fields$
+				{
+					key: 'ID',
+					type: 'input',
+					hidden: true,
+				},
+			],
 		}
-	},
-	props: {
-		fields: {
-			type: Array,
-		},
 	},
 	methods: {
 		reSearch() {

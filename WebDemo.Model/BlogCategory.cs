@@ -22,6 +22,7 @@ namespace WebDemo.Model
 
         [Display(Name = "排序")]
         public int Sort { get; set; }
+
         #region ITreeData成员
 
         [Display(Name = "所属类别")]

@@ -11,6 +11,7 @@ using KnifeZ.Virgo.Core;
 using KnifeZ.Virgo.Core.Attributes;
 using KnifeZ.Virgo.Core.Extensions;
 using KnifeZ.Virgo.Mvc.Model;
+using Microsoft.Extensions.FileProviders;
 
 namespace KnifeZ.Virgo.Mvc
 {
@@ -210,24 +211,53 @@ namespace KnifeZ.Virgo.Mvc
         {
             var genList = new Dictionary<string, string>
             {
-                //生成Controller
-                { $"{ControllerDir}{Path.DirectorySeparatorChar}{ModelName}Controller.cs", GenApiController() },
                 //生成ViewModel
-                { $"{VmDir}{Path.DirectorySeparatorChar}{ModelName}VM.cs", GenerateVM("CurdVm") },
+                { $"{VmDir}{Path.DirectorySeparatorChar}{ModelName}VM.cs", GenerateVM("CurdVM") },
                 { $"{VmDir}{Path.DirectorySeparatorChar}{ModelName}ListVM.cs", GenerateVM("ListVM") },
                 { $"{VmDir}{Path.DirectorySeparatorChar}{ModelName}BatchVM.cs", GenerateVM("BatchVM") },
                 { $"{VmDir}{Path.DirectorySeparatorChar}{ModelName}ImportVM.cs", GenerateVM("ImportVM") },
-                { $"{VmDir}{Path.DirectorySeparatorChar}{ModelName}Searcher.cs", GenerateVM("Searcher") }
+                { $"{VmDir}{Path.DirectorySeparatorChar}{ModelName}Searcher.cs", GenerateVM("Searcher") },
+                //生成Controller
+                { $"{ControllerDir}{Path.DirectorySeparatorChar}{ModelName}Controller.cs", GenApiController() }
             };
             //生成Vue
-            var up = Directory.GetParent(MainDir);
-            genList.Add($"{up}{Path.DirectorySeparatorChar}ClientApp{Path.DirectorySeparatorChar}src{Path.DirectorySeparatorChar}views{Path.DirectorySeparatorChar}{ModelName.ToLower()}{Path.DirectorySeparatorChar}index.vue"
-                , GenerateVue("index", "vue"));
-            //GenerateVue();
+            var vueDir = ConfigInfo.AppSettings["VueDir"];
+            genList.Add($"{vueDir}{Path.DirectorySeparatorChar}src{Path.DirectorySeparatorChar}views{Path.DirectorySeparatorChar}{ModelName.ToLower()}{Path.DirectorySeparatorChar}index.vue"
+                , GenerateVue("index"));
+            genList.Add($"{vueDir}{Path.DirectorySeparatorChar}src{Path.DirectorySeparatorChar}views{Path.DirectorySeparatorChar}{ModelName.ToLower()}{Path.DirectorySeparatorChar}api{Path.DirectorySeparatorChar}index.js"
+                , GenerateVue("api.index"));
+            genList.Add($"{vueDir}{Path.DirectorySeparatorChar}src{Path.DirectorySeparatorChar}views{Path.DirectorySeparatorChar}{ModelName.ToLower()}{Path.DirectorySeparatorChar}views{Path.DirectorySeparatorChar}dialog-form.vue"
+                , GenerateVue("views.dialog-form"));
+            //genList.Add($"{vueDir}{Path.DirectorySeparatorChar}public{Path.DirectorySeparatorChar}static{Path.DirectorySeparatorChar}configs{Path.DirectorySeparatorChar}default{Path.DirectorySeparatorChar}{Utils.ToFirstLower(ModelName)}.json"
+            //    , GenerateVue("json"));
+            //附加枚举
 
             foreach (var item in genList)
             {
-                File.WriteAllText(item.Key, item.Value, Encoding.UTF8);
+                if (!Directory.Exists(Path.GetDirectoryName(item.Key)))
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(item.Key));
+                }
+                if (!File.Exists(item.Key))
+                {
+                    File.Create(item.Key).Close();
+                }
+                using (StreamWriter sw = new StreamWriter(item.Key, true, Encoding.UTF8))
+                {
+                    sw.WriteLine(item.Value);
+
+                }
+            }
+            if (CodeModel.IsInsertMenu)
+            {
+                //插入菜单表
+                //DC.AddEntity(new FrameworkMenu()
+                //{
+                //    ActionName=ModelName,
+                //    DisplayOrder=999,
+                //    ICon="",
+                //});
+                //DC.SaveChanges();
             }
             return "success";
         }
@@ -267,10 +297,9 @@ namespace KnifeZ.Virgo.Mvc
                     int count = existSubPro.Where(x => x == key).Count();
                     if (count == 1)
                     {
-
                         other.AppendLine($@"
         [HttpGet(""[action]"")]
-        public ActionResult Get{subtype.Name}s()
+        public ActionResult Get{subtype.Name}List()
         {{
             return Ok(DC.Set<{subtype.Name}>().GetSelectListItems(LoginUserInfo?.DataPrivileges, null, x => x.{item.SubField}));
         }}");
@@ -487,7 +516,7 @@ namespace KnifeZ.Virgo.Mvc
                 rv = rv.Replace("$headers$", headerstring).Replace("$where$", wherestring).Replace("$select$", selectstring).Replace("$subpros$", subprostring).Replace("$format$", formatstring).Replace("$actions$", actionstring);
                 rv = GetRelatedNamespace(pros, rv);
             }
-            if (name == "CrudVM")
+            if (name == "CurdVM")
             {
                 string prostr = "";
                 string initstr = "";
@@ -592,9 +621,80 @@ namespace KnifeZ.Virgo.Mvc
             return rv;
         }
 
-        public string GenerateVue (string name,string subDir)
+        public string GenerateVue (string name)
         {
-            var rv = GetResource($"{name}.txt",subDir);
+            var rv = GetResource($"{name}.txt", "vue").Replace("$modelname$",Utils.ToFirstLower(ModelName));
+            List<VFieldInfo> fields = CodeModel.FieldInfos.ToList();
+            if (name == "index")
+            {
+                StringBuilder sbQueryInfos = new StringBuilder();
+                StringBuilder sbQueryItems = new StringBuilder();
+                StringBuilder sbColumns = new StringBuilder();
+                foreach (var item in fields.Where(x => x.IsListField))
+                {
+                    sbColumns.Append($@"
+                {{ key: '{item.FieldName}', title: '{item.FieldDes}' }},");
+                    // TODO table slot
+                }
+                //查询条件
+                foreach (var item in fields.Where(x => x.IsSearcherField == true))
+                {
+                    sbQueryInfos.Append($@"
+        {item.FieldName}:'',");
+                    sbQueryItems.Append($@"
+                <a-form-item label=""{item.FieldDes}"" name=""{item.FieldName}"">
+	                <a-input type=""text"" v-model:value=""queryInfos.{item.FieldName}""></a-input>
+                </a-form-item>");
+                }
+                rv = rv.Replace("$queryInfo$", sbQueryInfos.ToString())
+                    .Replace("$queryItems$", sbQueryItems.ToString())
+                    .Replace("$columns$", sbColumns.ToString());
+            }
+            if (name == "views.dialog-form") {
+                StringBuilder sbFields = new StringBuilder();
+                foreach (var item in fields.Where(x => x.IsFormField))
+                {
+                    // TODO form type
+                    sbFields.Append($@"
+                {{
+	                title: '{item.FieldDes}',
+	                key: '{item.FieldName}',
+                    type: 'input'
+                }},");
+                }
+                rv = rv.Replace("$fields$", sbFields.ToString());
+            }
+            if (name == "api.index")
+            {
+                // copy form generate controller
+                StringBuilder other = new StringBuilder();
+                List<string> existSubPro = new List<string>();
+                var pros = fields.Where(x => x.IsSearcherField == true || x.IsFormField == true).ToList();
+                for (int i = 0; i < pros.Count; i++)
+                {
+                    var item = pros[i];
+                    if ((item.InfoType == FieldInfoType.One2Many || item.InfoType == FieldInfoType.Many2Many) && item.SubField != "`file")
+                    {
+                        var subtype = Type.GetType(item.LinkedType);
+                        var subpro = subtype.GetProperties().Where(x => x.Name == item.SubField).FirstOrDefault();
+                        var key = subtype.FullName + ":" + subpro.Name;
+                        existSubPro.Add(key);
+                        int count = existSubPro.Where(x => x == key).Count();
+                        if (count == 1)
+                        {
+                            other.AppendLine($@"
+    Get{subtype.Name}List(data) {{
+        return request({{
+            url: reqPath + 'Get{subtype.Name}List',
+		    method: 'post',
+		    data: data,
+        }})
+    }}");
+                        }
+                    }
+                }
+                rv = rv.Replace("$extAPIs$", other.ToString());
+            }
             return rv;
         }
         #endregion
@@ -777,7 +877,7 @@ namespace KnifeZ.Virgo.Mvc
         private string GetRelatedNamespace (List<VFieldInfo> pros, string s)
         {
             string otherns = @"";
-            Type modelType = Type.GetType(CodeModel.ModelName);
+            Type modelType = Type.GetType(CodeModel.ModelType);
             foreach (var pro in pros)
             {
                 Type proType = null;

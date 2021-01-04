@@ -4,7 +4,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>KnifeZ's .NET5 Frameowrk</Description>
-    <Version>0.0.4</Version>
+    <Version>0.0.4.1</Version>
     <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://gitee.com/KnifeZ/KnifeZ.Virgo</RepositoryUrl>
     <PackageTags>knifez,mvvm,.net5</PackageTags>
@@ -38,7 +38,6 @@
     <None Remove="Areas\templates\Searcher.txt" />
     <None Remove="Areas\templates\vue\api\index.txt" />
     <None Remove="Areas\templates\vue\index.txt" />
-    <None Remove="Areas\templates\vue\json.txt" />
     <None Remove="Areas\templates\vue\views\dialog-form.txt" />
   </ItemGroup>
 
@@ -46,7 +45,6 @@
     <EmbeddedResource Include="Areas\templates\Searcher.txt" />
     <EmbeddedResource Include="Areas\templates\vue\api\index.txt" />
     <EmbeddedResource Include="Areas\templates\vue\index.txt" />
-    <EmbeddedResource Include="Areas\templates\vue\json.txt" />
     <EmbeddedResource Include="Areas\templates\vue\views\dialog-form.txt" />
   </ItemGroup>
 

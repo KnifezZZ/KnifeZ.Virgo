@@ -1,7 +1,7 @@
 ﻿import request from '@/utils/request'
 import config from '@/configs/index'
 import contentType from '@/configs/content-type'
-const reqPath = config.headerApi + '/$name$/'
+const reqPath = config.headerApi + '/$modelname$/'
 import {
 	bSearch,
 	bBatchDelete,

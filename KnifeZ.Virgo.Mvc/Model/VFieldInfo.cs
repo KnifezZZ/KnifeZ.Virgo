@@ -13,6 +13,7 @@ namespace KnifeZ.Virgo.Mvc.Model
     public class VFieldInfo
     {
         public string FieldName { get; set; }
+        public string FieldDes { get; set; }
         public string LinkedType { get; set; }
 
         public bool IsSearcherField { get; set; }

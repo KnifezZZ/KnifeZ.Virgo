@@ -384,5 +384,22 @@ namespace KnifeZ.Virgo.Core
         //        return rv.data[0].versions.Select(x => x.version).Where(x => x.StartsWith(start)).Last();
         //    }
         //}
+
+        public static string ToFirstLower (string text)
+        {
+            if (text.Length > 1)
+            {
+                return text.First().ToString().ToLower() + text.Substring(1);
+            }
+            return text.ToLower();
+        }
+        public static string ToFirstUper (string text)
+        {
+            if (text.Length > 1)
+            {
+                return text.First().ToString().ToUpper() + text.Substring(1);
+            }
+            return text.ToLower();
+        }
     }
 }
