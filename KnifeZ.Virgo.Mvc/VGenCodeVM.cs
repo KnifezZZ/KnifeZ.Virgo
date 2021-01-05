@@ -232,7 +232,10 @@ namespace KnifeZ.Virgo.Mvc
                 , GenerateVue("api.index"));
             genList.Add($"{vueDir}{Path.DirectorySeparatorChar}src{Path.DirectorySeparatorChar}views{Path.DirectorySeparatorChar}{ModelName.ToLower()}{Path.DirectorySeparatorChar}views{Path.DirectorySeparatorChar}dialog-form.vue"
                 , GenerateVue("views.dialog-form"));
+
             //附加枚举
+            string enumPath = $"{vueDir}{Path.DirectorySeparatorChar}src{Path.DirectorySeparatorChar}configs{Path.DirectorySeparatorChar}enums.js";
+            genList.Add(enumPath, GenerateEnums(enumPath));
 
             foreach (var item in genList)
             {
@@ -261,7 +264,7 @@ namespace KnifeZ.Virgo.Mvc
                     ClassName = ControllerNs + "," + ModelName,
                     MethodName = null,
                     Url = "/" + ModelName.ToLower(),
-                    ICon= "subtract",
+                    ICon = "subtract",
                     Privileges = new List<FunctionPrivilege>() { new FunctionPrivilege { RoleId = allowedRole.ID, Allowed = true } },
                     ShowOnMenu = true,
                     FolderOnly = false,
@@ -367,7 +370,7 @@ namespace KnifeZ.Virgo.Mvc
             #region 附加方法
 
             StringBuilder other = new StringBuilder();
-            List<VFieldInfo> pros =CodeModel.FieldInfos.Where(x => x.IsSearcherField == true || x.IsFormField == true).ToList();
+            List<VFieldInfo> pros = CodeModel.FieldInfos.Where(x => x.IsSearcherField == true || x.IsFormField == true).ToList();
             List<string> existSubPro = new List<string>();
             for (int i = 0; i < pros.Count; i++)
             {
@@ -608,7 +611,7 @@ namespace KnifeZ.Virgo.Mvc
                 string includestr = "";
                 string addstr = "";
                 string editstr = "";
-                var pros =CodeModel.FieldInfos.Where(x => x.IsFormField == true && string.IsNullOrEmpty(x.LinkedType) == false).ToList();
+                var pros = CodeModel.FieldInfos.Where(x => x.IsFormField == true && string.IsNullOrEmpty(x.LinkedType) == false).ToList();
                 foreach (var pro in pros)
                 {
                     var subtype = Type.GetType(pro.LinkedType);
@@ -652,7 +655,7 @@ namespace KnifeZ.Virgo.Mvc
 ";
                     }
                 }
-                    
+
                 rv = rv.Replace("$pros$", "").Replace("$init$", "").Replace("$include$", includestr).Replace("$add$", "").Replace("$edit$", "");
                 rv = GetRelatedNamespace(pros, rv);
             }
@@ -708,17 +711,22 @@ namespace KnifeZ.Virgo.Mvc
 
         public string GenerateVue (string name)
         {
-            var rv = GetResource($"{name}.txt", "vue").Replace("$modelname$",Utils.ToFirstLower(ModelName));
+            var rv = GetResource($"{name}.txt", "vue").Replace("$modelname$", Utils.ToFirstLower(ModelName));
             List<VFieldInfo> fields = CodeModel.FieldInfos.ToList();
-
+            StringBuilder sbQueryInfos = new StringBuilder();
+            StringBuilder sbQueryItems = new StringBuilder();
+            StringBuilder sbColumns = new StringBuilder();
+            StringBuilder sbImports = new StringBuilder();
             StringBuilder sbExtAPIs = new StringBuilder();
             StringBuilder sbExtData = new StringBuilder();
             StringBuilder sbExtCreated = new StringBuilder();
+            StringBuilder sbFields = new StringBuilder();
             List<string> existSubPro = new List<string>();
-            var pros = fields.Where(x => x.IsSearcherField == true || x.IsFormField == true).ToList();
-            for (int i = 0; i < pros.Count; i++)
+            var modelProps = Type.GetType(CodeModel.ModelType).GetProperties();
+            //循环所有字段
+            for (int i = 0; i < fields.Count; i++)
             {
-                var item = pros[i];
+                var item = fields[i];
                 if ((item.InfoType == FieldInfoType.One2Many || item.InfoType == FieldInfoType.Many2Many) && item.SubField != "`file")
                 {
                     var subtype = Type.GetType(item.LinkedType);
@@ -741,29 +749,27 @@ namespace KnifeZ.Virgo.Mvc
                         }
                         if (name == "index" || name == "views.dialog-form")
                         {
-                            sbExtData.AppendLine($@"
+                            if (item.IsFormField || item.IsListField)
+                            {
+                                sbExtData.AppendLine($@"
 			{Utils.ToFirstLower(subtype.Name)}ListData: [],");
-                            sbExtCreated.AppendLine($@"
+                                sbExtCreated.AppendLine($@"
 		apiEvents.get{subtype.Name}List().then((res) => {{
             this.{Utils.ToFirstLower(subtype.Name)}ListData = res.Data
         }})");
+
+                            }
                         }
                     }
                 }
-            }
-            if (name == "index")
-            {
-                StringBuilder sbQueryInfos = new StringBuilder();
-                StringBuilder sbQueryItems = new StringBuilder();
-                StringBuilder sbColumns = new StringBuilder();
-                foreach (var item in fields.Where(x => x.IsListField))
+
+                if (item.IsListField)
                 {
                     sbColumns.Append($@"
 				{{ key: '{item.FieldName}', title: '{item.FieldDes}' }},");
-                    // TODO table slot
                 }
-                //查询条件
-                foreach (var item in fields.Where(x => x.IsSearcherField == true))
+
+                if (item.IsSearcherField)
                 {
                     sbQueryInfos.Append($@"
 				{item.FieldName}:'',");
@@ -772,28 +778,69 @@ namespace KnifeZ.Virgo.Mvc
 				<a-form-item label=""{item.FieldDes}"" name=""{item.FieldName}"">
 					<a-input type=""text"" v-model:value=""queryInfos.{item.FieldName}""></a-input>
 				</a-form-item>");
+
                 }
-                rv = rv.Replace("$queryInfo$", sbQueryInfos.ToString())
-                    .Replace("$queryItems$", sbQueryItems.ToString())
-                    .Replace("$columns$", sbColumns.ToString())
-                    .Replace("$extData$", sbExtData.ToString())
-                    .Replace("$extCreated$", sbExtCreated.ToString());
-            }
-            if (name == "views.dialog-form") {
-                StringBuilder sbFields = new StringBuilder();
-                foreach (var item in fields.Where(x => x.IsFormField))
+
+                if (item.IsFormField)
                 {
-                    // TODO form type
-                    sbFields.Append($@"
+                    var proType = modelProps.Where(x => x.Name == item.FieldName).Select(x => x.PropertyType).FirstOrDefault();
+                    Type checktype = proType;
+                    if (proType.IsNullable())
+                    {
+                        checktype = proType.GetGenericArguments()[0];
+                    }
+                    if (checktype.IsBoolOrNullableBool())
+                    {
+                        sbFields.Append($@"
+				{{
+					title: '{item.FieldDes}',
+					key: '{item.FieldName}',
+					type: 'switch'
+				}},");
+
+                    }
+                    else if (checktype.IsEnum())
+                    {
+                        sbImports.Append($@"{item.FieldName}Types,");
+                        sbFields.Append($@"
+				{{
+					title: '{item.FieldDes}',
+					key: '{item.FieldName}',
+					type: 'radio',
+					props: {{
+						items: {item.FieldName}Types,
+					}}
+				}},");
+
+                    }
+                    else
+                    {
+                        sbFields.Append($@"
 				{{
 					title: '{item.FieldDes}',
 					key: '{item.FieldName}',
 					type: 'input'
 				}},");
+
+                    }
                 }
+            }
+
+            if (name == "index")
+            {
+                rv = rv.Replace("$queryInfo$", sbQueryInfos.ToString())
+                    .Replace("$queryItems$", sbQueryItems.ToString())
+                    .Replace("$columns$", sbColumns.ToString())
+                    .Replace("$extData$", sbExtData.ToString())
+                    .Replace("$extCreated$", sbExtCreated.ToString())
+                    .Replace("$imports$", "import {" + sbImports.ToString() + "} from '@/configs/enums.js'");
+            }
+            if (name == "views.dialog-form")
+            {
                 rv = rv.Replace("$fields$", sbFields.ToString())
                     .Replace("$extData$", sbExtData.ToString())
-                    .Replace("$extCreated$", sbExtCreated.ToString());
+                    .Replace("$extCreated$", sbExtCreated.ToString())
+                    .Replace("$imports$", "import {" + sbImports.ToString() + "} from '@/configs/enums.js'");
             }
             if (name == "api.index")
             {
@@ -801,6 +848,42 @@ namespace KnifeZ.Virgo.Mvc
             }
             return rv;
         }
+
+        public string GenerateEnums (string path)
+        {
+            string content = File.ReadAllText(path);
+            StringBuilder enumstr = new StringBuilder();
+            List<string> existEnum = new List<string>();
+
+            var pros = CodeModel.FieldInfos.Where(x => x.IsListField == true || x.IsSearcherField == true).ToList();
+            foreach (var item in pros)
+            {
+                var proType = Type.GetType(CodeModel.ModelType).GetProperties().Where(x => x.Name == item.FieldName).Select(x => x.PropertyType).FirstOrDefault();
+                Type checktype = proType;
+                if (proType.IsNullable())
+                {
+                    checktype = proType.GetGenericArguments()[0];
+                }
+                if (checktype.IsEnum())
+                {
+                    if (existEnum.Contains(checktype.Name) == false && !content.Contains(item.FieldName + "Types"))
+                    {
+                        var es = checktype.ToListItems();
+                        enumstr.AppendLine($@"export const {item.FieldName}Types = [");
+                        for (int a = 0; a < es.Count; a++)
+                        {
+                            var e = es[a];
+                            enumstr.Append($@"	{{ Text: '{e.Text}', Value: {e.Value} }}");
+                            enumstr.AppendLine();
+                        }
+                        enumstr.AppendLine($@"];");
+                        existEnum.Add(checktype.Name);
+                    }
+                }
+            }
+            return content + enumstr.ToString();
+        }
+
         #endregion
 
         public List<CodeGenListView> GetFieldInfos (string modelFullName)

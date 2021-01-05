@@ -31,6 +31,7 @@ import VTable from '@/components/page/v-table/index'
 import apiEvents from './api/index'
 import { ref, onMounted, watch } from 'vue'
 import DialogForm from './views/dialog-form'
+$imports$
 export default {
 	name: '$modelname$',
 	components: { VSearcher, VTable, DialogForm },
