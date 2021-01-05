@@ -8,6 +8,7 @@
 import VFormDialog from '@/components/page/v-form-dialog'
 import VForm from '@/components/page/v-form'
 import apiEvents from '../api/index'
+$imports$
 export default {
 	name: '$modelname$-dialog',
 	components: {
