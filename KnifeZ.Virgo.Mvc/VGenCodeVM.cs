@@ -232,8 +232,6 @@ namespace KnifeZ.Virgo.Mvc
                 , GenerateVue("api.index"));
             genList.Add($"{vueDir}{Path.DirectorySeparatorChar}src{Path.DirectorySeparatorChar}views{Path.DirectorySeparatorChar}{ModelName.ToLower()}{Path.DirectorySeparatorChar}views{Path.DirectorySeparatorChar}dialog-form.vue"
                 , GenerateVue("views.dialog-form"));
-            //genList.Add($"{vueDir}{Path.DirectorySeparatorChar}public{Path.DirectorySeparatorChar}static{Path.DirectorySeparatorChar}configs{Path.DirectorySeparatorChar}default{Path.DirectorySeparatorChar}{Utils.ToFirstLower(ModelName)}.json"
-            //    , GenerateVue("json"));
             //附加枚举
 
             foreach (var item in genList)
@@ -258,8 +256,8 @@ namespace KnifeZ.Virgo.Mvc
                 FrameworkMenu menu = new FrameworkMenu
                 {
                     PageName = CodeModel.ModelName,
-                    ActionName = "MainPage",
-                    ModuleName = "MenuKey." + ModelName,
+                    ActionName = null,
+                    ModuleName = CodeModel.ModelName,
                     ClassName = ControllerNs + "," + ModelName,
                     MethodName = null,
                     Url = "/" + ModelName.ToLower(),
@@ -279,9 +277,9 @@ namespace KnifeZ.Virgo.Mvc
                 {
                     var child = new FrameworkMenu()
                     {
-                        PageName = "MenuKey." + ModelName,
+                        PageName = "MenuKey." + item,
                         ActionName = item,
-                        ModuleName = "MenuKey." + item,
+                        ModuleName = CodeModel.ModelName,
                         ClassName = ControllerNs + "," + ModelName,
                         MethodName = item,
                         Url = "/api/" + ModelName + "/" + item,
@@ -319,9 +317,9 @@ namespace KnifeZ.Virgo.Mvc
                             string acitonName = "Get" + subtype.Name + "List";
                             menu.Children.Add(new FrameworkMenu()
                             {
-                                PageName = "MenuKey." + acitonName,
-                                ActionName = acitonName,
-                                ModuleName = "MenuKey." + acitonName,
+                                PageName = "获取" + subtype.Name + "列表",
+                                ActionName = "获取" + subtype.Name + "列表",
+                                ModuleName = CodeModel.ModelName,
                                 ClassName = ControllerNs + "," + ModelName,
                                 MethodName = acitonName,
                                 Url = "/api/" + ModelName + "/" + acitonName,
@@ -345,7 +343,7 @@ namespace KnifeZ.Virgo.Mvc
                 DC.Set<FrameworkMenu>().Add(menu);
                 DC.SaveChanges();
             }
-            return "success";
+            return Program._localizer["GenerateSuccess"];
         }
 
         #region 生成模板代码
@@ -384,6 +382,7 @@ namespace KnifeZ.Virgo.Mvc
                     if (count == 1)
                     {
                         other.AppendLine($@"
+        [ActionDescription(""获取{subtype.Name}列表"")]
         [HttpGet(""[action]"")]
         public ActionResult Get{subtype.Name}List()
         {{
@@ -711,6 +710,47 @@ namespace KnifeZ.Virgo.Mvc
         {
             var rv = GetResource($"{name}.txt", "vue").Replace("$modelname$",Utils.ToFirstLower(ModelName));
             List<VFieldInfo> fields = CodeModel.FieldInfos.ToList();
+
+            StringBuilder sbExtAPIs = new StringBuilder();
+            StringBuilder sbExtData = new StringBuilder();
+            StringBuilder sbExtCreated = new StringBuilder();
+            List<string> existSubPro = new List<string>();
+            var pros = fields.Where(x => x.IsSearcherField == true || x.IsFormField == true).ToList();
+            for (int i = 0; i < pros.Count; i++)
+            {
+                var item = pros[i];
+                if ((item.InfoType == FieldInfoType.One2Many || item.InfoType == FieldInfoType.Many2Many) && item.SubField != "`file")
+                {
+                    var subtype = Type.GetType(item.LinkedType);
+                    var subpro = subtype.GetProperties().Where(x => x.Name == item.SubField).FirstOrDefault();
+                    var key = subtype.FullName + ":" + subpro.Name;
+                    existSubPro.Add(key);
+                    int count = existSubPro.Where(x => x == key).Count();
+                    if (count == 1)
+                    {
+                        if (name == "api.index")
+                        {
+                            sbExtAPIs.AppendLine($@"
+	get{subtype.Name}List(data) {{
+		return request({{
+			url: reqPath + 'Get{subtype.Name}List',
+			method: 'get',
+			data: data,
+		}})
+	}},");
+                        }
+                        if (name == "index" || name == "views.dialog-form")
+                        {
+                            sbExtData.AppendLine($@"
+			{Utils.ToFirstLower(subtype.Name)}ListData: [],");
+                            sbExtCreated.AppendLine($@"
+		apiEvents.get{subtype.Name}List().then((res) => {{
+            this.{Utils.ToFirstLower(subtype.Name)}ListData = res.Data
+        }})");
+                        }
+                    }
+                }
+            }
             if (name == "index")
             {
                 StringBuilder sbQueryInfos = new StringBuilder();
@@ -727,6 +767,7 @@ namespace KnifeZ.Virgo.Mvc
                 {
                     sbQueryInfos.Append($@"
 				{item.FieldName}:'',");
+                    // TODO query slot
                     sbQueryItems.Append($@"
 				<a-form-item label=""{item.FieldDes}"" name=""{item.FieldName}"">
 					<a-input type=""text"" v-model:value=""queryInfos.{item.FieldName}""></a-input>
@@ -734,7 +775,9 @@ namespace KnifeZ.Virgo.Mvc
                 }
                 rv = rv.Replace("$queryInfo$", sbQueryInfos.ToString())
                     .Replace("$queryItems$", sbQueryItems.ToString())
-                    .Replace("$columns$", sbColumns.ToString());
+                    .Replace("$columns$", sbColumns.ToString())
+                    .Replace("$extData$", sbExtData.ToString())
+                    .Replace("$extCreated$", sbExtCreated.ToString());
             }
             if (name == "views.dialog-form") {
                 StringBuilder sbFields = new StringBuilder();
@@ -748,38 +791,13 @@ namespace KnifeZ.Virgo.Mvc
 					type: 'input'
 				}},");
                 }
-                rv = rv.Replace("$fields$", sbFields.ToString());
+                rv = rv.Replace("$fields$", sbFields.ToString())
+                    .Replace("$extData$", sbExtData.ToString())
+                    .Replace("$extCreated$", sbExtCreated.ToString());
             }
             if (name == "api.index")
             {
-                // copy form generate controller
-                StringBuilder other = new StringBuilder();
-                List<string> existSubPro = new List<string>();
-                var pros = fields.Where(x => x.IsSearcherField == true || x.IsFormField == true).ToList();
-                for (int i = 0; i < pros.Count; i++)
-                {
-                    var item = pros[i];
-                    if ((item.InfoType == FieldInfoType.One2Many || item.InfoType == FieldInfoType.Many2Many) && item.SubField != "`file")
-                    {
-                        var subtype = Type.GetType(item.LinkedType);
-                        var subpro = subtype.GetProperties().Where(x => x.Name == item.SubField).FirstOrDefault();
-                        var key = subtype.FullName + ":" + subpro.Name;
-                        existSubPro.Add(key);
-                        int count = existSubPro.Where(x => x == key).Count();
-                        if (count == 1)
-                        {
-                            other.AppendLine($@"
-	get{subtype.Name}List(data) {{
-		return request({{
-			url: reqPath + 'Get{subtype.Name}List',
-			method: 'post',
-			data: data,
-		}})
-	}}");
-                        }
-                    }
-                }
-                rv = rv.Replace("$extAPIs$", other.ToString());
+                rv = rv.Replace("$extAPIs$", sbExtAPIs.ToString());
             }
             return rv;
         }

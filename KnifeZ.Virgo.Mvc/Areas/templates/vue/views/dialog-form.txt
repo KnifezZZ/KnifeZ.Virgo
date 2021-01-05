@@ -7,7 +7,7 @@
 <script>
 import VFormDialog from '@/components/page/v-form-dialog'
 import VForm from '@/components/page/v-form'
-import API from '../api/index'
+import apiEvents from '../api/index'
 export default {
 	name: '$modelname$-dialog',
 	components: {
@@ -16,20 +16,22 @@ export default {
 	},
 	data() {
 		return {
-			events: API,
+			events: apiEvents,
 			fields: [$fields$
 				{
 					key: 'ID',
 					type: 'input',
 					hidden: true,
 				},
-			],
+			],$extData$
 		}
 	},
 	methods: {
 		reSearch() {
 			this.$emit('reSearch')
 		},
+	},
+	created() {$extCreated$
 	},
 }
 </script>

@@ -28,7 +28,7 @@
 <script>
 import VSearcher from '@/components/page/v-searcher/index'
 import VTable from '@/components/page/v-table/index'
-import API from './api/index'
+import apiEvents from './api/index'
 import { ref, onMounted, watch } from 'vue'
 import DialogForm from './views/dialog-form'
 export default {
@@ -48,10 +48,9 @@ export default {
 				},
 			],
 			actions: ['add', 'edit', 'detail', 'delete', 'exported', 'imported'],
-			events: API,
-			queryInfos: {
-			$queryInfo$
-			},
+			events: apiEvents,
+			queryInfos: {$queryInfo$
+			},$extData$
 		}
 	},
 	methods: {
@@ -61,6 +60,8 @@ export default {
 		queryReset() {
 			this.$refs.vtable.queryReset()
 		},
+	},
+	created() {$extCreated$
 	},
 }
 </script>

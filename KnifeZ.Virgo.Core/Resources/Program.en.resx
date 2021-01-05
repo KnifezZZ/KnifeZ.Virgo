@@ -414,6 +414,9 @@
   <data name="GenApi" xml:space="preserve">
     <value>Generate Api</value>
   </data>
+  <data name="GenerateSuccess" xml:space="preserve">
+    <value>Successfully generated code, please rerun the project</value>
+  </data>
   <data name="Get" xml:space="preserve">
     <value>Get</value>
   </data>

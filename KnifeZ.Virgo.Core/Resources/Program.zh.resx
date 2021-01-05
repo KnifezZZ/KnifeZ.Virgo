@@ -411,6 +411,9 @@
   <data name="GenApi" xml:space="preserve">
     <value>生成Api</value>
   </data>
+  <data name="GenerateSuccess" xml:space="preserve">
+    <value>成功生成代码，请重新运行项目</value>
+  </data>
   <data name="Get" xml:space="preserve">
     <value>获取</value>
   </data>
