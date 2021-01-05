@@ -21,7 +21,7 @@ namespace WebDemo.ViewModel.BlogCategoryVMs
                 this.MakeGridHeader(x => x.Description),
                 this.MakeGridHeader(x => x.Icon),
                 this.MakeGridHeader(x => x.Name),
-                this.MakeGridHeader(x => x.Name_view),
+                this.MakeGridHeader(x => x.BlogCategory_Name),
                 this.MakeGridHeader(x => x.Sort),
                 this.MakeGridHeader(x => x.Url),
                 this.MakeGridHeaderAction(width: 200)
@@ -38,7 +38,7 @@ namespace WebDemo.ViewModel.BlogCategoryVMs
                     Description = x.Description,
                     Icon = x.Icon,
                     Name = x.Name,
-                    Name_view = x.Parent.Name,
+                    BlogCategory_Name = x.Parent.Name,
                     Sort = x.Sort,
                     Url = x.Url,
                 })
@@ -50,7 +50,7 @@ namespace WebDemo.ViewModel.BlogCategoryVMs
 
     public class BlogCategory_View : BlogCategory{
         [Display(Name = "类别名称")]
-        public String Name_view { get; set; }
+        public String BlogCategory_Name { get; set; }
 
     }
 }

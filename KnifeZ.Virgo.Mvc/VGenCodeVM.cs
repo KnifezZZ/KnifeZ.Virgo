@@ -207,6 +207,10 @@ namespace KnifeZ.Virgo.Mvc
             }
         }
 
+        /// <summary>
+        /// 生成模板
+        /// </summary>
+        /// <returns></returns>
         public string GenTemplates ()
         {
             var genList = new Dictionary<string, string>
@@ -242,22 +246,104 @@ namespace KnifeZ.Virgo.Mvc
                 {
                     File.Create(item.Key).Close();
                 }
-                using (StreamWriter sw = new StreamWriter(item.Key, true, Encoding.UTF8))
+                using (StreamWriter sw = new StreamWriter(item.Key, false, Encoding.UTF8))
                 {
                     sw.WriteLine(item.Value);
-
                 }
             }
             if (CodeModel.IsInsertMenu)
             {
+                var allowedRole = DC.Set<FrameworkRole>().Where(x => x.RoleCode == "001").FirstOrDefault();
+                var actions = new List<string> { "Get", "Edit", "Search", "Add", "BatchDelete", "ExportExcel", "ExportExcelByIds", "GetExcelTemplate", "Import" };
+                FrameworkMenu menu = new FrameworkMenu
+                {
+                    PageName = CodeModel.ModelName,
+                    ActionName = "MainPage",
+                    ModuleName = "MenuKey." + ModelName,
+                    ClassName = ControllerNs + "," + ModelName,
+                    MethodName = null,
+                    Url = "/" + ModelName.ToLower(),
+                    ICon= "subtract",
+                    Privileges = new List<FunctionPrivilege>() { new FunctionPrivilege { RoleId = allowedRole.ID, Allowed = true } },
+                    ShowOnMenu = true,
+                    FolderOnly = false,
+                    Children = new List<FrameworkMenu>(),
+                    IsPublic = false,
+                    IsInside = true,
+                    DisplayOrder = 99,
+                    CreateTime = DateTime.Now
+                };
+                int order = 1;
+                //添加常规方法
+                foreach (var item in actions)
+                {
+                    var child = new FrameworkMenu()
+                    {
+                        PageName = "MenuKey." + ModelName,
+                        ActionName = item,
+                        ModuleName = "MenuKey." + item,
+                        ClassName = ControllerNs + "," + ModelName,
+                        MethodName = item,
+                        Url = "/api/" + ModelName + "/" + item,
+                        Privileges = new List<FunctionPrivilege>(){
+                            new FunctionPrivilege{ RoleId = allowedRole.ID, Allowed = true}
+                        },
+                        ShowOnMenu = false,
+                        FolderOnly = false,
+                        Children = new List<FrameworkMenu>(),
+                        IsPublic = false,
+                        IsInside = true,
+                        DisplayOrder = order++,
+                        CreateTime = DateTime.Now,
+                        ParentId = menu.ID
+                    };
+                    if (item == "Get")
+                    {
+                        child.Url = "/api/" + ModelName + "/{id}";
+                    }
+                    menu.Children.Add(child);
+                }
+                List<string> existSubPro = new List<string>();
+                //添加拓展方法
+                foreach (var item in CodeModel.FieldInfos.Where(x => x.IsSearcherField == true || x.IsFormField == true).ToList())
+                {
+                    if ((item.InfoType == FieldInfoType.One2Many || item.InfoType == FieldInfoType.Many2Many) && item.SubField != "`file")
+                    {
+                        var subtype = Type.GetType(item.LinkedType);
+                        var subpro = subtype.GetProperties().Where(x => x.Name == item.SubField).FirstOrDefault();
+                        var key = subtype.FullName + ":" + subpro.Name;
+                        existSubPro.Add(key);
+                        int count = existSubPro.Where(x => x == key).Count();
+                        if (count == 1)
+                        {
+                            string acitonName = "Get" + subtype.Name + "List";
+                            menu.Children.Add(new FrameworkMenu()
+                            {
+                                PageName = "MenuKey." + acitonName,
+                                ActionName = acitonName,
+                                ModuleName = "MenuKey." + acitonName,
+                                ClassName = ControllerNs + "," + ModelName,
+                                MethodName = acitonName,
+                                Url = "/api/" + ModelName + "/" + acitonName,
+                                Privileges = new List<FunctionPrivilege>(){
+                                    new FunctionPrivilege{ RoleId = allowedRole.ID, Allowed = true}
+                                },
+                                ShowOnMenu = false,
+                                FolderOnly = false,
+                                Children = new List<FrameworkMenu>(),
+                                IsPublic = false,
+                                IsInside = true,
+                                DisplayOrder = order++,
+                                CreateTime = DateTime.Now,
+                                ParentId = menu.ID
+
+                            });
+                        }
+                    }
+                }
                 //插入菜单表
-                //DC.AddEntity(new FrameworkMenu()
-                //{
-                //    ActionName=ModelName,
-                //    DisplayOrder=999,
-                //    ICon="",
-                //});
-                //DC.SaveChanges();
+                DC.Set<FrameworkMenu>().Add(menu);
+                DC.SaveChanges();
             }
             return "success";
         }
@@ -446,18 +532,18 @@ namespace KnifeZ.Virgo.Mvc
 
                             var subdisplay = subpro.GetCustomAttribute<DisplayAttribute>();
                             headerstring += $@"
-                this.MakeGridHeader(x => x.{pro.SubField + "_view" + prefix}),";
+                this.MakeGridHeader(x => x.{subpro.DeclaringType.Name + "_" + pro.SubField + prefix}),";
                             if (pro.InfoType == FieldInfoType.One2Many)
                             {
                                 selectstring += $@"
-                    {pro.SubField + "_view" + prefix} = x.{pro.FieldName}.{pro.SubField},";
+                    {subpro.DeclaringType.Name + "_" + pro.SubField + prefix} = x.{pro.FieldName}.{pro.SubField},";
                             }
                             else
                             {
                                 var middleType = modelType.GetSingleProperty(pro.FieldName).PropertyType.GenericTypeArguments[0];
                                 var middlename = DC.GetPropertyNameByFk(middleType, pro.SubIdField);
                                 selectstring += $@"
-                    {pro.SubField + "_view" + prefix} = x.{pro.FieldName}.Select(y=>y.{middlename}.{pro.SubField}).ToSpratedString(null,"",""), ";
+                    {subpro.DeclaringType.Name + "_" + pro.SubField + prefix} = x.{pro.FieldName}.Select(y=>y.{middlename}.{pro.SubField}).ToSpratedString(null,"",""), ";
                             }
                             if (subdisplay?.Name != null)
                             {
@@ -465,7 +551,7 @@ namespace KnifeZ.Virgo.Mvc
         [Display(Name = ""{subdisplay.Name}"")]";
                             }
                             subprostring += $@"
-        public {subtypename} {pro.SubField + "_view" + prefix} {{ get; set; }}";
+        public {subtypename} {subpro.DeclaringType.Name + "_" + pro.SubField + prefix} {{ get; set; }}";
                         }
                     }
 
@@ -633,18 +719,18 @@ namespace KnifeZ.Virgo.Mvc
                 foreach (var item in fields.Where(x => x.IsListField))
                 {
                     sbColumns.Append($@"
-                {{ key: '{item.FieldName}', title: '{item.FieldDes}' }},");
+				{{ key: '{item.FieldName}', title: '{item.FieldDes}' }},");
                     // TODO table slot
                 }
                 //查询条件
                 foreach (var item in fields.Where(x => x.IsSearcherField == true))
                 {
                     sbQueryInfos.Append($@"
-        {item.FieldName}:'',");
+				{item.FieldName}:'',");
                     sbQueryItems.Append($@"
-                <a-form-item label=""{item.FieldDes}"" name=""{item.FieldName}"">
-	                <a-input type=""text"" v-model:value=""queryInfos.{item.FieldName}""></a-input>
-                </a-form-item>");
+				<a-form-item label=""{item.FieldDes}"" name=""{item.FieldName}"">
+					<a-input type=""text"" v-model:value=""queryInfos.{item.FieldName}""></a-input>
+				</a-form-item>");
                 }
                 rv = rv.Replace("$queryInfo$", sbQueryInfos.ToString())
                     .Replace("$queryItems$", sbQueryItems.ToString())
@@ -656,11 +742,11 @@ namespace KnifeZ.Virgo.Mvc
                 {
                     // TODO form type
                     sbFields.Append($@"
-                {{
-	                title: '{item.FieldDes}',
-	                key: '{item.FieldName}',
-                    type: 'input'
-                }},");
+				{{
+					title: '{item.FieldDes}',
+					key: '{item.FieldName}',
+					type: 'input'
+				}},");
                 }
                 rv = rv.Replace("$fields$", sbFields.ToString());
             }
@@ -683,13 +769,13 @@ namespace KnifeZ.Virgo.Mvc
                         if (count == 1)
                         {
                             other.AppendLine($@"
-    Get{subtype.Name}List(data) {{
-        return request({{
-            url: reqPath + 'Get{subtype.Name}List',
-		    method: 'post',
-		    data: data,
-        }})
-    }}");
+	get{subtype.Name}List(data) {{
+		return request({{
+			url: reqPath + 'Get{subtype.Name}List',
+			method: 'post',
+			data: data,
+		}})
+	}}");
                         }
                     }
                 }

@@ -16,7 +16,7 @@ namespace WebDemo.Controllers
 {
     
     [AuthorizeJwtWithCookie]
-    [ActionDescription("博客类别")]
+    [ActionDescription("博客分类管理")]
     [ApiController]
     [Route("api/[controller]")]
     public class BlogCategoryController : BaseApiController
