@@ -9,7 +9,7 @@ using WebDemo.Model;
 namespace WebDemo.Model.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20201229090612_init")]
+    [Migration("20210106063346_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -633,6 +633,9 @@ namespace WebDemo.Model.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("BlogCategoryId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("BodyText")
                         .HasColumnType("TEXT");
 
@@ -643,7 +646,110 @@ namespace WebDemo.Model.Migrations
                     b.Property<DateTime?>("CreateTime")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsSinglePage")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsValid")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Keywords")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UpdateBy")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdateTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("VisitCount")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("BlogCategoryId");
+
+                    b.ToTable("Blog");
+                });
+
+            modelBuilder.Entity("WebDemo.Model.BlogCategory", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreateBy")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("CreateTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Icon")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Sort")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("UpdateBy")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdateTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("ParentId");
+
+                    b.ToTable("BlogCategories");
+                });
+
+            modelBuilder.Entity("WebDemo.Model.BlogClassification", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreateBy")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("CreateTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("FrameworkUserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("UpdateBy")
@@ -655,7 +761,44 @@ namespace WebDemo.Model.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Blogs");
+                    b.HasIndex("FrameworkUserId");
+
+                    b.ToTable("BlogClassifications");
+                });
+
+            modelBuilder.Entity("WebDemo.Model.BlogClassificationMiddle", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("BlogClassificationId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("BlogId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreateBy")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("CreateTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UpdateBy")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdateTime")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("BlogClassificationId");
+
+                    b.HasIndex("BlogId");
+
+                    b.ToTable("BlogClassificationMiddles");
                 });
 
             modelBuilder.Entity("KnifeZ.Virgo.Core.DataPrivilege", b =>
@@ -765,6 +908,54 @@ namespace WebDemo.Model.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("WebDemo.Model.Blog", b =>
+                {
+                    b.HasOne("WebDemo.Model.BlogCategory", "BlogCategory")
+                        .WithMany()
+                        .HasForeignKey("BlogCategoryId");
+
+                    b.Navigation("BlogCategory");
+                });
+
+            modelBuilder.Entity("WebDemo.Model.BlogCategory", b =>
+                {
+                    b.HasOne("WebDemo.Model.BlogCategory", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId");
+
+                    b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("WebDemo.Model.BlogClassification", b =>
+                {
+                    b.HasOne("KnifeZ.Virgo.Core.FrameworkUserBase", "FrameworkUser")
+                        .WithMany()
+                        .HasForeignKey("FrameworkUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FrameworkUser");
+                });
+
+            modelBuilder.Entity("WebDemo.Model.BlogClassificationMiddle", b =>
+                {
+                    b.HasOne("WebDemo.Model.BlogClassification", "BlogClassification")
+                        .WithMany("BlogClassificationMiddle")
+                        .HasForeignKey("BlogClassificationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WebDemo.Model.Blog", "Blog")
+                        .WithMany("BlogClassificationMiddle")
+                        .HasForeignKey("BlogId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Blog");
+
+                    b.Navigation("BlogClassification");
+                });
+
             modelBuilder.Entity("KnifeZ.Virgo.Core.FrameworkGroup", b =>
                 {
                     b.Navigation("UserGroups");
@@ -789,6 +980,21 @@ namespace WebDemo.Model.Migrations
                     b.Navigation("UserGroups");
 
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("WebDemo.Model.Blog", b =>
+                {
+                    b.Navigation("BlogClassificationMiddle");
+                });
+
+            modelBuilder.Entity("WebDemo.Model.BlogCategory", b =>
+                {
+                    b.Navigation("Children");
+                });
+
+            modelBuilder.Entity("WebDemo.Model.BlogClassification", b =>
+                {
+                    b.Navigation("BlogClassificationMiddle");
                 });
 #pragma warning restore 612, 618
         }

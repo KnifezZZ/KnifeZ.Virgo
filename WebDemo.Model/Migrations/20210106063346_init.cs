@@ -32,12 +32,16 @@ namespace WebDemo.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Blogs",
+                name: "BlogCategories",
                 columns: table => new
                 {
                     ID = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Title = table.Column<string>(type: "TEXT", nullable: true),
-                    BodyText = table.Column<string>(type: "TEXT", nullable: true),
+                    Name = table.Column<string>(type: "TEXT", nullable: true),
+                    Description = table.Column<string>(type: "TEXT", nullable: true),
+                    Icon = table.Column<string>(type: "TEXT", nullable: true),
+                    Url = table.Column<string>(type: "TEXT", nullable: true),
+                    Sort = table.Column<int>(type: "INTEGER", nullable: false),
+                    ParentId = table.Column<Guid>(type: "TEXT", nullable: true),
                     CreateTime = table.Column<DateTime>(type: "TEXT", nullable: true),
                     CreateBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
                     UpdateTime = table.Column<DateTime>(type: "TEXT", nullable: true),
@@ -45,7 +49,13 @@ namespace WebDemo.Model.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Blogs", x => x.ID);
+                    table.PrimaryKey("PK_BlogCategories", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_BlogCategories_BlogCategories_ParentId",
+                        column: x => x.ParentId,
+                        principalTable: "BlogCategories",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -144,6 +154,37 @@ namespace WebDemo.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Blog",
+                columns: table => new
+                {
+                    ID = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Title = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "TEXT", maxLength: 200, nullable: true),
+                    Keywords = table.Column<string>(type: "TEXT", maxLength: 200, nullable: true),
+                    BodyText = table.Column<string>(type: "TEXT", nullable: true),
+                    BlogCategoryId = table.Column<Guid>(type: "TEXT", nullable: true),
+                    IsSinglePage = table.Column<bool>(type: "INTEGER", nullable: false),
+                    VisitCount = table.Column<int>(type: "INTEGER", nullable: false),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false),
+                    Url = table.Column<string>(type: "TEXT", nullable: true),
+                    CreateTime = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    CreateBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
+                    UpdateTime = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    UpdateBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
+                    IsValid = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Blog", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Blog_BlogCategories_BlogCategoryId",
+                        column: x => x.BlogCategoryId,
+                        principalTable: "BlogCategories",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "FrameworkUsers",
                 columns: table => new
                 {
@@ -215,6 +256,29 @@ namespace WebDemo.Model.Migrations
                         principalTable: "FrameworkMenus",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BlogClassifications",
+                columns: table => new
+                {
+                    ID = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: true),
+                    FrameworkUserId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    CreateTime = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    CreateBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
+                    UpdateTime = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    UpdateBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BlogClassifications", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_BlogClassifications_FrameworkUsers_FrameworkUserId",
+                        column: x => x.FrameworkUserId,
+                        principalTable: "FrameworkUsers",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -363,6 +427,60 @@ namespace WebDemo.Model.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "BlogClassificationMiddles",
+                columns: table => new
+                {
+                    ID = table.Column<Guid>(type: "TEXT", nullable: false),
+                    BlogId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    BlogClassificationId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    CreateTime = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    CreateBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true),
+                    UpdateTime = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    UpdateBy = table.Column<string>(type: "TEXT", maxLength: 50, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BlogClassificationMiddles", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_BlogClassificationMiddles_Blog_BlogId",
+                        column: x => x.BlogId,
+                        principalTable: "Blog",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BlogClassificationMiddles_BlogClassifications_BlogClassificationId",
+                        column: x => x.BlogClassificationId,
+                        principalTable: "BlogClassifications",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Blog_BlogCategoryId",
+                table: "Blog",
+                column: "BlogCategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BlogCategories_ParentId",
+                table: "BlogCategories",
+                column: "ParentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BlogClassificationMiddles_BlogClassificationId",
+                table: "BlogClassificationMiddles",
+                column: "BlogClassificationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BlogClassificationMiddles_BlogId",
+                table: "BlogClassificationMiddles",
+                column: "BlogId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BlogClassifications_FrameworkUserId",
+                table: "BlogClassifications",
+                column: "FrameworkUserId");
+
             migrationBuilder.CreateIndex(
                 name: "IX_DataPrivileges_DomainId",
                 table: "DataPrivileges",
@@ -436,7 +554,7 @@ namespace WebDemo.Model.Migrations
                 name: "ActionLogs");
 
             migrationBuilder.DropTable(
-                name: "Blogs");
+                name: "BlogClassificationMiddles");
 
             migrationBuilder.DropTable(
                 name: "DataPrivileges");
@@ -457,6 +575,12 @@ namespace WebDemo.Model.Migrations
                 name: "SearchConditions");
 
             migrationBuilder.DropTable(
+                name: "Blog");
+
+            migrationBuilder.DropTable(
+                name: "BlogClassifications");
+
+            migrationBuilder.DropTable(
                 name: "FrameworkGroups");
 
             migrationBuilder.DropTable(
@@ -464,6 +588,9 @@ namespace WebDemo.Model.Migrations
 
             migrationBuilder.DropTable(
                 name: "FrameworkMenus");
+
+            migrationBuilder.DropTable(
+                name: "BlogCategories");
 
             migrationBuilder.DropTable(
                 name: "FrameworkUsers");

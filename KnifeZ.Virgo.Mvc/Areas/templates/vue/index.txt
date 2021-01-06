@@ -51,7 +51,7 @@ export default {
 			actions: ['add', 'edit', 'detail', 'delete', 'exported', 'imported'],
 			events: apiEvents,
 			queryInfos: {$queryInfo$
-			},$extData$
+			},
 		}
 	},
 	methods: {
@@ -61,8 +61,6 @@ export default {
 		queryReset() {
 			this.$refs.vtable.queryReset()
 		},
-	},
-	created() {$extCreated$
 	},
 }
 </script>

@@ -631,7 +631,7 @@ namespace WebDemo.Model.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("BlogCategoryID")
+                    b.Property<Guid?>("BlogCategoryId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("BodyText")
@@ -681,7 +681,7 @@ namespace WebDemo.Model.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("BlogCategoryID");
+                    b.HasIndex("BlogCategoryId");
 
                     b.ToTable("Blog");
                 });
@@ -744,7 +744,7 @@ namespace WebDemo.Model.Migrations
                     b.Property<DateTime?>("CreateTime")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("FrameworkUserID")
+                    b.Property<Guid>("FrameworkUserId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -759,7 +759,7 @@ namespace WebDemo.Model.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("FrameworkUserID");
+                    b.HasIndex("FrameworkUserId");
 
                     b.ToTable("BlogClassifications");
                 });
@@ -910,7 +910,7 @@ namespace WebDemo.Model.Migrations
                 {
                     b.HasOne("WebDemo.Model.BlogCategory", "BlogCategory")
                         .WithMany()
-                        .HasForeignKey("BlogCategoryID");
+                        .HasForeignKey("BlogCategoryId");
 
                     b.Navigation("BlogCategory");
                 });
@@ -928,7 +928,7 @@ namespace WebDemo.Model.Migrations
                 {
                     b.HasOne("KnifeZ.Virgo.Core.FrameworkUserBase", "FrameworkUser")
                         .WithMany()
-                        .HasForeignKey("FrameworkUserID")
+                        .HasForeignKey("FrameworkUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

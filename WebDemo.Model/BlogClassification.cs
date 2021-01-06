@@ -10,7 +10,7 @@ namespace WebDemo.Model
         [Display(Name = "类别名称")]
         public string Name { get; set; }
         [Display(Name = "所属用户")]
-        public Guid FrameworkUserID { get; set; }
+        public Guid FrameworkUserId { get; set; }
         [Display(Name = "所属用户")]
         public FrameworkUserBase FrameworkUser { get; set; }
         [Display(Name = "个人分类")]

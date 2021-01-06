@@ -8,6 +8,7 @@
 import VFormDialog from '@/components/page/v-form-dialog'
 import VForm from '@/components/page/v-form'
 import apiEvents from '../api/index'
+import { onMounted, ref } from 'vue'
 $imports$
 export default {
 	name: '$modelname$-dialog',
@@ -24,15 +25,13 @@ export default {
 					type: 'input',
 					hidden: true,
 				},
-			],$extData$
+			],
 		}
 	},
 	methods: {
 		reSearch() {
 			this.$emit('reSearch')
 		},
-	},
-	created() {$extCreated$
 	},
 }
 </script>

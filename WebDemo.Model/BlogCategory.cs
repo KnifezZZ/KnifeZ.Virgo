@@ -24,10 +24,8 @@ namespace WebDemo.Model
         public int Sort { get; set; }
 
         #region ITreeData成员
-
-        [Display(Name = "所属类别")]
         public Guid? ParentId { get; set; }
-        [Display(Name = "ParentFolder")]
+        [Display(Name = "所属类别")]
         [JsonIgnore]
         public BlogCategory Parent { get; set; }
         [Display(Name = "Children")]

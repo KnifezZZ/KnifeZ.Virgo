@@ -264,7 +264,7 @@ namespace KnifeZ.Virgo.Mvc
                     ClassName = ControllerNs + "," + ModelName,
                     MethodName = null,
                     Url = "/" + ModelName.ToLower(),
-                    ICon = "subtract",
+                    ICon = "star",
                     Privileges = new List<FunctionPrivilege>() { new FunctionPrivilege { RoleId = allowedRole.ID, Allowed = true } },
                     ShowOnMenu = true,
                     FolderOnly = false,
@@ -718,27 +718,44 @@ namespace KnifeZ.Virgo.Mvc
             StringBuilder sbColumns = new StringBuilder();
             StringBuilder sbImports = new StringBuilder();
             StringBuilder sbExtAPIs = new StringBuilder();
-            StringBuilder sbExtData = new StringBuilder();
-            StringBuilder sbExtCreated = new StringBuilder();
             StringBuilder sbFields = new StringBuilder();
             List<string> existSubPro = new List<string>();
-            var modelProps = Type.GetType(CodeModel.ModelType).GetProperties();
+            var modelType = Type.GetType(CodeModel.ModelType);
+            var modelProps = modelType.GetProperties();
             //循环所有字段
             for (int i = 0; i < fields.Count; i++)
             {
                 var item = fields[i];
-                if ((item.InfoType == FieldInfoType.One2Many || item.InfoType == FieldInfoType.Many2Many) && item.SubField != "`file")
+                var mpro = modelProps.Where(x => x.Name == item.FieldName).FirstOrDefault();
+                string label = mpro.GetPropertyDisplayName();
+                string newname = item.FieldName;
+                if (string.IsNullOrEmpty(item.LinkedType) == false)
                 {
                     var subtype = Type.GetType(item.LinkedType);
-                    var subpro = subtype.GetProperties().Where(x => x.Name == item.SubField).FirstOrDefault();
-                    var key = subtype.FullName + ":" + subpro.Name;
-                    existSubPro.Add(key);
-                    int count = existSubPro.Where(x => x == key).Count();
-                    if (count == 1)
+                    //图片处理
+                    if (subtype == typeof(FileAttachment))
                     {
-                        if (name == "api.index")
+                        var fk = DC.GetFKName2(modelType, item.FieldName);
+                        newname = fk;
+                    }
+                    else
+                    {
+                        var subpro = subtype.GetProperties().Where(x => x.Name == item.SubField).FirstOrDefault();
+                        var key = subtype.FullName + ":" + subpro.Name;
+                        existSubPro.Add(key);
+                        string prefix = "";
+                        int count = existSubPro.Where(x => x == key).Count();
+                        if (count > 1)
                         {
-                            sbExtAPIs.AppendLine($@"
+                            prefix = count + "";
+                        }
+                        newname = subpro.DeclaringType.Name + "_" + item.SubField + prefix;
+                        if (count == 1)
+                        {
+                            //添加api
+                            if (name == "api.index")
+                            {
+                                sbExtAPIs.AppendLine($@"
 	get{subtype.Name}List(data) {{
 		return request({{
 			url: reqPath + 'Get{subtype.Name}List',
@@ -746,55 +763,42 @@ namespace KnifeZ.Virgo.Mvc
 			data: data,
 		}})
 	}},");
-                        }
-                        if (name == "index" || name == "views.dialog-form")
-                        {
-                            if (item.IsFormField || item.IsListField)
-                            {
-                                sbExtData.AppendLine($@"
-			{Utils.ToFirstLower(subtype.Name)}ListData: [],");
-                                sbExtCreated.AppendLine($@"
-		apiEvents.get{subtype.Name}List().then((res) => {{
-            this.{Utils.ToFirstLower(subtype.Name)}ListData = res.Data
-        }})");
-
                             }
                         }
                     }
                 }
-
+                //列表展示
                 if (item.IsListField)
                 {
                     sbColumns.Append($@"
-				{{ key: '{item.FieldName}', title: '{item.FieldDes}' }},");
+				{{ key: '{newname}', title: '{label}' }},");
                 }
-
+                //查询条件
                 if (item.IsSearcherField)
                 {
                     sbQueryInfos.Append($@"
-				{item.FieldName}:'',");
+				{newname}:'',");
                     // TODO query slot
                     sbQueryItems.Append($@"
-				<a-form-item label=""{item.FieldDes}"" name=""{item.FieldName}"">
-					<a-input type=""text"" v-model:value=""queryInfos.{item.FieldName}""></a-input>
+				<a-form-item label=""{label}"" name=""{newname}"">
+					<a-input type=""text"" v-model:value=""queryInfos.{newname}""></a-input>
 				</a-form-item>");
 
                 }
-
+                //表单展示
                 if (item.IsFormField)
                 {
-                    var proType = modelProps.Where(x => x.Name == item.FieldName).Select(x => x.PropertyType).FirstOrDefault();
-                    Type checktype = proType;
-                    if (proType.IsNullable())
+                    Type checktype = mpro.PropertyType;
+                    if (checktype.IsNullable())
                     {
-                        checktype = proType.GetGenericArguments()[0];
+                        checktype = mpro.PropertyType.GetGenericArguments()[0];
                     }
                     if (checktype.IsBoolOrNullableBool())
                     {
                         sbFields.Append($@"
 				{{
-					title: '{item.FieldDes}',
-					key: '{item.FieldName}',
+					title: '{label}',
+					key: '{newname}',
 					type: 'switch'
 				}},");
 
@@ -804,8 +808,8 @@ namespace KnifeZ.Virgo.Mvc
                         sbImports.Append($@"{item.FieldName}Types,");
                         sbFields.Append($@"
 				{{
-					title: '{item.FieldDes}',
-					key: '{item.FieldName}',
+					title: '{label}',
+					key: '{newname}',
 					type: 'radio',
 					props: {{
 						items: {item.FieldName}Types,
@@ -813,39 +817,107 @@ namespace KnifeZ.Virgo.Mvc
 				}},");
 
                     }
+                    //一对多 --select 单选
+                    else if (item.InfoType == FieldInfoType.One2Many)
+                    {
+                        var subtype = Type.GetType(item.LinkedType);
+                        var subpros = subtype.GetProperties();
+                        if (subpros.Where(x => x.Name == "Parent").Any() && subpros.Where(x => x.Name == "Children").Any())
+                        {
+                            sbFields.Append($@"
+				{{
+					title: '{item.FieldDes.Replace("(一对多)", "")}',
+					key: '{item.FieldName}Id',
+					type: 'treeSelect',
+					props: {{
+						items: [],
+						loadData: apiEvents.get{subtype.Name}ListData,
+					}}
+				}},");
+                        }
+                        else
+                        {
+                            sbFields.Append($@"
+				{{
+					title: '{item.FieldDes.Replace("(一对多)", "")}',
+					key: '{item.FieldName}Id',
+					type: 'select',
+					props: {{
+						mode: 'default',
+						items: [],
+						loadData: apiEvents.get{subtype.Name}ListData,
+					}}
+				}},");
+
+                        }
+                    }
+                    //多对多 --select 多选
+                    else if (item.InfoType == FieldInfoType.Many2Many)
+                    {
+                        var subtype = Type.GetType(item.LinkedType);
+                        var subpros = subtype.GetProperties();
+                        if (subpros.Where(x => x.Name == "Parent").Any() && subpros.Where(x => x.Name == "Children").Any())
+                        {
+                            sbFields.Append($@"
+				{{
+					title: '{item.FieldDes.Replace("(多对多)", "")}',
+					key: '{item.FieldName}',
+					type: 'treeSelect',
+					props: {{
+						treeCheckable: true,
+						items: [],
+						loadData: apiEvents.get{subtype.Name}ListData,
+					}}
+				}},");
+                        }
+                        else
+                        {
+                            sbFields.Append($@"
+				{{
+					title: '{item.FieldDes.Replace("(多对多)", "")}',
+					key: '{item.FieldName}',
+					type: 'select',
+					props: {{
+						mode: 'multiple',
+						items: [],
+						loadData: apiEvents.get{subtype.Name}ListData,
+					}}
+				}},");
+
+                        }
+                    }
                     else
                     {
                         sbFields.Append($@"
 				{{
-					title: '{item.FieldDes}',
-					key: '{item.FieldName}',
+					title: '{label}',
+					key: '{newname}',
 					type: 'input'
 				}},");
 
                     }
                 }
             }
-
             if (name == "index")
             {
                 rv = rv.Replace("$queryInfo$", sbQueryInfos.ToString())
                     .Replace("$queryItems$", sbQueryItems.ToString())
-                    .Replace("$columns$", sbColumns.ToString())
-                    .Replace("$extData$", sbExtData.ToString())
-                    .Replace("$extCreated$", sbExtCreated.ToString())
-                    .Replace("$imports$", "import {" + sbImports.ToString() + "} from '@/configs/enums.js'");
+                    .Replace("$columns$", sbColumns.ToString());
             }
             if (name == "views.dialog-form")
             {
-                rv = rv.Replace("$fields$", sbFields.ToString())
-                    .Replace("$extData$", sbExtData.ToString())
-                    .Replace("$extCreated$", sbExtCreated.ToString())
-                    .Replace("$imports$", "import {" + sbImports.ToString() + "} from '@/configs/enums.js'");
+                rv = rv.Replace("$fields$", sbFields.ToString());
             }
             if (name == "api.index")
             {
                 rv = rv.Replace("$extAPIs$", sbExtAPIs.ToString());
             }
+            string imports = sbImports.ToString();
+            if (!string.IsNullOrWhiteSpace(imports))
+            {
+                imports = "import {" + imports + "} from '@/configs/enums.js'";
+            }
+            rv = rv.Replace("$imports$", imports);
             return rv;
         }
 

@@ -34,7 +34,7 @@ namespace WebDemo.Model
         [Display(Name = "正文")]
         public string BodyText { get; set; }
         [Display(Name = "博客类别")]
-        public Guid? BlogCategoryID { get; set; }
+        public Guid? BlogCategoryId { get; set; }
         [Display(Name = "博客类别")]
         public BlogCategory BlogCategory { get; set; }
         [Display(Name = "个人分类")]
