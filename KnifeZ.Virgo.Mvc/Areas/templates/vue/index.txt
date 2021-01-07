@@ -1,14 +1,19 @@
 ﻿<template>
 	<a-row :gutter="[16, 16]">
 		<a-col :span="24">
-			<v-searcher :collapse.sync="collapse" @search="querySearch" @reset="queryReset">
-				$queryItems$
+			<v-searcher
+				:collapse.sync="collapse"
+				:events="events"
+				:fields="queryFields"
+				@search="querySearch"
+				@reset="queryReset"
+			>
 			</v-searcher>
 		</a-col>
 		<a-col :span="24">
 			<v-table
 				ref="vtable"
-				:form-items="queryInfos"
+				:form-items="queryForm"
 				:columns="columns"
 				:actions="actions"
 				:events="events"
@@ -50,13 +55,19 @@ export default {
 			],
 			actions: ['add', 'edit', 'detail', 'delete', 'exported', 'imported'],
 			events: apiEvents,
-			queryInfos: {$queryInfo$
-			},
+			queryFields: [$queryFields$
+			],
+			queryForm: {},
 		}
 	},
 	methods: {
-		querySearch() {
-			this.$refs.vtable.doSearch()
+		querySearch(info) {
+			new Promise((resolve, reject) => {
+				this.queryForm = info
+				resolve(true)
+			}).then((res) => {
+				this.$refs.vtable.doSearch(true)
+			})
 		},
 		queryReset() {
 			this.$refs.vtable.queryReset()

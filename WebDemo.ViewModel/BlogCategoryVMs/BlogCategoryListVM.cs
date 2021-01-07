@@ -32,6 +32,7 @@ namespace WebDemo.ViewModel.BlogCategoryVMs
         {
             var query = DC.Set<BlogCategory>()
                 .CheckContain(Searcher.Name, x=>x.Name)
+                .CheckContain(Searcher.Url, x=>x.Url)
                 .Select(x => new BlogCategory_View
                 {
 				    ID = x.ID,

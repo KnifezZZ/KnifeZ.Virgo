@@ -713,8 +713,7 @@ namespace KnifeZ.Virgo.Mvc
         {
             var rv = GetResource($"{name}.txt", "vue").Replace("$modelname$", Utils.ToFirstLower(ModelName));
             List<VFieldInfo> fields = CodeModel.FieldInfos.ToList();
-            StringBuilder sbQueryInfos = new StringBuilder();
-            StringBuilder sbQueryItems = new StringBuilder();
+            StringBuilder sbQueryFields = new StringBuilder();
             StringBuilder sbColumns = new StringBuilder();
             StringBuilder sbImports = new StringBuilder();
             StringBuilder sbExtAPIs = new StringBuilder();
@@ -773,47 +772,50 @@ namespace KnifeZ.Virgo.Mvc
                     sbColumns.Append($@"
 				{{ key: '{newname}', title: '{label}' }},");
                 }
+
+
+                Type checktype = mpro.PropertyType;
+                if (checktype.IsNullable())
+                {
+                    checktype = mpro.PropertyType.GetGenericArguments()[0];
+                }
+
                 //查询条件
                 if (item.IsSearcherField)
                 {
-                    sbQueryInfos.Append($@"
-				{newname}:'',");
-                    // TODO query slot
-                    sbQueryItems.Append($@"
-				<a-form-item label=""{label}"" name=""{newname}"">
-					<a-input type=""text"" v-model:value=""queryInfos.{newname}""></a-input>
-				</a-form-item>");
-
-                }
-                //表单展示
-                if (item.IsFormField)
-                {
-                    Type checktype = mpro.PropertyType;
-                    if (checktype.IsNullable())
-                    {
-                        checktype = mpro.PropertyType.GetGenericArguments()[0];
-                    }
                     if (checktype.IsBoolOrNullableBool())
                     {
-                        sbFields.Append($@"
+                        sbQueryFields.Append($@"
 				{{
 					title: '{label}',
 					key: '{newname}',
-					type: 'switch'
+					type: 'switch',
 				}},");
 
                     }
                     else if (checktype.IsEnum())
                     {
-                        sbImports.Append($@"{item.FieldName}Types,");
-                        sbFields.Append($@"
+                        if (!sbImports.ToString().Contains($@"{item.FieldName}Types,"))
+                        {
+                            sbImports.Append($@"{item.FieldName}Types,");
+                        }
+                        sbQueryFields.Append($@"
 				{{
 					title: '{label}',
 					key: '{newname}',
-					type: 'radio',
+					type: 'select',
 					props: {{
 						items: {item.FieldName}Types,
 					}}
+				}},");
+                    }
+                    else if (checktype == typeof(DateTime))
+                    {
+                        sbQueryFields.Append($@"
+				{{
+					title: '{label}',
+					key: '{newname}',
+					type: 'dataPicker',
 				}},");
 
                     }
@@ -826,7 +828,92 @@ namespace KnifeZ.Virgo.Mvc
                         {
                             sbFields.Append($@"
 				{{
-					title: '{item.FieldDes.Replace("(一对多)", "")}',
+					title: '{label}',
+					key: '{item.FieldName}Id',
+					type: 'treeSelect',
+					props: {{
+						treeCheckable: true,
+						items: [],
+						loadData: apiEvents.get{subtype.Name}ListData,
+					}}
+				}},");
+                        }
+                        else
+                        {
+                            sbFields.Append($@"
+				{{
+					title: '{label}',
+					key: '{item.FieldName}Id',
+					type: 'select',
+					props: {{
+						mode: 'multiple',
+						items: [],
+						loadData: apiEvents.get{subtype.Name}ListData,
+					}}
+				}},");
+
+                        }
+                    }
+                    else
+                    {
+                        sbQueryFields.Append($@"
+				{{
+					title: '{label}',
+					key: '{newname}',
+					type: 'input'
+				}},");
+                    }
+                }
+                //表单展示
+                if (item.IsFormField)
+                {
+                    if (checktype.IsBoolOrNullableBool())
+                    {
+                        sbFields.Append($@"
+				{{
+					title: '{label}',
+					key: '{newname}',
+					type: 'switch'
+				}},");
+
+                    }
+                    else if (checktype.IsEnum())
+                    {
+                        if (!sbImports.ToString().Contains($@"{item.FieldName}Types,"))
+                        {
+                            sbImports.Append($@"{item.FieldName}Types,");
+                        }
+                        sbFields.Append($@"
+				{{
+					title: '{label}',
+					key: '{newname}',
+					type: 'radio',
+					props: {{
+						items: {item.FieldName}Types,
+					}}
+				}},");
+
+                    }
+
+                    else if (checktype == typeof(DateTime))
+                    {
+                        sbFields.Append($@"
+				{{
+					title: '{label}',
+					key: '{newname}',
+					type: 'datePicker'
+				}},");
+                    }
+                    //一对多 --select 单选
+                    else if (item.InfoType == FieldInfoType.One2Many)
+                    {
+                        var subtype = Type.GetType(item.LinkedType);
+                        var subpros = subtype.GetProperties();
+                        if (subpros.Where(x => x.Name == "Parent").Any() && subpros.Where(x => x.Name == "Children").Any())
+                        {
+                            sbFields.Append($@"
+				{{
+					title: '{label}',
 					key: '{item.FieldName}Id',
 					type: 'treeSelect',
 					props: {{
@@ -839,7 +926,7 @@ namespace KnifeZ.Virgo.Mvc
                         {
                             sbFields.Append($@"
 				{{
-					title: '{item.FieldDes.Replace("(一对多)", "")}',
+					title: '{label}',
 					key: '{item.FieldName}Id',
 					type: 'select',
 					props: {{
@@ -860,7 +947,7 @@ namespace KnifeZ.Virgo.Mvc
                         {
                             sbFields.Append($@"
 				{{
-					title: '{item.FieldDes.Replace("(多对多)", "")}',
+					title: '{label}',
 					key: '{item.FieldName}',
 					type: 'treeSelect',
 					props: {{
@@ -874,7 +961,7 @@ namespace KnifeZ.Virgo.Mvc
                         {
                             sbFields.Append($@"
 				{{
-					title: '{item.FieldDes.Replace("(多对多)", "")}',
+					title: '{label}',
 					key: '{item.FieldName}',
 					type: 'select',
 					props: {{
@@ -897,16 +984,24 @@ namespace KnifeZ.Virgo.Mvc
 
                     }
                 }
+
             }
             if (name == "index")
             {
-                rv = rv.Replace("$queryInfo$", sbQueryInfos.ToString())
-                    .Replace("$queryItems$", sbQueryItems.ToString())
+                rv = rv.Replace("$queryFields$", sbQueryFields.ToString())
                     .Replace("$columns$", sbColumns.ToString());
             }
             if (name == "views.dialog-form")
             {
                 rv = rv.Replace("$fields$", sbFields.ToString());
+                if (fields.Count(x => x.IsFormField) > 6)
+                {
+                    rv = rv.Replace("$isDialog$", "false");
+                }
+                else
+                {
+                    rv = rv.Replace("$isDialog$", "true");
+                }
             }
             if (name == "api.index")
             {

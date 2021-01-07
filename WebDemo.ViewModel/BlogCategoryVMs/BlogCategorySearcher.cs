@@ -15,6 +15,8 @@ namespace WebDemo.ViewModel.BlogCategoryVMs
     {
         [Display(Name = "类别名称")]
         public String Name { get; set; }
+        [Display(Name = "静态地址")]
+        public String Url { get; set; }
 
         protected override void InitVM()
         {
