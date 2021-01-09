@@ -15,7 +15,7 @@ namespace WebDemo.Controllers
 {
     
     [AuthorizeJwtWithCookie]
-    [ActionDescription("博客类别管理")]
+    [ActionDescription("类别管理")]
     [ApiController]
     [Route("api/[controller]")]
     public class BlogCategoryController : BaseApiController
@@ -35,7 +35,7 @@ namespace WebDemo.Controllers
         [HttpGet("{id}")]
         public BlogCategoryVM Get (Guid id)
         {
-            var vm =KnifeVirgo.CreateVM <BlogCategoryVM > (id);
+            var vm = KnifeVirgo.CreateVM <BlogCategoryVM > (id);
             return vm;
         }
 
@@ -83,8 +83,7 @@ namespace WebDemo.Controllers
                 }
             }
         }
-
-        [HttpPost("BatchDelete")]
+                [HttpPost("BatchDelete")]
         [ActionDescription("Delete")]
         public IActionResult BatchDelete (string[] ids)
         {
@@ -167,7 +166,7 @@ namespace WebDemo.Controllers
         [HttpGet("[action]")]
         public ActionResult GetBlogCategoryList()
         {
-            return Ok(KnifeVirgo.DC.Set<BlogCategory>().GetSelectListItems(KnifeVirgo, null, x => x.Name));
+            return Ok(KnifeVirgo.DC.Set<BlogCategory>().GetSelectListItems(KnifeVirgo, x => x.Name));
         }
 
     }

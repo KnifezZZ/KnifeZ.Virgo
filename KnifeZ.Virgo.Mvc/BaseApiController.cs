@@ -84,7 +84,7 @@ namespace KnifeZ.Virgo.Mvc
         /// <param name="prefix">prefix</param>
         /// <returns>true if success</returns>
         [NonAction]
-        public bool RedoUpdateModel (object vm, string prefix = null)
+        public static bool RedoUpdateModel (object vm, string prefix = null)
         {
             try
             {
@@ -102,7 +102,7 @@ namespace KnifeZ.Virgo.Mvc
         }
         #endregion
 
-        protected JsonResult JsonMore (object data, int statusCode = StatusCodes.Status200OK, string msg = "success")
+        protected static JsonResult JsonMore (object data, int statusCode = StatusCodes.Status200OK, string msg = "success")
         {
             return new JsonResult(new JsonResultT<object> { Msg = msg, Code = statusCode, Data = data });
         }

@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using KnifeZ.Virgo.Core;
 using KnifeZ.Virgo.Core.Extensions;
+using KnifeZ.Virgo.Core.Support.Json;
 
 namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
 {
@@ -20,6 +21,7 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
         [Display(Name = "AllowedRole")]
         public List<Guid> SelectedRolesIDs { get; set; }
 
+        public List<SimpleModule> SimpleModules { get => KnifeVirgo?.GlobaInfo?.AllModule; }
 
         public FrameworkMenuVM2()
         {
@@ -33,12 +35,11 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
             var data = DC.Set<FrameworkMenu>().ToList();
             var topMenu = data.Where(x => x.ParentId == null).ToList().FlatTree(x => x.DisplayOrder);
             var pids = Entity.GetAllChildrenIDs(DC);
-            var modules = KnifeVirgo.GlobaInfo.AllModule;
 
             if (Entity.Url != null && Entity.IsInside == true)
             {
-                SelectedModule = modules.Where(x => x.IsApi == true && x.FullName == Entity.ClassName).FirstOrDefault().FullName;
-                var urls = modules.Where(x => x.FullName == SelectedModule && x.IsApi == true).SelectMany(x => x.Actions).Where(x => x.IgnorePrivillege == false).Select(x => x.Url).ToList();
+                SelectedModule = SimpleModules.Where(x => x.IsApi == true && x.FullName == Entity.ClassName).FirstOrDefault().FullName;
+                var urls = SimpleModules.Where(x => x.FullName == SelectedModule && x.IsApi == true).SelectMany(x => x.Actions).Where(x => x.IgnorePrivillege == false).Select(x => x.Url).ToList();
                 SelectedActionIDs = DC.Set<FrameworkMenu>().Where(x => urls.Contains(x.Url) && x.IsInside == true && x.FolderOnly == false).Select(x => x.MethodName).ToList();
             }
         }
@@ -47,7 +48,6 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
         {
             if (Entity.IsInside == true && Entity.FolderOnly == false)
             {
-                var modules = KnifeVirgo.GlobaInfo.AllModule;
                 var test = DC.Set<FrameworkMenu>().Where(x => x.ClassName == this.SelectedModule && string.IsNullOrEmpty(x.MethodName) && x.ID != Entity.ID).FirstOrDefault();
                 if (test != null)
                 {
@@ -90,10 +90,9 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
 
                 if (string.IsNullOrEmpty(SelectedModule) == false && Entity.FolderOnly == false)
                 {
-                    var modules = KnifeVirgo.GlobaInfo.AllModule;
                     var ndc = DC.ReCreate();
                     var actionsInDB = DC.Set<FrameworkMenu>().AsNoTracking().Where(x => x.ParentId == Entity.ID).ToList();
-                    var mo = modules.Where(x => x.FullName == this.SelectedModule && x.IsApi == true).FirstOrDefault();
+                    var mo = SimpleModules.Where(x => x.FullName == this.SelectedModule && x.IsApi == true).FirstOrDefault();
                     Entity.ModuleName = mo.ModuleName;
                     Entity.ClassName = mo.FullName;
                     Entity.MethodName = null;
@@ -182,9 +181,8 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
                 }
                 if (string.IsNullOrEmpty(SelectedModule) == false && Entity.FolderOnly == false)
                 {
-                    var modules = KnifeVirgo.GlobaInfo.AllModule;
 
-                    var mo = modules.Where(x => x.FullName == this.SelectedModule && x.IsApi == true).FirstOrDefault();
+                    var mo = SimpleModules.Where(x => x.FullName == this.SelectedModule && x.IsApi == true).FirstOrDefault();
                     Entity.ModuleName = mo.ModuleName;
                     Entity.ClassName = mo.FullName;
                     Entity.MethodName = null;

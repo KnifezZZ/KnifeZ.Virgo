@@ -20,7 +20,7 @@ namespace WebDemo.ViewModel.BlogCategoryVMs
         public ExcelPropety Icon_Excel = ExcelPropety.CreateProperty<BlogCategory>(x => x.Icon);
         [Display(Name = "类别名称")]
         public ExcelPropety Name_Excel = ExcelPropety.CreateProperty<BlogCategory>(x => x.Name);
-        [Display(Name = "所属类别")]
+        [Display(Name = "Parent")]
         public ExcelPropety Parent_Excel = ExcelPropety.CreateProperty<BlogCategory>(x => x.ParentId);
         [Display(Name = "排序")]
         public ExcelPropety Sort_Excel = ExcelPropety.CreateProperty<BlogCategory>(x => x.Sort);
@@ -30,7 +30,7 @@ namespace WebDemo.ViewModel.BlogCategoryVMs
 	    protected override void InitVM()
         {
             Parent_Excel.DataType = ColumnDataType.ComboBox;
-            Parent_Excel.ListItems = DC.Set<BlogCategory>().GetSelectListItems(KnifeVirgo, null, y => y.Name);
+            Parent_Excel.ListItems = DC.Set<BlogCategory>().GetSelectListItems(KnifeVirgo, y => y.Name);
         }
 
     }

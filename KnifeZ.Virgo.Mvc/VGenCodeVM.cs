@@ -386,7 +386,7 @@ namespace KnifeZ.Virgo.Mvc
         [HttpGet(""[action]"")]
         public ActionResult Get{subtype.Name}List()
         {{
-            return Ok(KnifeVirgo.DC.Set<{subtype.Name}>().GetSelectListItems(KnifeVirgo, null, x => x.{item.SubField}));
+            return Ok(KnifeVirgo.DC.Set<{subtype.Name}>().GetSelectListItems(KnifeVirgo, x => x.{item.SubField}));
         }}");
                     }
                 }
@@ -610,7 +610,7 @@ namespace KnifeZ.Virgo.Mvc
                     prostr += $@"
         public List<ComboSelectListItem> {fname} {{ get; set; }}";
                     initstr += $@"
-            {fname} = DC.Set<{subtype.Name}>().GetSelectListItems(KnifeVirgo, null, y => y.{pro.SubField});";
+            {fname} = DC.Set<{subtype.Name}>().GetSelectListItems(KnifeVirgo, y => y.{pro.SubField});";
                     includestr += $@"
             SetInclude(x => x.{pro.FieldName});";
 
@@ -668,7 +668,7 @@ namespace KnifeZ.Virgo.Mvc
                         }
                         initstr += $@"
             {pro.FieldName + "_Excel"}.DataType = ColumnDataType.ComboBox;
-            {pro.FieldName + "_Excel"}.ListItems = DC.Set<{subtype.Name}>().GetSelectListItems(KnifeVirgo, null, y => y.{pro.SubField});";
+            {pro.FieldName + "_Excel"}.ListItems = DC.Set<{subtype.Name}>().GetSelectListItems(KnifeVirgo, y => y.{pro.SubField});";
                     }
                     var proType = modelType.GetProperties().Where(x => x.Name == pro.FieldName).FirstOrDefault();
                     var display = proType.GetCustomAttribute<DisplayAttribute>();
@@ -821,7 +821,7 @@ namespace KnifeZ.Virgo.Mvc
 					props: {{
 						treeCheckable: true,
 						items: [],
-						loadData: apiEvents.get{subtype.Name}ListData,
+						loadData: apiEvents.get{subtype.Name}List,
 					}}
 				}},");
                         }
@@ -835,7 +835,7 @@ namespace KnifeZ.Virgo.Mvc
 					props: {{
 						mode: 'multiple',
 						items: [],
-						loadData: apiEvents.get{subtype.Name}ListData,
+						loadData: apiEvents.get{subtype.Name}List,
 					}}
 				}},");
 
@@ -905,7 +905,7 @@ namespace KnifeZ.Virgo.Mvc
 					type: 'treeSelect',
 					props: {{
 						items: [],
-						loadData: apiEvents.get{subtype.Name}ListData,
+						loadData: apiEvents.get{subtype.Name}List,
 					}}
 				}},");
                         }
@@ -919,7 +919,7 @@ namespace KnifeZ.Virgo.Mvc
 					props: {{
 						mode: 'default',
 						items: [],
-						loadData: apiEvents.get{subtype.Name}ListData,
+						loadData: apiEvents.get{subtype.Name}List,
 					}}
 				}},");
 
@@ -940,7 +940,7 @@ namespace KnifeZ.Virgo.Mvc
 					props: {{
 						treeCheckable: true,
 						items: [],
-						loadData: apiEvents.get{subtype.Name}ListData,
+						loadData: apiEvents.get{subtype.Name}List,
 					}}
 				}},");
                         }
@@ -954,7 +954,7 @@ namespace KnifeZ.Virgo.Mvc
 					props: {{
 						mode: 'multiple',
 						items: [],
-						loadData: apiEvents.get{subtype.Name}ListData,
+						loadData: apiEvents.get{subtype.Name}List,
 					}}
 				}},");
 
@@ -1156,11 +1156,11 @@ namespace KnifeZ.Virgo.Mvc
                 }
             }
 
-            for (int i = 0; i < lv.Count(); i++)
+            for (int i = 0; i < lv.Count; i++)
             {
                 if (ignoreField.Contains(lv[i].FieldName))
                 {
-                    for (int j = i; j < lv.Count(); j++)
+                    for (int j = i; j < lv.Count; j++)
                     {
                         lv[j].Index--;
                     }
@@ -1172,7 +1172,7 @@ namespace KnifeZ.Virgo.Mvc
             return res;
         }
         //获取关联表字段
-        private List<ComboSelectListItem> GetLinkFields (string linkedType)
+        private static List<ComboSelectListItem> GetLinkFields (string linkedType)
         {
             if (string.IsNullOrEmpty(linkedType) == false)
             {

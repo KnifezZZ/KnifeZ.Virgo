@@ -284,7 +284,7 @@ namespace KnifeZ.Virgo.Mvc
                         model.Actions.Add(action);
                     }
                 }
-                if (model.Actions != null && model.Actions.Count() > 0)
+                if (model.Actions != null && model.Actions.Count > 0)
                 {
                     if (areaattr.Length > 0)
                     {
@@ -595,7 +595,7 @@ namespace KnifeZ.Virgo.Mvc
                         Type = ReferenceType.SecurityScheme,
                         Id = "Bearer"
                     }
-                }, new string[] { });
+                }, Array.Empty<string>());
                 c.AddSecurityRequirement(sr);
                 c.SchemaFilter<SwaggerFilter>();
             });

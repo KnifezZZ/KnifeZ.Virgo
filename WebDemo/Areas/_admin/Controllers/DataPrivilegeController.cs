@@ -133,7 +133,7 @@ namespace KnifeZ.Virgo.Admin.Api
         [HttpGet("[action]")]
         public ActionResult GetUserGroups()
         {
-            var rv = KnifeVirgo.DC.Set<FrameworkGroup>().GetSelectListItems(KnifeVirgo, null, x => x.GroupName);
+            var rv = KnifeVirgo.DC.Set<FrameworkGroup>().GetSelectListItems(KnifeVirgo, x => x.GroupName);
             return Ok(rv);
         }
     }

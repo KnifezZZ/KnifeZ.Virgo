@@ -85,7 +85,7 @@ namespace KnifeZ.Virgo.Admin.Api
         public async Task<IActionResult> BatchDelete(string[] ids)
         {
             var vm = KnifeVirgo.CreateVM<FrameworkUserBatchVM>();
-            if (ids != null && ids.Count() > 0)
+            if (ids != null && ids.Length > 0)
             {
                 vm.Ids = ids;
             }
@@ -106,7 +106,7 @@ namespace KnifeZ.Virgo.Admin.Api
                 }
                 var userids =KnifeVirgo.DC.Set<FrameworkUserBase>().Where(x => tempids.Contains(x.ID)).Select(x => x.ID.ToString()).ToArray();
                 await KnifeVirgo.RemoveUserCache(userids);
-                return Ok(ids.Count());
+                return Ok(ids.Length);
             }
         }
 
@@ -125,7 +125,7 @@ namespace KnifeZ.Virgo.Admin.Api
         public IActionResult ExportExcelByIds(string[] ids)
         {
             var vm = KnifeVirgo.CreateVM<FrameworkUserListVM>();
-            if (ids != null && ids.Count() > 0)
+            if (ids != null && ids.Length > 0)
             {
                 vm.Ids = new List<string>(ids);
                 vm.SearcherMode = ListVMSearchModeEnum.CheckExport;
@@ -170,14 +170,14 @@ namespace KnifeZ.Virgo.Admin.Api
         [ActionDescription("GetRoles")]
         public ActionResult GetFrameworkRoles()
         {
-            return Ok(KnifeVirgo.DC.Set<FrameworkRole>().GetSelectListItems(KnifeVirgo, null, x => x.RoleName));
+            return Ok(KnifeVirgo.DC.Set<FrameworkRole>().GetSelectListItems(KnifeVirgo, x => x.RoleName));
         }
 
         [HttpGet("GetFrameworkGroups")]
         [ActionDescription("GetGroups")]
         public ActionResult GetFrameworkGroups()
         {
-            return Ok(KnifeVirgo.DC.Set<FrameworkGroup>().GetSelectListItems(KnifeVirgo, null, x => x.GroupName));
+            return Ok(KnifeVirgo.DC.Set<FrameworkGroup>().GetSelectListItems(KnifeVirgo, x => x.GroupName));
         }
 
     }

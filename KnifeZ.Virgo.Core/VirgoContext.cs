@@ -506,7 +506,7 @@ namespace KnifeZ.Virgo.Core
             //if viewmodel is derrived from IBaseBatchVM<>，set ViewMode's Ids property,and init it's ListVM and EditModel properties
             if (rv is IBaseBatchVM<BaseVM> temp)
             {
-                temp.Ids = new string[] { };
+                temp.Ids = Array.Empty<string>();
                 if (Ids != null)
                 {
                     var tempids = new List<string>();
@@ -583,14 +583,14 @@ namespace KnifeZ.Virgo.Core
         /// Create a ViewModel, and pass Session,cache,dc...etc to the viewmodel
         /// </summary>
         /// <typeparam name="T">The type of the viewmodelThe type of the viewmodel</typeparam>
-        /// <param name="values">use Lambda to set viewmodel's properties,use && for multiply properties, for example Wtm.CreateVM<Test>(values: x=>x.Field1=='a' && x.Field2 == 'b'); will set viewmodel's Field1 to 'a' and Field2 to 'b'</param>
+        /// <param name="values">use Lambda to set viewmodel's properties,use && for multiply properties, for example CreateVM<Test>(values: x=>x.Field1=='a' && x.Field2 == 'b'); will set viewmodel's Field1 to 'a' and Field2 to 'b'</param>
         /// <param name="passInit">if true, the viewmodel will not call InitVM internally</param>
         /// <returns>ViewModel</returns>
         public T CreateVM<T> (Expression<Func<T, object>> values = null, bool passInit = false) where T : BaseVM
         {
             SetValuesParser p = new SetValuesParser();
             var dir = p.Parse(values);
-            return CreateVM(typeof(T), null, new object[] { }, dir, passInit) as T;
+            return CreateVM(typeof(T), null, Array.Empty<object>(), dir, passInit) as T;
         }
 
         /// <summary>
@@ -605,7 +605,7 @@ namespace KnifeZ.Virgo.Core
         {
             SetValuesParser p = new SetValuesParser();
             var dir = p.Parse(values);
-            return CreateVM(typeof(T), Id, new object[] { }, dir, passInit) as T;
+            return CreateVM(typeof(T), Id, Array.Empty<object>(), dir, passInit) as T;
         }
 
         /// <summary>
@@ -613,7 +613,7 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <typeparam name="T">The type of the viewmodelThe type of the viewmodel</typeparam>
         /// <param name="Ids">If the viewmodel is a BatchVM, the BatchVM's Ids property will be assigned</param>
-        /// <param name="values">use Lambda to set viewmodel's properties,use && for multiply properties, for example Wtm.CreateVM<Test>(values: x=>x.Field1=='a' && x.Field2 == 'b'); will set viewmodel's Field1 to 'a' and Field2 to 'b'</param>
+        /// <param name="values">use Lambda to set viewmodel's properties,use && for multiply properties, for example CreateVM<Test>(values: x=>x.Field1=='a' && x.Field2 == 'b'); will set viewmodel's Field1 to 'a' and Field2 to 'b'</param>
         /// <param name="passInit">if true, the viewmodel will not call InitVM internally</param>
         /// <returns>ViewModel</returns>
         public T CreateVM<T> (object[] Ids, Expression<Func<T, object>> values = null, bool passInit = false) where T : BaseVM
@@ -629,7 +629,7 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <typeparam name="T">The type of the viewmodelThe type of the viewmodel</typeparam>
         /// <param name="Ids">If the viewmodel is a BatchVM, the BatchVM's Ids property will be assigned</param>
-        /// <param name="values">use Lambda to set viewmodel's properties,use && for multiply properties, for example Wtm.CreateVM<Test>(values: x=>x.Field1=='a' && x.Field2 == 'b'); will set viewmodel's Field1 to 'a' and Field2 to 'b'</param>
+        /// <param name="values">use Lambda to set viewmodel's properties,use && for multiply properties, for example CreateVM<Test>(values: x=>x.Field1=='a' && x.Field2 == 'b'); will set viewmodel's Field1 to 'a' and Field2 to 'b'</param>
         /// <param name="passInit">if true, the viewmodel will not call InitVM internally</param>
         /// <returns>ViewModel</returns>
         public T CreateVM<T> (Guid[] Ids, Expression<Func<T, object>> values = null, bool passInit = false) where T : BaseVM
@@ -644,7 +644,7 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <typeparam name="T">The type of the viewmodelThe type of the viewmodel</typeparam>
         /// <param name="Ids">If the viewmodel is a BatchVM, the BatchVM's Ids property will be assigned</param>
-        /// <param name="values">use Lambda to set viewmodel's properties,use && for multiply properties, for example Wtm.CreateVM<Test>(values: x=>x.Field1=='a' && x.Field2 == 'b'); will set viewmodel's Field1 to 'a' and Field2 to 'b'</param>
+        /// <param name="values">use Lambda to set viewmodel's properties,use && for multiply properties, for example CreateVM<Test>(values: x=>x.Field1=='a' && x.Field2 == 'b'); will set viewmodel's Field1 to 'a' and Field2 to 'b'</param>
         /// <param name="passInit">if true, the viewmodel will not call InitVM internally</param>
         /// <returns>ViewModel</returns>
         public T CreateVM<T> (int[] Ids, Expression<Func<T, object>> values = null, bool passInit = false) where T : BaseVM
@@ -659,7 +659,7 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <typeparam name="T">The type of the viewmodelThe type of the viewmodel</typeparam>
         /// <param name="Ids">If the viewmodel is a BatchVM, the BatchVM's Ids property will be assigned</param>
-        /// <param name="values">use Lambda to set viewmodel's properties,use && for multiply properties, for example Wtm.CreateVM<Test>(values: x=>x.Field1=='a' && x.Field2 == 'b'); will set viewmodel's Field1 to 'a' and Field2 to 'b'</param>
+        /// <param name="values">use Lambda to set viewmodel's properties,use && for multiply properties, for example CreateVM<Test>(values: x=>x.Field1=='a' && x.Field2 == 'b'); will set viewmodel's Field1 to 'a' and Field2 to 'b'</param>
         /// <param name="passInit">if true, the viewmodel will not call InitVM internally</param>
         /// <returns>ViewModel</returns>
         public T CreateVM<T> (long[] Ids, Expression<Func<T, object>> values = null, bool passInit = false) where T : BaseVM
@@ -673,7 +673,7 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <typeparam name="T">The type of the viewmodelThe type of the viewmodel</typeparam>
         /// <param name="Ids">If the viewmodel is a BatchVM, the BatchVM's Ids property will be assigned</param>
-        /// <param name="values">use Lambda to set viewmodel's properties,use && for multiply properties, for example Wtm.CreateVM<Test>(values: x=>x.Field1=='a' && x.Field2 == 'b'); will set viewmodel's Field1 to 'a' and Field2 to 'b'</param>
+        /// <param name="values">use Lambda to set viewmodel's properties,use && for multiply properties, for example CreateVM<Test>(values: x=>x.Field1=='a' && x.Field2 == 'b'); will set viewmodel's Field1 to 'a' and Field2 to 'b'</param>
         /// <param name="passInit">if true, the viewmodel will not call InitVM internally</param>
         /// <returns>ViewModel</returns>
         public T CreateVM<T> (string[] Ids, Expression<Func<T, object>> values = null, bool passInit = false) where T : BaseVM

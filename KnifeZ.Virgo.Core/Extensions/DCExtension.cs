@@ -26,7 +26,7 @@ namespace KnifeZ.Virgo.Core.Extensions
         /// </summary>
         /// <typeparam name="T">数据源类型</typeparam>
         /// <param name="baseQuery">基础查询</param>
-        /// <param name="knifeVirgo">wtm context</param>
+        /// <param name="knifeVirgo">context</param>
         /// <param name="whereCondition">条件语句</param>
         /// <param name="textField">表达式用来获取Text字段对应的值</param>
         /// <param name="valueField">表达式用来获取Value字段对应的值，不指定则默认使用Id字段</param>
@@ -223,7 +223,7 @@ namespace KnifeZ.Virgo.Core.Extensions
             if (typeof(TreePoco<>).IsAssignableFrom(typeof(T)))
             {
                 var parentMember = Expression.MakeMemberAccess(pe, typeof(TreePoco<>).GetSingleProperty("ParentId"));
-                var p = Expression.Call(parentMember, "ToString", new Type[] { });
+                var p = Expression.Call(parentMember, "ToString", Array.Empty<Type>());
                 //var p1 = Expression.Call(p, "ToLower", new Type[] { });
                 parentBind = Expression.Bind(parentMI, p);
             }
@@ -314,7 +314,7 @@ namespace KnifeZ.Virgo.Core.Extensions
                 //将外键 Id 用.分割，循环生成指向最终id的表达式，比如x=> x.a.b.Id
                 var fieldName = IdField.GetPropertyName(false);
                 //获取关联的类
-                string typename = "";
+                string typename;
                 //如果外键名称不是‘id’，则根据model层的命名规则，它应该是xxxId，所以抹掉最后的 Id 应该是关联的类名
                 if (fieldName.ToLower() != "id")
                 {
@@ -339,7 +339,7 @@ namespace KnifeZ.Virgo.Core.Extensions
         /// </summary>
         /// <typeparam name="T">源数据类</typeparam>
         /// <param name="baseQuery">源Query</param>
-        /// <param name="knifeVirgo">wtm context</param>
+        /// <param name="knifeVirgo">context</param>
         /// <param name="tableName">关联数据权限的表名,如果关联外键为自身，则参数第一个为自身</param>
         /// <param name="IdFields">关联表外键</param>
         /// <returns>修改后的查询语句</returns>
@@ -583,7 +583,7 @@ namespace KnifeZ.Virgo.Core.Extensions
         public static IQueryable<T> CheckID<T> (this IQueryable<T> baseQuery, object val, MemberExpression member = null)
         {
             ParameterExpression pe = Expression.Parameter(typeof(T));
-            PropertyInfo idproperty = null;
+            PropertyInfo idproperty;
             if (member == null)
             {
                 idproperty = typeof(T).GetSingleProperty("ID");
@@ -756,8 +756,7 @@ where S : struct
             }
             else
             {
-                Expression exp = null;
-                exp = Expression.Call(Expression.Constant(val), "Contains", null, field.Body);
+                Expression exp = Expression.Call(Expression.Constant(val), "Contains", null, field.Body);
 
                 var where = Expression.Lambda<Func<T, bool>>(exp, field.Parameters[0]);
                 return baseQuery.Where(where);

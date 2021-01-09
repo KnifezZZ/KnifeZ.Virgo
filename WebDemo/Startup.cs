@@ -70,9 +70,9 @@ namespace WebDemo
             {
                 options.JsonSerializerOptions.PropertyNamingPolicy = null;
                 options.JsonSerializerOptions.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(UnicodeRanges.All);
-                options.JsonSerializerOptions.NumberHandling =
-                    JsonNumberHandling.AllowReadingFromString |
-                    JsonNumberHandling.WriteAsString;
+                //options.JsonSerializerOptions.NumberHandling =
+                //    JsonNumberHandling.AllowReadingFromString |
+                //    JsonNumberHandling.WriteAsString;
                 //options.JsonSerializerOptions.Converters.Add(new StringIgnoreLTGTConverter());
                 options.JsonSerializerOptions.Converters.Add(new DateRangeConverter());
             })
@@ -89,10 +89,6 @@ namespace WebDemo
             .AddVirgoDataAnnotationsLocalization(typeof(Program));
 
             services.AddVirgoContext(ConfigRoot, x => x.DataPrivileges = DataPrivilegeSettings());
-
-            //List<IDataPrivilege> pris = new List<IDataPrivilege>();
-
-            //new DataPrivilegeInfo<Model.Base_WebSite>("¹ÜÀíÕ¾µã", y => y.Name)
 
         }
 
@@ -123,7 +119,6 @@ namespace WebDemo
 
             app.UseVirgoSwagger(false);
             app.UseVirgo();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

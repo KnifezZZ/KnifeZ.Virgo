@@ -45,7 +45,7 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
 
         public List<ComboSelectListItem> GetUsers(string text)
         {
-            var d = DC.Set<FrameworkUserBase>().Where(x => x.ITCode.ToLower().Contains(text.ToLower())).GetSelectListItems(KnifeVirgo, null, x => x.ITCode);
+            var d = DC.Set<FrameworkUserBase>().Where(x => x.ITCode.ToLower().Contains(text.ToLower())).GetSelectListItems(KnifeVirgo, x => x.ITCode);
             return d;
         }
 

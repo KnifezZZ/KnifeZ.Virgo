@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
@@ -8,10 +7,11 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using KnifeZ.Virgo.Core;
 using KnifeZ.Virgo.Core.Auth;
 using KnifeZ.Virgo.Core.Extensions;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace KnifeZ.Virgo.Mvc.Auth
 {
@@ -110,7 +110,7 @@ namespace KnifeZ.Virgo.Mvc.Auth
                 };
 
                 // 清理过期 refreshtoken
-                var sql = $"DELETE FROM {DC.GetTableName<PersistedGrant>()} WHERE Expiration<'{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff")}'";
+                var sql = $"DELETE FROM {DC.GetTableName<PersistedGrant>()} WHERE Expiration<'{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}'";
                 _dc.RunSQL(sql);
                 _logger.LogDebug("清理过期的refreshToken：【sql:{0}】", sql);
 

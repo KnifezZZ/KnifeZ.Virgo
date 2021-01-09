@@ -23,7 +23,7 @@ namespace WebDemo.ViewModel.BlogCategoryVMs
                 this.MakeGridHeader(x => x.Name),
                 this.MakeGridHeader(x => x.BlogCategory_Name),
                 this.MakeGridHeader(x => x.Sort),
-                this.MakeGridHeader(x => x.Url)
+                this.MakeGridHeader(x => x.Url),
             };
         }
 

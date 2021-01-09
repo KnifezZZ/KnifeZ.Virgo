@@ -36,15 +36,19 @@ namespace KnifeZ.Virgo.Core
         public bool IsValid { get; set; }
 
         [Display(Name = "Role")]
+        [JsonIgnore]
         public List<FrameworkUserRole> UserRoles { get; set; }
 
         [Display(Name = "Group")]
+
+        [JsonIgnore]
         public List<FrameworkUserGroup> UserGroups { get; set; }
 
         [Display(Name = "Photo")]
         public Guid? PhotoId { get; set; }
 
         [Display(Name = "Photo")]
+        [JsonIgnore]
         public FileAttachment Photo { get; set; }
 
     }

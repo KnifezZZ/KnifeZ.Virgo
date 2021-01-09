@@ -22,43 +22,36 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkUserVms
         public List<Guid> SelectedGroupIDs { get; set; }
 
 
-        public FrameworkUserVM()
+        public FrameworkUserVM ()
         {
-            SetInclude(x => x.UserRoles, x=>x.UserGroups);
+            SetInclude(x => x.UserRoles, x => x.UserGroups);
         }
 
         /// <summary>
         /// 验证重复字段
         /// </summary>
         /// <returns></returns>
-        public override DuplicatedInfo<FrameworkUser> SetDuplicatedCheck()
+        public override DuplicatedInfo<FrameworkUser> SetDuplicatedCheck ()
         {
             var rv = CreateFieldsInfo(SimpleField(x => x.ITCode));
             return rv;
         }
 
-        protected override void InitVM()
+        protected override void InitVM ()
         {
-            if (ControllerName.Contains("/api") == false)
-            {
-                SelectedRolesIDs = Entity.UserRoles.Select(x => x.RoleId).ToList();
-                AllRoles = DC.Set<FrameworkRole>().GetSelectListItems(KnifeVirgo, y => y.RoleName);
-                SelectedGroupIDs = Entity.UserGroups.Select(x => x.GroupId).ToList();
-                AllGroups = DC.Set<FrameworkGroup>().GetSelectListItems(KnifeVirgo, y => y.GroupName);
-            }
-
+            SelectedRolesIDs = Entity.UserRoles.Select(x => x.RoleId).ToList();
+            AllRoles = DC.Set<FrameworkRole>().GetSelectListItems(KnifeVirgo, y => y.RoleName);
+            SelectedGroupIDs = Entity.UserGroups.Select(x => x.GroupId).ToList();
+            AllGroups = DC.Set<FrameworkGroup>().GetSelectListItems(KnifeVirgo, y => y.GroupName);
         }
 
-        protected override void ReInitVM()
+        protected override void ReInitVM ()
         {
-            if (ControllerName.Contains("/api") == false)
-            {
-                AllRoles = DC.Set<FrameworkRole>().GetSelectListItems(KnifeVirgo, y => y.RoleName);
-                AllGroups = DC.Set<FrameworkGroup>().GetSelectListItems(KnifeVirgo, y => y.GroupName);
-            }
+            AllRoles = DC.Set<FrameworkRole>().GetSelectListItems(KnifeVirgo, y => y.RoleName);
+            AllGroups = DC.Set<FrameworkGroup>().GetSelectListItems(KnifeVirgo, y => y.GroupName);
         }
 
-        public override async Task DoAddAsync()
+        public override async Task DoAddAsync ()
         {
             if (ControllerName.Contains("/api") == false)
             {
@@ -84,34 +77,31 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkUserVms
             await base.DoAddAsync();
         }
 
-        public override async Task DoEditAsync(bool updateAllFields = false)
+        public override async Task DoEditAsync (bool updateAllFields = false)
         {
-            if (ControllerName.Contains("/api") == false)
+            FC.TryAdd("Entity.UserRoles", 0);
+            FC.TryAdd("Entity.UserGroups", 0);
+            Entity.UserRoles = new List<FrameworkUserRole>();
+            Entity.UserGroups = new List<FrameworkUserGroup>();
+            if (SelectedRolesIDs != null)
             {
-                FC.TryAdd("Entity.UserRoles", 0);
-                FC.TryAdd("Entity.UserGroups", 0);
-                Entity.UserRoles = new List<FrameworkUserRole>();
-                Entity.UserGroups = new List<FrameworkUserGroup>();
-                if (SelectedRolesIDs != null)
-                {
-                    SelectedRolesIDs.ForEach(x => Entity.UserRoles.Add(new FrameworkUserRole { ID = Guid.NewGuid(), UserId = Entity.ID, RoleId = x }));
-                }
-                if (SelectedGroupIDs != null)
-                {
-                    SelectedGroupIDs.ForEach(x => Entity.UserGroups.Add(new FrameworkUserGroup { ID = Guid.NewGuid(), UserId = Entity.ID, GroupId = x }));
-                }
+                SelectedRolesIDs.ForEach(x => Entity.UserRoles.Add(new FrameworkUserRole { ID = Guid.NewGuid(), UserId = Entity.ID, RoleId = x }));
+            }
+            if (SelectedGroupIDs != null)
+            {
+                SelectedGroupIDs.ForEach(x => Entity.UserGroups.Add(new FrameworkUserGroup { ID = Guid.NewGuid(), UserId = Entity.ID, GroupId = x }));
             }
             await base.DoEditAsync(updateAllFields);
             await KnifeVirgo.RemoveUserCache(Entity.ID.ToString());
         }
 
-        public override async Task DoDeleteAsync()
+        public override async Task DoDeleteAsync ()
         {
             await base.DoDeleteAsync();
             await KnifeVirgo.RemoveUserCache(Entity.ID.ToString());
         }
 
-        public void ChangePassword()
+        public void ChangePassword ()
         {
             Entity.Password = Utils.GetMD5String(Entity.Password);
             DC.UpdateProperty(Entity, x => x.Password);

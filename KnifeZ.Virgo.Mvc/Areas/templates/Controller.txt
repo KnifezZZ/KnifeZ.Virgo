@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
 using KnifeZ.Virgo.Core;
-using KnifeZ.Virgo.Core.Auth.Attribute;
 using KnifeZ.Virgo.Core.Extensions;
 using KnifeZ.Virgo.Mvc;
 
@@ -27,7 +26,7 @@ namespace $namespace$
         [HttpPost("[action]")]
         public string Search ($controllername$Searcher searcher)
         {
-            var vm = CreateVM <$controllername$ListVM > ();
+            var vm = KnifeVirgo.CreateVM <$controllername$ListVM > ();
             vm.Searcher = searcher;
             return vm.GetJson();
         }
@@ -36,7 +35,7 @@ namespace $namespace$
         [HttpGet("{id}")]
         public $controllername$VM Get (Guid id)
         {
-            var vm = CreateVM <$controllername$VM > (id);
+            var vm = KnifeVirgo.CreateVM <$controllername$VM > (id);
             return vm;
         }
 
@@ -111,7 +110,7 @@ namespace $namespace$
         [HttpPost("[action]")]
         public IActionResult ExportExcel ($controllername$Searcher searcher)
         {
-            var vm = CreateVM <$controllername$ListVM > ();
+            var vm = KnifeVirgo.CreateVM <$controllername$ListVM > ();
             vm.Searcher = searcher;
             vm.SearcherMode = ListVMSearchModeEnum.Export;
             return vm.GetExportData();
@@ -121,7 +120,7 @@ namespace $namespace$
         [HttpPost("[action]")]
         public IActionResult ExportExcelByIds (string[] ids)
         {
-            var vm = CreateVM <$controllername$ListVM > ();
+            var vm = KnifeVirgo.CreateVM <$controllername$ListVM > ();
             if (ids != null && ids.Length > 0)
             {
                 vm.Ids = new List<string>(ids);
@@ -134,7 +133,7 @@ namespace $namespace$
         [HttpGet("[action]")]
         public IActionResult GetExcelTemplate ()
         {
-            var vm = CreateVM <$controllername$ImportVM > ();
+            var vm = KnifeVirgo.CreateVM <$controllername$ImportVM > ();
             var qs = new Dictionary<string, string>();
             foreach (var item in Request.Query.Keys)
             {
