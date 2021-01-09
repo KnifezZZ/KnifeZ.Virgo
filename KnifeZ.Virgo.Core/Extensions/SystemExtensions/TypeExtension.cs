@@ -48,8 +48,26 @@ namespace KnifeZ.Virgo.Core.Extensions
         /// <returns>判断结果</returns>
         public static bool IsList (this Type self)
         {
-            return self.IsGeneric(typeof(List<>));
+            return self.IsGeneric(typeof(List<>)) || self.IsGeneric(typeof(IEnumerable<>));
         }
+
+        /// <summary>
+        /// 判断是否为List<>类型
+        /// </summary>
+        /// <param name="self">Type类</param>
+        /// <returns>判断结果</returns>
+        public static bool IsListOf<T> (this Type self)
+        {
+            if (self.IsGeneric(typeof(List<>)) && typeof(T).IsAssignableFrom(self.GenericTypeArguments[0]))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
 
         #region 判断是否为枚举
 
@@ -155,7 +173,7 @@ namespace KnifeZ.Virgo.Core.Extensions
         {
             Dictionary<string, string> rv = new Dictionary<string, string>();
             string pat = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
-            var pros = self.GetProperties();
+            var pros = self.GetAllProperties();
             foreach (var pro in pros)
             {
                 string key = pro.Name;
@@ -221,5 +239,24 @@ namespace KnifeZ.Virgo.Core.Extensions
             }
             return _propertyCache[self.FullName].Where(x => x.Name == name).FirstOrDefault();
         }
+
+        public static PropertyInfo GetSingleProperty (this Type self, Func<PropertyInfo, bool> where)
+        {
+            if (_propertyCache.ContainsKey(self.FullName) == false)
+            {
+                _propertyCache.Add(self.FullName, self.GetProperties().ToList());
+            }
+            return _propertyCache[self.FullName].Where(where).FirstOrDefault();
+        }
+
+        public static List<PropertyInfo> GetAllProperties (this Type self)
+        {
+            if (_propertyCache.ContainsKey(self.FullName) == false)
+            {
+                _propertyCache.Add(self.FullName, self.GetProperties().ToList());
+            }
+            return _propertyCache[self.FullName];
+        }
+
     }
 }

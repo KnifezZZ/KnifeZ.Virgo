@@ -24,10 +24,12 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 记录数
         /// </summary>
+        [JsonIgnore]
         public long Count { get; set; }
         /// <summary>
         /// 分页数
         /// </summary>
+        [JsonIgnore]
         public int PageCount { get; set; }
         #endregion
 
@@ -37,7 +39,8 @@ namespace KnifeZ.Virgo.Core
         [JsonIgnore]
         public Dictionary<string, object> FC { get; set; }
 
-        public IModelStateService MSD { get; set; }
+        [JsonIgnore]
+        public IModelStateService MSD { get => KnifeVirgo?.MSD; }
 
         /// <summary>
         /// 获取VM的全名
@@ -53,56 +56,56 @@ namespace KnifeZ.Virgo.Core
             }
         }
 
+        private IDataContext _dc;
         /// <summary>
         /// 数据库环境
         /// </summary>
         [JsonIgnore]
-        public IDataContext DC { get; set; }
+        public IDataContext DC
+        {
+            get
+            {
+                if (_dc == null)
+                {
+                    return KnifeVirgo?.DC;
+                }
+                else
+                {
+                    return _dc;
+                }
+            }
+            set
+            {
+                _dc = value;
+            }
+        }
 
         /// <summary>
         /// Session信息
         /// </summary>
         [JsonIgnore]
-        public ISessionService Session { get; set; }
+        public ISessionService Session { get => KnifeVirgo?.Session; }
 
         /// <summary>
         /// 当前登录人信息
         /// </summary>
         [JsonIgnore]
-        public LoginUserInfo LoginUserInfo { get; set; }
+        public LoginUserInfo LoginUserInfo { get => KnifeVirgo?.LoginUserInfo; }
 
         #region 未使用
         /// <summary>
         /// 排序信息
         /// </summary>
         public SortInfo SortInfo { get; set; }
-        /// <summary>
-        /// 是否搜索树形结构数据
-        /// </summary>
-        [JsonIgnore]
-        public bool TreeMode { get; set; }
-        /// <summary>
-        /// 树形结构数据父Id
-        /// </summary>
-        [JsonIgnore]
-        public Guid? ParentId { get; set; }
-        /// <summary>
-        /// 是否有效，针对继承PersistPoco的Model
-        /// </summary>
-        [Display(Name = "IsValid")]
-        [JsonIgnore]
-        public bool? IsValid { get; set; }
-        /// <summary>
-        /// 用于框架判断列表页是否全局刷新
-        /// </summary>
-        [JsonIgnore]
-        public bool IsPostBack { get; set; }
 
         /// <summary>
         /// 前台搜索框是否展开
         /// </summary>
         [JsonIgnore]
         public bool? IsExpanded { get; set; }
+
+        [JsonIgnore]
+        public VirgoContext KnifeVirgo { get; set; }
 
         #endregion
 
@@ -126,7 +129,7 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 调用 InitVM 并触发 OnAfterInit 事件
         /// </summary>
-        public void DoInit()
+        public void DoInit ()
         {
             InitVM();
             OnAfterInit?.Invoke(this);
@@ -135,7 +138,7 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 调用 ReInitVM 并触发 OnAfterReInit 事件
         /// </summary>
-        public void DoReInit()
+        public void DoReInit ()
         {
             ReInitVM();
             OnAfterReInit?.Invoke(this);
@@ -144,19 +147,19 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 初始化ViewModel，框架会在创建VM实例之后自动调用本函数
         /// </summary>
-        protected virtual void InitVM()
+        protected virtual void InitVM ()
         {
         }
 
         /// <summary>
         /// 从新初始化ViewModel，框架会在验证失败时自动调用本函数
         /// </summary>
-        protected virtual void ReInitVM()
+        protected virtual void ReInitVM ()
         {
             InitVM();
         }
 
-        public virtual void Validate()
+        public virtual void Validate ()
         {
 
         }
@@ -164,15 +167,10 @@ namespace KnifeZ.Virgo.Core
         /// 将源 VM 的 FC 等内容复制到本VM中
         /// </summary>
         /// <param name="vm"></param>
-        public void CopyContext(IBaseVM vm)
+        public void CopyContext (IBaseVM vm)
         {
             FC = vm.FC;
-            this.DC = vm.DC;
-            this.Session = vm.Session;
-            this.LoginUserInfo = vm.LoginUserInfo;
-            this.MSD = vm.MSD;
-            //var CurrentCS = vm.CurrentCS;
-            //var CreatorAssembly = vm.CreatorAssembly;
+            this.KnifeVirgo = vm.KnifeVirgo;
         }
 
         #endregion

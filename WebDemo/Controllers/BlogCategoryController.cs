@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
 using KnifeZ.Virgo.Core;
-using KnifeZ.Virgo.Core.Auth.Attribute;
 using KnifeZ.Virgo.Core.Extensions;
 using KnifeZ.Virgo.Mvc;
 
@@ -27,7 +26,7 @@ namespace WebDemo.Controllers
         [HttpPost("[action]")]
         public string Search (BlogCategorySearcher searcher)
         {
-            var vm = CreateVM <BlogCategoryListVM > ();
+            var vm =KnifeVirgo.CreateVM <BlogCategoryListVM > ();
             vm.Searcher = searcher;
             return vm.GetJson();
         }
@@ -36,7 +35,7 @@ namespace WebDemo.Controllers
         [HttpGet("{id}")]
         public BlogCategoryVM Get (Guid id)
         {
-            var vm = CreateVM <BlogCategoryVM > (id);
+            var vm =KnifeVirgo.CreateVM <BlogCategoryVM > (id);
             return vm;
         }
 
@@ -87,9 +86,9 @@ namespace WebDemo.Controllers
 
         [HttpPost("BatchDelete")]
         [ActionDescription("Delete")]
-        public async Task<IActionResult> BatchDelete (string[] ids)
+        public IActionResult BatchDelete (string[] ids)
         {
-            var vm = CreateVM <BlogCategoryBatchVM > ();
+            var vm = KnifeVirgo.CreateVM<BlogCategoryBatchVM>();
             if (ids != null && ids.Length > 0)
             {
                 vm.Ids = ids;
@@ -104,13 +103,6 @@ namespace WebDemo.Controllers
             }
             else
             {
-                List<Guid?> groupids = new List<Guid?>();
-                foreach (var item in vm?.Ids)
-                {
-                    groupids.Add(Guid.Parse(item));
-                }
-                var userids = DC.Set<FrameworkUserGroup>().Where(x => groupids.Contains(x.GroupId)).Select(x => x.UserId.ToString()).ToArray();
-                await LoginUserInfo.RemoveUserCache(userids);
                 return Ok(ids.Length);
             }
         }
@@ -119,7 +111,7 @@ namespace WebDemo.Controllers
         [HttpPost("[action]")]
         public IActionResult ExportExcel (BlogCategorySearcher searcher)
         {
-            var vm = CreateVM <BlogCategoryListVM > ();
+            var vm = KnifeVirgo.CreateVM <BlogCategoryListVM > ();
             vm.Searcher = searcher;
             vm.SearcherMode = ListVMSearchModeEnum.Export;
             return vm.GetExportData();
@@ -129,7 +121,7 @@ namespace WebDemo.Controllers
         [HttpPost("[action]")]
         public IActionResult ExportExcelByIds (string[] ids)
         {
-            var vm = CreateVM <BlogCategoryListVM > ();
+            var vm = KnifeVirgo.CreateVM <BlogCategoryListVM > ();
             if (ids != null && ids.Length > 0)
             {
                 vm.Ids = new List<string>(ids);
@@ -142,7 +134,7 @@ namespace WebDemo.Controllers
         [HttpGet("[action]")]
         public IActionResult GetExcelTemplate ()
         {
-            var vm = CreateVM <BlogCategoryImportVM > ();
+            var vm = KnifeVirgo.CreateVM <BlogCategoryImportVM > ();
             var qs = new Dictionary<string, string>();
             foreach (var item in Request.Query.Keys)
             {
@@ -175,7 +167,7 @@ namespace WebDemo.Controllers
         [HttpGet("[action]")]
         public ActionResult GetBlogCategoryList()
         {
-            return Ok(DC.Set<BlogCategory>().GetSelectListItems(LoginUserInfo?.DataPrivileges, null, x => x.Name));
+            return Ok(KnifeVirgo.DC.Set<BlogCategory>().GetSelectListItems(KnifeVirgo, null, x => x.Name));
         }
 
     }

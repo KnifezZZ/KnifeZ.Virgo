@@ -18,11 +18,11 @@ namespace KnifeZ.Virgo.Core
         /// <typeparam name="T">Entity类型</typeparam>
         /// <param name="table">DataTable</param>
         /// <returns>Entity列表</returns>
-        public static IList<T> GetEntityList<T>(DataTable table)
+        public static IList<T> GetEntityList<T> (DataTable table)
         {
             IList<T> entityList = new List<T>();
 
-            var properties = typeof(T).GetProperties().ToLookup(property => property.Name, property => property).ToDictionary(i => i.Key, i => i.First()).Values;
+            var properties = typeof(T).GetAllProperties().ToLookup(property => property.Name, property => property).ToDictionary(i => i.Key, i => i.First()).Values;
 
             //循环Datable中的每一行
             foreach (DataRow row in table.Rows)
@@ -77,7 +77,7 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <param name="modelList">实体类列表</param>
         /// <returns>DataSet</returns>
-        public static DataSet ToDataSet<T>(List<T> modelList) where T : new()
+        public static DataSet ToDataSet<T> (List<T> modelList) where T : new()
         {
             if (modelList == null || modelList.Count == 0)
             {
@@ -96,7 +96,7 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <param name="modelList">实体类列表</param>
         /// <returns>DataTable</returns>
-        public static DataTable ToDataTable<T>(List<T> modelList) where T : new()
+        public static DataTable ToDataTable<T> (List<T> modelList) where T : new()
         {
             if (modelList == null || modelList.Count == 0)
             {
@@ -108,7 +108,7 @@ namespace KnifeZ.Virgo.Core
             {
                 DataRow dataRow = dt.NewRow();
                 //循环实体类所有属性，给对应的DataTable字段赋值
-                foreach (PropertyInfo propertyInfo in typeof(T).GetProperties())
+                foreach (PropertyInfo propertyInfo in typeof(T).GetAllProperties())
                 {
                     var res = propertyInfo.GetValue(model);
                     dataRow[propertyInfo.Name] = res ?? DBNull.Value;
@@ -123,11 +123,10 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <param name="model">实体类</param>
         /// <returns>DataTable</returns>
-        private static DataTable CreateData<T>(T model) where T : new()
+        private static DataTable CreateData<T> (T model) where T : new()
         {
             DataTable dataTable = new DataTable(typeof(T).Name);
-            var types = typeof(T).GetProperties();
-            foreach (PropertyInfo propertyInfo in typeof(T).GetProperties())
+            foreach (PropertyInfo propertyInfo in typeof(T).GetAllProperties())
             {
                 if (propertyInfo.PropertyType.IsGenericType)
                 {

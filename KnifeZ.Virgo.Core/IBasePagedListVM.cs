@@ -18,20 +18,20 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 多级表头深度  默认 1级
         /// </summary>
-        int GetChildrenDepth();
+        int GetChildrenDepth ();
 
         /// <summary>
         /// GetHeaders
         /// </summary>
         /// <returns></returns>
 
-        IEnumerable<IGridColumn<T>> GetHeaders();
+        IEnumerable<IGridColumn<T>> GetHeaders ();
 
         /// <summary>
         /// 查询并生成Excel
         /// </summary>
         /// <returns>Excel文件</returns>
-        byte[] GenerateExcel();
+        byte[] GenerateExcel ();
 
         string TotalText { get; set; }
         #region Old
@@ -45,9 +45,9 @@ namespace KnifeZ.Virgo.Core
         /// 获取Model集合
         /// </summary>
         /// <returns>Model集合</returns>
-        IEnumerable<T> GetEntityList();
+        IEnumerable<T> GetEntityList ();
 
-        void ClearEntityList();
+        void ClearEntityList ();
         /// <summary>
         /// 获取Searcher
         /// </summary>
@@ -57,7 +57,7 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        bool GetIsSelected(object item);
+        bool GetIsSelected (object item);
 
         /// <summary>
         /// 是否已经搜索过
@@ -92,32 +92,27 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 移除操作列
         /// </summary>
-        void RemoveActionColumn(object root = null);
+        void RemoveActionColumn (object root = null);
 
         /// <summary>
         /// 填加错误信息列，用于批量操作的列表
         /// </summary>
-        void AddErrorColumn();
-
-        /// <summary>
-        /// 搜索条件Panel的Id
-        /// </summary>
-        string SearcherDivId { get; }
+        void AddErrorColumn ();
 
         /// <summary>
         /// GetSearchQuery
         /// </summary>
         /// <returns></returns>
-        IOrderedQueryable<T> GetSearchQuery();
+        IOrderedQueryable<T> GetSearchQuery ();
         /// <summary>
         /// DoSearch
         /// </summary>
-        void DoSearch();
+        void DoSearch ();
         /// <summary>
         /// CopyContext
         /// </summary>
         /// <param name="vm"></param>
-        void CopyContext(BaseVM vm);
+        void CopyContext (BaseVM vm);
 
         /// <summary>
         /// ReplaceWhere
@@ -129,22 +124,22 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        string SetFullRowColor(object entity);
+        string SetFullRowColor (object entity);
         /// <summary>
         /// SetFullRowBgColor
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        string SetFullRowBgColor(object entity);
+        string SetFullRowBgColor (object entity);
 
-        T CreateEmptyEntity();
+        T CreateEmptyEntity ();
 
         /// <summary>
         /// 用于为子表生成可编辑Grid时，内部控件名称前缀
         /// </summary>
         string DetailGridPrix { get; set; }
 
-        void DoInitListVM();
+        void DoInitListVM ();
 
         #endregion
 

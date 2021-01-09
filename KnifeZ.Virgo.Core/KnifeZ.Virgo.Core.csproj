@@ -3,17 +3,18 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.0.4</Version>
+    <Version>0.1.0</Version>
     <Description>KnifeZ's .NET5 Frameowrk</Description>
     <RepositoryUrl>https://gitee.com/KnifeZ/KnifeZ.Virgo</RepositoryUrl>
     <PackageIcon>icon.png</PackageIcon>
     <Authors>KnifeZ</Authors>
     <PackageTags>knifez,mvvm,.net5</PackageTags>
     <NeutralLanguage>zh-CN</NeutralLanguage>
-    <PackageReleaseNotes>基于.net5和WTM修改而来的框架，移除了layui\react版本无用代码，删除了原本的代码生成方法，完全使用System.Text.Json处理内容，部分语法代码优化</PackageReleaseNotes>
+    <PackageReleaseNotes>基于.net5和WTM修改而来的框架，前端采用vue3.0+antd vue。</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aliyun.OSS.SDK.NetCore" Version="2.12.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.1" />
@@ -37,8 +38,10 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="5.0.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.1" />
     <PackageReference Include="NPOI" Version="2.5.2" />
+    <PackageReference Include="Oracle.EntityFrameworkCore" Version="3.19.80" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="5.0.0-alpha.2" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+    <PackageReference Include="Tencent.QCloud.Cos.Sdk" Version="5.4.17" />
   </ItemGroup>
 
   <ItemGroup>

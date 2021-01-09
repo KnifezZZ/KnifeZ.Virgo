@@ -17,6 +17,8 @@ using System.Reflection;
 using KnifeZ.Virgo.Core.Extensions;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.DependencyInjection;
+using KnifeZ.Virgo.Core.Support.FileHandlers;
 
 namespace KnifeZ.Virgo.Core
 {
@@ -27,8 +29,8 @@ namespace KnifeZ.Virgo.Core
     public interface IBaseImport<out T> where T : BaseTemplateVM
     {
         T Template { get; }
-        byte[] GenerateTemplate(out string displayName);
-        void SetParms(Dictionary<string, string> parms);
+        byte[] GenerateTemplate (out string displayName);
+        void SetParms (Dictionary<string, string> parms);
     }
 
     /// <summary>
@@ -45,7 +47,7 @@ namespace KnifeZ.Virgo.Core
         /// 上传文件的Id，方便导入等操作中进行绑定，这类操作需要上传文件但不需要记录在数据库中，所以Model层中没有文件Id的字段
         /// </summary>
         [Display(Name = "UploadFile")]
-        public Guid? UploadFileId { get; set; }
+        public string UploadFileId { get; set; }
 
         /// <summary>
         /// 下载模板显示名称
@@ -71,7 +73,6 @@ namespace KnifeZ.Virgo.Core
         [JsonIgnore]
         public Dictionary<string, string> Parms { get; set; }
 
-        [JsonIgnore]
         protected List<T> TemplateData;
 
         /// <summary>
@@ -118,7 +119,7 @@ namespace KnifeZ.Virgo.Core
         #endregion
 
         #region 构造函数
-        public BaseImportVM()
+        public BaseImportVM ()
         {
             ErrorListVM = new TemplateErrorListVM();
             ValidityTemplateType = true;
@@ -132,7 +133,7 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <param name="displayName">模版文件名</param>
         /// <returns>生成的模版</returns>
-        public byte[] GenerateTemplate(out string displayName)
+        public byte[] GenerateTemplate (out string displayName)
         {
             return Template.GenerateTemplate(out displayName);
         }
@@ -143,7 +144,7 @@ namespace KnifeZ.Virgo.Core
         /// 设置模版参数
         /// </summary>
         /// <param name="parms">参数</param>
-        public void SetParms(Dictionary<string, string> parms)
+        public void SetParms (Dictionary<string, string> parms)
         {
             Template.Parms = parms;
         }
@@ -155,7 +156,7 @@ namespace KnifeZ.Virgo.Core
         /// 设置数据唯一性验证，子类中如果需要数据唯一性验证，应重写此方法
         /// </summary>
         /// <returns>唯一性属性</returns>
-        public virtual DuplicatedInfo<P> SetDuplicatedCheck()
+        public virtual DuplicatedInfo<P> SetDuplicatedCheck ()
         {
             return null;
         }
@@ -163,7 +164,7 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 获取上传的结果值
         /// </summary>
-        public virtual void SetEntityList()
+        public virtual void SetEntityList ()
         {
             if (!isEntityListSet)
             {
@@ -189,7 +190,7 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 获取上传模板中填写的数据，包含了对模板正确性的验证
         /// </summary>
-        public virtual void SetTemplateData()
+        public virtual void SetTemplateData ()
         {
             if (TemplateData != null && TemplateData.Count > 0)
             {
@@ -208,15 +209,17 @@ namespace KnifeZ.Virgo.Core
                     return;
                 }
 
-                //【CHECK】数据库中不存在附件ID对应的数据信息
-                var UploadFileInfo = DC.Set<FileAttachment>().Where(x => x.ID == UploadFileId).FirstOrDefault();
-                if (UploadFileInfo == null)
+                var fp = KnifeVirgo.HttpContext.RequestServices.GetRequiredService<VirgoFileProvider>();
+
+                var file = fp.GetFile(UploadFileId, true, DC);
+                if (file == null)
                 {
                     ErrorListVM.EntityList.Add(new ErrorMessage { Message = Program._localizer["WrongTemplate"] });
                     return;
                 }
 
-                xssfworkbook = FileHelper.GetXSSFWorkbook(xssfworkbook, (FileAttachment)UploadFileInfo, ConfigInfo);
+                xssfworkbook = new XSSFWorkbook(file.DataStream);
+
                 Template.InitExcelData();
                 Template.InitCustomFormat();
 
@@ -259,7 +262,7 @@ namespace KnifeZ.Virgo.Core
                 for (int i = 0; i < cells.Count; i++)
                 {
                     //是否有子表
-                    HasSubTable = ListTemplateProptetys[pIndex].SubTableType != null || HasSubTable;
+                    HasSubTable = ListTemplateProptetys[pIndex].SubTableType != null ? true : HasSubTable;
                     if (ListTemplateProptetys[pIndex].DataType != ColumnDataType.Dynamic)
                     {
                         if (cells[i].ToString().Trim('*') != ListTemplateProptetys[pIndex].ColumnName)
@@ -280,9 +283,9 @@ namespace KnifeZ.Virgo.Core
                                 ErrorListVM.EntityList.Add(new ErrorMessage { Message = Program._localizer["WrongTemplate"] });
                                 break;
                             }
-                            i += 1;
+                            i = i + 1;
                         }
-                        i -= 1;
+                        i = i - 1;
                         pIndex++;
                     }
                 }
@@ -292,7 +295,7 @@ namespace KnifeZ.Virgo.Core
                 {
                     for (int i = 0; i < cells.Count; i++)
                     {
-                        ListTemplateProptetys[i].IsNullAble = ListTemplateProptetys[i].SubTableType == null || ListTemplateProptetys[i].IsNullAble;
+                        ListTemplateProptetys[i].IsNullAble = ListTemplateProptetys[i].SubTableType == null ? true : ListTemplateProptetys[i].IsNullAble;
                     }
                 }
 
@@ -358,13 +361,13 @@ namespace KnifeZ.Virgo.Core
         }
 
         #region 进行公式计算
-        public string GetCellFormulaValue(XSSFFormulaEvaluator XE, ICell cell, string Value)
+        public string GetCellFormulaValue (XSSFFormulaEvaluator XE, ICell cell, string Value)
         {
             if (!string.IsNullOrEmpty(Value) && Value.IndexOf("=") == 0)
             {
                 try
                 {
-                    string Formula = Value[1..];
+                    string Formula = Value.Substring(1);
                     cell.SetCellFormula(Formula);
                     XE.EvaluateFormulaCell(cell);
                     Value = cell.NumericCellValue.ToString();
@@ -380,7 +383,7 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 根据模板中的数据，填写导入类的集合中
         /// </summary>
-        public virtual void SetEntityData()
+        public virtual void SetEntityData ()
         {
             //反射出类中所有属性字段 P是Model层定义的类
             var pros = typeof(P).GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
@@ -531,7 +534,7 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 进行上传中的错误验证
         /// </summary>
-        public virtual void SetValidateCheck()
+        public virtual void SetValidateCheck ()
         {
             //找到对应的BaseCRUDVM，并初始化
             var vms = this.GetType().Assembly.GetExportedTypes().Where(x => x.IsSubclassOf(typeof(BaseCRUDVM<P>))).ToList();
@@ -586,14 +589,14 @@ namespace KnifeZ.Virgo.Core
             }
 
             //调用controller方法验证model
-            var vmethod = Controller?.GetType().GetMethod("RedoValidation");
+            //var vmethod = Controller?.GetType().GetMethod("RedoValidation");
             foreach (var entity in EntityList)
             {
-                try
-                {
-                    vmethod.Invoke(Controller, new object[] { entity });
-                }
-                catch { }
+                //try
+                //{
+                //    vmethod.Invoke(Controller, new object[] { entity });
+                //}
+                //catch { }
 
                 if (vm != null)
                 {
@@ -619,7 +622,7 @@ namespace KnifeZ.Virgo.Core
             }
         }
 
-        protected void SetEntityFieldValue(object entity, ExcelPropety ep, int rowIndex, string fieldName, T templateVM)
+        protected void SetEntityFieldValue (object entity, ExcelPropety ep, int rowIndex, string fieldName, T templateVM)
         {
             if (ep.FormatData != null)
             {
@@ -670,7 +673,7 @@ namespace KnifeZ.Virgo.Core
             }
         }
 
-        protected bool IsUpdateRecordDuplicated(DuplicatedInfo<P> checkCondition, P entity)
+        protected bool IsUpdateRecordDuplicated (DuplicatedInfo<P> checkCondition, P entity)
         {
             if (checkCondition != null && checkCondition.Groups.Count > 0)
             {
@@ -683,7 +686,7 @@ namespace KnifeZ.Virgo.Core
                 {
                     List<Expression> conditions = new List<Expression>();
                     //生成一个表达式，类似于 x=>x.Id != id，这是为了当修改数据时验证重复性的时候，排除当前正在修改的数据
-                    var idproperty = modelType.GetProperties().Where(x => x.Name.ToLower() == "id").FirstOrDefault();
+                    var idproperty = modelType.GetSingleProperty("ID");
                     MemberExpression idLeft = Expression.Property(para, idproperty);
                     ConstantExpression idRight = Expression.Constant(entity.GetID());
                     BinaryExpression idNotEqual = Expression.NotEqual(idLeft, idRight);
@@ -732,7 +735,7 @@ namespace KnifeZ.Virgo.Core
             return false;
         }
 
-        protected void ValidateDuplicateData(DuplicatedInfo<P> checkCondition, P entity)
+        protected void ValidateDuplicateData (DuplicatedInfo<P> checkCondition, P entity)
         {
             if (checkCondition != null && checkCondition.Groups.Count > 0)
             {
@@ -745,7 +748,7 @@ namespace KnifeZ.Virgo.Core
                 {
                     List<Expression> conditions = new List<Expression>();
                     //生成一个表达式，类似于 x=>x.Id != id，这是为了当修改数据时验证重复性的时候，排除当前正在修改的数据
-                    var idproperty = modelType.GetProperties().Where(x => x.Name.ToLower() == "id").FirstOrDefault();
+                    var idproperty = modelType.GetSingleProperty("ID");
                     MemberExpression idLeft = Expression.Property(para, idproperty);
                     ConstantExpression idRight = Expression.Constant(entity.GetID());
                     BinaryExpression idNotEqual = Expression.NotEqual(idLeft, idRight);
@@ -817,8 +820,19 @@ namespace KnifeZ.Virgo.Core
         /// 保存指定表中的数据
         /// </summary>
         /// <returns>成功返回True，失败返回False</returns>
-        public virtual bool BatchSaveData()
+        public virtual bool BatchSaveData ()
         {
+            //删除不必要的附件
+            if (DeletedFileIds != null && DeletedFileIds.Count > 0)
+            {
+                var fp = KnifeVirgo.HttpContext.RequestServices.GetRequiredService<VirgoFileProvider>();
+
+                foreach (var item in DeletedFileIds)
+                {
+                    fp.DeleteFile(item.ToString(), DC.ReCreate());
+                }
+            }
+
             //进行赋值
             SetEntityList();
             if (ErrorListVM.EntityList.Count > 0)
@@ -851,7 +865,7 @@ namespace KnifeZ.Virgo.Core
                         foreach (var pro in tempPros)
                         {
                             var excelProp = Template.GetType().GetField(pro.Name).GetValue(Template) as ExcelPropety;
-                            var proToSet = typeof(P).GetProperties().Where(x => x.Name == excelProp.FieldName).FirstOrDefault();
+                            var proToSet = typeof(P).GetSingleProperty(excelProp.FieldName);
                             if (proToSet != null)
                             {
                                 var val = proToSet.GetValue(item);
@@ -891,9 +905,8 @@ namespace KnifeZ.Virgo.Core
                 {
                     (item as PersistPoco).IsValid = true;
                 }
-
                 //如果是SqlServer数据库，而且没有主子表功能，进行Bulk插入
-                if (ConfigInfo.DbType == DBTypeEnum.SqlServer && !HasSubTable && UseBulkSave == true)
+                if (ConfigInfo.ConnectionStrings.Where(x => x.Key == (CurrentCS ?? "default")).FirstOrDefault().DbType == DBTypeEnum.SqlServer && !HasSubTable && UseBulkSave == true)
                 {
                     ListAdd.Add(item);
                 }
@@ -922,6 +935,12 @@ namespace KnifeZ.Virgo.Core
                     return false;
                 }
             }
+            if (string.IsNullOrEmpty(UploadFileId) == false)
+            {
+                var fp = KnifeVirgo.HttpContext.RequestServices.GetRequiredService<VirgoFileProvider>();
+                fp.DeleteFile(UploadFileId, DC.ReCreate());
+            }
+
             return true;
         }
 
@@ -929,10 +948,10 @@ namespace KnifeZ.Virgo.Core
         /// 批量插入数据库操作，支持SqlServer
         /// </summary>
         /// <typeparam name="K"></typeparam>
-        /// <param name="connection"></param>
+        /// <param name="dc">data context</param>
         /// <param name="tableName"></param>
         /// <param name="list"></param>
-        protected static void BulkInsert<K>(IDataContext dc, string tableName, IList<K> list)
+        protected static void BulkInsert<K> (IDataContext dc, string tableName, IList<K> list)
         {
             using (var bulkCopy = new SqlBulkCopy(dc.CSName))
             {
@@ -940,7 +959,7 @@ namespace KnifeZ.Virgo.Core
                 bulkCopy.DestinationTableName = tableName;
 
                 var table = new DataTable();
-                var props = typeof(K).GetProperties().Distinct(x => x.Name);
+                var props = typeof(K).GetAllProperties().Distinct(x => x.Name);
 
                 //生成Table的列
                 foreach (var propertyInfo in props)
@@ -949,7 +968,7 @@ namespace KnifeZ.Virgo.Core
                     var notobject = propertyInfo.PropertyType.Namespace.Equals("System") || propertyInfo.PropertyType.IsEnumOrNullableEnum();
                     if (notmapped == null && notobject)
                     {
-                        string Name = dc.GetFieldName<K>( propertyInfo.Name);
+                        string Name = dc.GetFieldName<K>(propertyInfo.Name);
                         bulkCopy.ColumnMappings.Add(Name, Name);
                         table.Columns.Add(Name, Nullable.GetUnderlyingType(propertyInfo.PropertyType) ?? propertyInfo.PropertyType);
                     }
@@ -995,7 +1014,7 @@ namespace KnifeZ.Virgo.Core
         /// <param name="row">行数</param>
         /// <param name="colCount">列数</param>
         /// <returns>True代表空行，False代表非空行</returns>
-        private bool IsEmptyRow(XSSFRow row, int colCount)
+        private bool IsEmptyRow (XSSFRow row, int colCount)
         {
             bool result = true;
             for (int i = 0; i < colCount; i++)
@@ -1017,7 +1036,7 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <param name="excelPropety">单元格属性</param>
         /// <returns>复制后的单元格</returns>
-        private ExcelPropety CopyExcelPropety(ExcelPropety excelPropety)
+        private ExcelPropety CopyExcelPropety (ExcelPropety excelPropety)
         {
             ExcelPropety ep = new ExcelPropety
             {
@@ -1053,7 +1072,7 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <param name="e">异常</param>
         /// <param name="id">数据Id</param>
-        protected void SetExceptionMessage(Exception e, long? id)
+        protected void SetExceptionMessage (Exception e, long? id)
         {
             //检查是否为数据库操作错误
             if (e is DbUpdateException)
@@ -1109,7 +1128,7 @@ namespace KnifeZ.Virgo.Core
         /// <param name="Entity">要验证的数据</param>
         /// <param name="checkCondition">验证表达式</param>
         /// <returns>null代表没有重复</returns>
-        protected P IsDuplicateData(P Entity, DuplicatedInfo<P> checkCondition)
+        protected P IsDuplicateData (P Entity, DuplicatedInfo<P> checkCondition)
         {
             //获取设定的重复字段信息
             if (checkCondition != null && checkCondition.Groups.Count > 0)
@@ -1176,7 +1195,7 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <param name="FieldExps">重复数据信息</param>
         /// <returns>重复数据信息</returns>
-        protected DuplicatedInfo<T> CreateFieldsInfo(params DuplicatedField<T>[] FieldExps)
+        protected DuplicatedInfo<T> CreateFieldsInfo (params DuplicatedField<T>[] FieldExps)
         {
             DuplicatedInfo<T> d = new DuplicatedInfo<T>();
             d.AddGroup(FieldExps);
@@ -1188,7 +1207,7 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <param name="FieldExp">重复数据的字段</param>
         /// <returns>重复数据信息</returns>
-        public static DuplicatedField<T> SimpleField(Expression<Func<T, object>> FieldExp)
+        public static DuplicatedField<T> SimpleField (Expression<Func<T, object>> FieldExp)
         {
             return new DuplicatedField<T>(FieldExp);
         }
@@ -1200,22 +1219,22 @@ namespace KnifeZ.Virgo.Core
         /// <param name="MiddleExp">指向关联表类数组的Lambda</param>
         /// <param name="FieldExps">指向最终字段的Lambda</param>
         /// <returns>重复数据信息</returns>
-        public static DuplicatedField<T> SubField<V>(Expression<Func<T, List<V>>> MiddleExp, params Expression<Func<V, object>>[] FieldExps)
+        public static DuplicatedField<T> SubField<V> (Expression<Func<T, List<V>>> MiddleExp, params Expression<Func<V, object>>[] FieldExps)
         {
             return new ComplexDuplicatedField<T, V>(MiddleExp, FieldExps);
         }
 
-        public ErrorObj GetErrorJson()
+        public ErrorObj GetErrorJson ()
         {
-            var mse = new ErrorObj
-            {
-                Form = new Dictionary<string, string>()
-            };
+            var mse = new ErrorObj();
+            mse.Form = new Dictionary<string, string>();
             var err = ErrorListVM?.EntityList?.Where(x => x.Index == 0).FirstOrDefault()?.Message;
             if (string.IsNullOrEmpty(err))
             {
-                var fa = DC.Set<FileAttachment>().Where(x => x.ID == UploadFileId).SingleOrDefault();
-                xssfworkbook = FileHelper.GetXSSFWorkbook(xssfworkbook, (FileAttachment)fa, ConfigInfo);
+                var fp = KnifeVirgo.HttpContext.RequestServices.GetRequiredService<VirgoFileProvider>();
+                var fh = fp.CreateFileHandler();
+                var fa = fp.GetFile(UploadFileId, true, DC);
+                xssfworkbook = new XSSFWorkbook(fa.DataStream);
 
                 var propetys = Template.GetType().GetFields().Where(x => x.FieldType == typeof(ExcelPropety)).ToList();
                 List<ExcelPropety> excelPropetys = new List<ExcelPropety>();
@@ -1249,23 +1268,13 @@ namespace KnifeZ.Virgo.Core
                 MemoryStream ms = new MemoryStream();
                 xssfworkbook.Write(ms);
                 ms.Position = 0;
-                FileAttachmentVM vm = new FileAttachmentVM();
-                vm.CopyContext(this);
-                vm.Entity.FileName = "Error-" + fa.FileName;
-                vm.Entity.Length = ms.Length;
-                vm.Entity.UploadTime = DateTime.Now;
-                vm.Entity.SaveFileMode = ConfigInfo.FileUploadOptions.SaveFileMode;
-                vm = FileHelper.GetFileByteForUpload(vm, ms, ConfigInfo, vm.Entity.FileName, null, null);
-                vm.Entity.IsTemprory = true;
-                if ((!string.IsNullOrEmpty(vm.Entity.Path) && (vm.Entity.SaveFileMode == SaveFileModeEnum.Local || vm.Entity.SaveFileMode == SaveFileModeEnum.DFS)) || (vm.Entity.FileData != null && vm.Entity.SaveFileMode == SaveFileModeEnum.Database))
-                {
-                    vm.DoAdd();
-                }
+
+                var newfile = fh.Upload("Error-" + fa.FileName, ms.Length, ms);
                 ms.Close();
                 ms.Dispose();
                 err = "导入时发生错误";
                 mse.Form.Add("Entity.Import", err);
-                mse.Form.Add("Entity.ErrorFileId", vm.Entity.ID.ToString());
+                mse.Form.Add("Entity.ErrorFileId", newfile.GetID());
             }
             else
             {
@@ -1293,26 +1302,25 @@ namespace KnifeZ.Virgo.Core
     public class TemplateErrorListVM : BasePagedListVM<ErrorMessage, BaseSearcher>
     {
 
-        public TemplateErrorListVM()
+        public TemplateErrorListVM ()
         {
             EntityList = new List<ErrorMessage>();
             NeedPage = false;
         }
 
-        protected override IEnumerable<IGridColumn<ErrorMessage>> InitGridHeader()
+        protected override IEnumerable<IGridColumn<ErrorMessage>> InitGridHeader ()
         {
             return new List<GridColumn<ErrorMessage>>{
-                this.MakeGridHeader(x => x.Index, 60),
+                this.MakeGridHeader(x => x.Index),
                 this.MakeGridHeader(x => x.Message)
             };
         }
 
-        public override IOrderedQueryable<ErrorMessage> GetSearchQuery()
+        public override IOrderedQueryable<ErrorMessage> GetSearchQuery ()
         {
             return EntityList.AsQueryable().OrderBy(x => x.Index);
         }
     }
 
     #endregion
-
 }

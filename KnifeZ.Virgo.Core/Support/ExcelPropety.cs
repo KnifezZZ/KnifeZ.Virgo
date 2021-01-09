@@ -160,7 +160,7 @@ namespace KnifeZ.Virgo.Core
         /// <param name="dataSheet">数据Sheet页</param>
         /// <param name="dataStyle">样式</param>
         /// <param name="dataFormat">格式</param>
-        public void SetColumnFormat(ColumnDataType dateType, int porpetyIndex, ISheet sheet, ISheet dataSheet, ICellStyle dataStyle, IDataFormat dataFormat)
+        public void SetColumnFormat (ColumnDataType dateType, int porpetyIndex, ISheet sheet, ISheet dataSheet, ICellStyle dataStyle, IDataFormat dataFormat)
         {
             XSSFDataValidationHelper dvHelper = new XSSFDataValidationHelper((XSSFSheet)sheet);
             CellRangeAddressList CellRangeList = new CellRangeAddressList(1, 1048576 - 1, porpetyIndex, porpetyIndex); //超过1048576最大行数，打开Excel会报错
@@ -264,7 +264,7 @@ namespace KnifeZ.Virgo.Core
         /// <param name="value"></param>
         /// <param name="errorMessage"></param>
         /// <param name="rowIndex"></param>
-        public void ValueValidity(string value, List<ErrorMessage> errorMessage, int rowIndex)
+        public void ValueValidity (string value, List<ErrorMessage> errorMessage, int rowIndex)
         {
             if (this.IsNullAble && string.IsNullOrEmpty(value))
             {
@@ -353,7 +353,7 @@ namespace KnifeZ.Virgo.Core
 
         #endregion
 
-        public static ExcelPropety CreateProperty<T>(Expression<Func<T, object>> field, bool isDateTime = false)
+        public static ExcelPropety CreateProperty<T> (Expression<Func<T, object>> field, bool isDateTime = false)
         {
             ExcelPropety cp = new ExcelPropety();
             cp.ColumnName = field.GetPropertyDisplayName();
@@ -449,14 +449,14 @@ namespace KnifeZ.Virgo.Core
     /// <param name="excelTemplate">excel中的值</param>
     /// <param name="entityValue">实体的值</param>
     /// <param name="errorMsg">错误消息，没有错误为空</param>
-    public delegate void CopySingleData(object excelValue, BaseTemplateVM excelTemplate, out string entityValue, out string errorMsg);
+    public delegate void CopySingleData (object excelValue, BaseTemplateVM excelTemplate, out string entityValue, out string errorMsg);
     /// <summary>
     /// 定义处理excel为多个字段的委托
     /// </summary>
     /// <param name="excelValue">excel中的值</param>
     /// <param name="excelTemplate">excel中的值</param>
     /// <returns>返回的处理结果</returns>
-    public delegate ProcessResult CopyData(object excelValue, BaseTemplateVM excelTemplate);
+    public delegate ProcessResult CopyData (object excelValue, BaseTemplateVM excelTemplate);
 
     /// <summary>
     /// 处理结果
@@ -464,7 +464,7 @@ namespace KnifeZ.Virgo.Core
     public class ProcessResult
     {
         public List<EntityValue> EntityValues { get; set; }
-        public ProcessResult()
+        public ProcessResult ()
         {
             EntityValues = new List<EntityValue>();
         }

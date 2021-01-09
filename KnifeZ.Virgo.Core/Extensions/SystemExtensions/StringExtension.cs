@@ -17,7 +17,7 @@ namespace KnifeZ.Virgo.Core.Extensions
         /// </summary>
         /// <param name="fieldName">名字</param>
         /// <returns>将[].转换成_形式的Id</returns>
-        public static string GetIdByName(this string fieldName)
+        public static string GetIdByName (this string fieldName)
         {
             return fieldName == null ? "" : fieldName.Replace(".", "_").Replace("[", "_").Replace("]", "_");
         }
@@ -27,7 +27,7 @@ namespace KnifeZ.Virgo.Core.Extensions
         /// </summary>
         /// <param name="url">初始url</param>
         /// <returns>格式化后的url</returns>
-        public static string CorrectUrl(this string url)
+        public static string CorrectUrl (this string url)
         {
             if (string.IsNullOrWhiteSpace(url) == true)
             {
@@ -54,7 +54,7 @@ namespace KnifeZ.Virgo.Core.Extensions
         /// <param name="Format">转化文本字段的表达式</param>
         /// <param name="seperator">分隔符，默认为逗号</param>
         /// <returns>转化后的字符串</returns>
-        public static string ToSpratedString<T, V>(this IEnumerable<T> self, Expression<Func<T, V>> textField, Func<V, string> Format = null, string seperator = ",")
+        public static string ToSepratedString<T, V> (this IEnumerable<T> self, Expression<Func<T, V>> textField, Func<V, string> Format = null, string seperator = ",")
         {
             string rv = "";
             if (self == null)
@@ -66,7 +66,7 @@ namespace KnifeZ.Virgo.Core.Extensions
             {
                 //获取文本字段的值
                 V text = textField.Compile().Invoke(self.ElementAt(i));
-                string str;
+                string str = "";
                 //如果有转换函数，则调用获取转换后的字符串
                 if (Format == null)
                 {
@@ -94,7 +94,7 @@ namespace KnifeZ.Virgo.Core.Extensions
             return rv;
         }
 
-        public static string ToSpratedString(this IEnumerable self, Func<object, string> Format = null, string seperator = ",")
+        public static string ToSepratedString (this IEnumerable self, Func<object, string> Format = null, string seperator = ",")
         {
             string rv = "";
             if (self == null)
@@ -103,23 +103,28 @@ namespace KnifeZ.Virgo.Core.Extensions
             }
             foreach (var item in self)
             {
+                var s = "";
                 if (Format == null)
                 {
-                    rv += item.ToString() + seperator;
+                    s = item.ToString();
                 }
                 else
                 {
-                    rv += Format.Invoke(item) + seperator;
+                    s = Format.Invoke(item);
+                }
+                if (string.IsNullOrEmpty(s) == false)
+                {
+                    rv += s + seperator;
                 }
             }
             if (rv.Length > 0)
             {
-                rv = rv[0..^1];
+                rv = rv.Substring(0, rv.Length - 1);
             }
             return rv;
         }
 
-        public static string ToSpratedString(this NameValueCollection self, string seperator = ",")
+        public static string ToSepratedString (this NameValueCollection self, string seperator = ",")
         {
             string rv = "";
             if (self == null)
@@ -132,14 +137,14 @@ namespace KnifeZ.Virgo.Core.Extensions
             }
             if (rv.Length > 0)
             {
-                rv = rv[0..^1];
+                rv = rv.Substring(0, rv.Length - 1);
             }
             return rv;
         }
 
-        public static string AppendQuery(this string self,string query)
+        public static string AppendQuery (this string self, string query)
         {
-            if(self == null)
+            if (self == null)
             {
                 return null;
             }

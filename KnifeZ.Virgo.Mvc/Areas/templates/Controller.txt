@@ -84,12 +84,11 @@ namespace $namespace$
                 }
             }
         }
-
-        [HttpPost("BatchDelete")]
+                [HttpPost("BatchDelete")]
         [ActionDescription("Delete")]
-        public async Task<IActionResult> BatchDelete (string[] ids)
+        public IActionResult BatchDelete (string[] ids)
         {
-            var vm = CreateVM <$controllername$BatchVM > ();
+            var vm = KnifeVirgo.CreateVM<$controllername$BatchVM>();
             if (ids != null && ids.Length > 0)
             {
                 vm.Ids = ids;
@@ -104,13 +103,6 @@ namespace $namespace$
             }
             else
             {
-                List<Guid?> groupids = new List<Guid?>();
-                foreach (var item in vm?.Ids)
-                {
-                    groupids.Add(Guid.Parse(item));
-                }
-                var userids = DC.Set<FrameworkUserGroup>().Where(x => groupids.Contains(x.GroupId)).Select(x => x.UserId.ToString()).ToArray();
-                await LoginUserInfo.RemoveUserCache(userids);
                 return Ok(ids.Length);
             }
         }

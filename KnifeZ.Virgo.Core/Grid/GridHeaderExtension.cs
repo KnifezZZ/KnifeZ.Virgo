@@ -21,7 +21,6 @@ namespace KnifeZ.Virgo.Core
         /// <returns></returns>
         public static GridColumn<T> MakeGridHeader<T, V>(this IBasePagedListVM<T, V> self
             , Expression<Func<T, object>> columnExp
-            , int? width = null
         )
             where T : TopBasePoco
             where V : ISearcher
@@ -39,17 +38,7 @@ namespace KnifeZ.Virgo.Core
                     me = le.Body as MemberExpression;
                 }
             }
-            var alignType = GridColumnAlignEnum.Center;
-            if (me != null)
-            {
-                var propType = me.Type;
-                if (propType == typeof(string))
-                {
-                    alignType = GridColumnAlignEnum.Left;
-                }
-            }
-
-            return new GridColumn<T>(columnExp, width) { ColumnType = GridColumnTypeEnum.Normal, Align = alignType };
+            return new GridColumn<T>(columnExp) { ColumnType = GridColumnTypeEnum.Normal};
         }
 
         /// <summary>
@@ -80,23 +69,6 @@ namespace KnifeZ.Virgo.Core
             where V : ISearcher
         {
             return new GridColumn<T>() { Title = title };
-        }
-
-        public static GridColumn<T> MakeGridHeaderAction<T, V>(this IBasePagedListVM<T, V> self
-            , string title = null
-            , int? width = 160
-            , int? rowspan = null
-        )
-            where T : TopBasePoco
-            where V : ISearcher
-        {
-            return new GridColumn<T>()
-            {
-                ColumnType = GridColumnTypeEnum.Action,
-                Width = width,
-                Fixed = GridColumnFixedEnum.Right,
-                Title = title ?? Program._localizer["Operation"]
-            };
         }
 
         /// <summary>
@@ -154,31 +126,6 @@ namespace KnifeZ.Virgo.Core
             return self;
         }
 
-        /// <summary>
-        /// 设定列宽
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="self"></param>
-        /// <param name="width">列宽的设定也通常是必须的（“特殊列”除外，如：复选框列、工具列等），它关系到表格的整体美观程度。</param>
-        /// <returns></returns>
-        public static GridColumn<T> SetWidth<T>(this GridColumn<T> self, int width)
-            where T : TopBasePoco
-        {
-            self.Width = width;
-            return self;
-        }
-        /// <summary>
-        /// 单元格事件名称
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="self"></param>
-        /// <param name="hide"></param>
-        /// <returns></returns>
-        public static GridColumn<T> SetEvent<T>(this GridColumn<T> self, string eEvent) where T : TopBasePoco
-        {
-            self.Event = eEvent;
-            return self;
-        }
 
         ///// <summary>
         ///// 设定当前列头 列横跨的单元格数
@@ -208,47 +155,7 @@ namespace KnifeZ.Virgo.Core
         //    return self;
         //}
 
-        /// <summary>
-        /// 设定是否允许排序 (ASCII码排序)
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="self"></param>
-        /// <param name="sort">如果设置 true，则在对应的表头显示排序icon，从而对列开启排序功能。</param>
-        /// <returns></returns>
-        public static GridColumn<T> SetSort<T>(this GridColumn<T> self, bool sort = true)
-            where T : TopBasePoco
-        {
-            self.Sort = sort;
-            return self;
-        }
 
-        /// <summary>
-        /// 设定是否固定列
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="self"></param>
-        /// <param name="fixed">如果设置 Left 或 Right，则对应的列将会被固定在左或右，不随滚动条而滚动。</param>
-        /// <returns></returns>
-        public static GridColumn<T> SetFixed<T>(this GridColumn<T> self, GridColumnFixedEnum @fixed)
-            where T : TopBasePoco
-        {
-            self.Fixed = @fixed;
-            return self;
-        }
-
-        /// <summary>
-        /// 设定对齐方式
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="self"></param>
-        /// <param name="align"></param>
-        /// <returns></returns>
-        public static GridColumn<T> SetAlign<T>(this GridColumn<T> self, GridColumnAlignEnum align)
-            where T : TopBasePoco
-        {
-            self.Align = align;
-            return self;
-        }
 
         ///// <summary>
         ///// 设定是否允许编辑
@@ -297,36 +204,6 @@ namespace KnifeZ.Virgo.Core
         public static GridColumn<T> SetHide<T>(this GridColumn<T> self, bool hide = true) where T : TopBasePoco
         {
             self.Hide = hide;
-            return self;
-        }
-
-        /// <summary>
-        /// 设定列宽不可改变
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="self"></param>
-        /// <param name="unresize"></param>
-        /// <returns></returns>
-        public static GridColumn<T> SetUnResize<T>(this GridColumn<T> self, bool unresize = true)
-            where T : TopBasePoco
-        {
-            self.UnResize = unresize;
-            return self;
-        }
-
-        /// <summary>
-        /// 设定单元格编辑类型
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="self"></param>
-        /// <param name="editType">单元格编辑类型</param>
-        /// <param name="listitems">listitems</param>
-        /// <returns></returns>
-        public static GridColumn<T> SetEditType<T>(this GridColumn<T> self, EditTypeEnum editType = EditTypeEnum.Text, List<ComboSelectListItem> listitems = null)
-            where T : TopBasePoco
-        {
-            self.EditType = editType;
-            self.ListItems = listitems;
             return self;
         }
 

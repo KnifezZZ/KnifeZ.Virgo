@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 
 namespace KnifeZ.Virgo.Core
 {
@@ -15,9 +17,45 @@ namespace KnifeZ.Virgo.Core
 
         public ConstructorInfo DcConstructor;
 
-        public IDataContext CreateDC()
+
+        public IDataContext CreateDC ()
         {
+            if (DcConstructor == null)
+            {
+                var AllAssembly = Utils.GetAllAssembly();
+                List<ConstructorInfo> cis = new List<ConstructorInfo>();
+                if (AllAssembly != null)
+                {
+                    foreach (var ass in AllAssembly)
+                    {
+                        try
+                        {
+                            var t = ass.GetExportedTypes().Where(x => typeof(DbContext).IsAssignableFrom(x) && x.Name != "DbContext" && x.Name != "FrameworkContext" && x.Name != "EmptyContext").ToList();
+                            foreach (var st in t)
+                            {
+                                var ci = st.GetConstructor(new Type[] { typeof(CS) });
+                                if (ci != null)
+                                {
+                                    cis.Add(ci);
+                                }
+                            }
+                        }
+                        catch { }
+                    }
+                    string dcname = DbContext;
+                    if (string.IsNullOrEmpty(dcname))
+                    {
+                        dcname = "DataContext";
+                    }
+                    DcConstructor = cis.Where(x => x.DeclaringType.Name.ToLower() == dcname.ToLower()).FirstOrDefault();
+                    if (DcConstructor == null)
+                    {
+                        DcConstructor = cis.FirstOrDefault();
+                    }
+                }
+            }
             return (IDataContext)DcConstructor?.Invoke(new object[] { this });
         }
+
     }
 }

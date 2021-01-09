@@ -14,12 +14,13 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Options;
 using KnifeZ.Virgo.Core;
 using KnifeZ.Virgo.Core.Auth;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace KnifeZ.Virgo.Mvc.Filters
 {
     public class PrivilegeFilter : ActionFilterAttribute
     {
-        public override void OnActionExecuting(ActionExecutingContext context)
+        public override void OnActionExecuting (ActionExecutingContext context)
         {
             var controller = context.Controller as IBaseController;
             if (controller == null)
@@ -27,28 +28,36 @@ namespace KnifeZ.Virgo.Mvc.Filters
                 base.OnActionExecuting(context);
                 return;
             }
-            if (controller.ConfigInfo.IsQuickDebug && controller is BaseApiController)
+            context.SetVirgoContext();
+
+            if (controller.KnifeVirgo.ConfigInfo.IsQuickDebug && controller is BaseApiController)
             {
                 base.OnActionExecuting(context);
                 return;
             }
             ControllerActionDescriptor ad = context.ActionDescriptor as ControllerActionDescriptor;
 
-            var lg = GlobalServices.GetRequiredService<LinkGenerator>();
-            var u = lg.GetPathByAction(ad.ActionName, ad.ControllerName, new { area = context.RouteData.Values["area"] });
-            if (u == null)
+            var lg = context.HttpContext.RequestServices.GetRequiredService<LinkGenerator>();
+
+            string u = null;
+            if (ad.Parameters.Any(x => x.Name.ToLower() == "id"))
             {
                 u = lg.GetPathByAction(ad.ActionName, ad.ControllerName, new { area = context.RouteData.Values["area"], id = 0 });
             }
-            if (u.EndsWith("/0"))
+            else
+            {
+                u = lg.GetPathByAction(ad.ActionName, ad.ControllerName, new { area = context.RouteData.Values["area"] });
+            }
+            if (u != null && u.EndsWith("/0"))
             {
                 u = u.Substring(0, u.Length - 2);
                 if (controller is BaseApiController)
                 {
-                    u += "/{id}";
+                    u = u + "/{id}";
                 }
             }
-            controller.BaseUrl = u + context.HttpContext.Request.QueryString.ToUriComponent(); ;
+
+            controller.KnifeVirgo.BaseUrl = u + context.HttpContext.Request.QueryString.ToUriComponent();
 
 
             //如果是QuickDebug模式，或者Action或Controller上有AllRightsAttribute标记都不需要判断权限
@@ -60,13 +69,13 @@ namespace KnifeZ.Virgo.Mvc.Filters
 
             var isAllRights = ad.MethodInfo.IsDefined(typeof(AllRightsAttribute), false) || ad.ControllerTypeInfo.IsDefined(typeof(AllRightsAttribute), false);
             var isDebug = ad.MethodInfo.IsDefined(typeof(DebugOnlyAttribute), false) || ad.ControllerTypeInfo.IsDefined(typeof(DebugOnlyAttribute), false);
-            if (controller.ConfigInfo.IsFilePublic == true)
+            if (controller.KnifeVirgo.ConfigInfo.IsFilePublic == true)
             {
                 if (ad.ControllerName == "_Framework" && (ad.MethodInfo.Name == "GetFile" || ad.MethodInfo.Name == "ViewFile"))
                 {
                     isPublic = true;
                 }
-                if(ad.ControllerTypeInfo.FullName == "KnifeZ.Virgo.Admin.Api.FileApiController" && (ad.MethodInfo.Name == "GetFileName" || ad.MethodInfo.Name == "GetFile" || ad.MethodInfo.Name == "DownloadFile"))
+                if (ad.ControllerTypeInfo.FullName == "KnifeZ.Virgo.Admin.Api.FileApiController" && (ad.MethodInfo.Name == "GetFileName" || ad.MethodInfo.Name == "GetFile" || ad.MethodInfo.Name == "DownloadFile"))
                 {
                     isPublic = true;
 
@@ -74,19 +83,15 @@ namespace KnifeZ.Virgo.Mvc.Filters
             }
             if (isDebug)
             {
-                if (controller.ConfigInfo.IsQuickDebug)
+                if (controller.KnifeVirgo.ConfigInfo.IsQuickDebug)
                 {
                     base.OnActionExecuting(context);
                 }
                 else
                 {
-                    if (controller is BaseController c)
+                    if (controller is ControllerBase c2)
                     {
-                        context.Result = c.Content(Program._localizer["DebugOnly"]);
-                    }
-                    else if (controller is ControllerBase c2)
-                    {
-                        context.Result = c2.BadRequest(Program._localizer["DebugOnly"]);
+                        context.Result = c2.BadRequest(Mvc.Program._localizer["DebugOnly"]);
                     }
                 }
                 return;
@@ -98,46 +103,60 @@ namespace KnifeZ.Virgo.Mvc.Filters
                 return;
             }
 
-            if (controller.LoginUserInfo == null)
+            if (controller.KnifeVirgo.LoginUserInfo == null)
             {
                 if (controller is ControllerBase ctrl)
                 {
-                    if (ctrl.HttpContext.Request.Headers.ContainsKey("Authorization"))
+                    //if it's a layui search request,returns a layui format message so that it can parse
+                    if (ctrl.Request.Headers.ContainsKey("layuisearch"))
                     {
-                        context.Result = ctrl.Unauthorized(JwtBearerDefaults.AuthenticationScheme);
+                        ContentResult cr = new ContentResult()
+                        {
+                            Content = "{\"Data\":[],\"Count\":0,\"Page\":1,\"PageCount\":0,\"Msg\":\"" + Mvc.Program._localizer["NeedLogin"] + "\",\"Code\":401}",
+                            ContentType = "application/json",
+                            StatusCode = 200
+                        };
+                        context.Result = cr;
                     }
                     else
                     {
-                        if (controller is BaseApiController)
+                        if (ctrl.HttpContext.Request.Headers.ContainsKey("Authorization"))
                         {
-                            ContentResult cr = new ContentResult()
-                            {
-                                Content = Program._localizer["NeedLogin"],
-                                ContentType = "text/html",
-                                StatusCode = 401
-                            };
-                            context.Result = cr;
+                            context.Result = ctrl.Unauthorized(JwtBearerDefaults.AuthenticationScheme);
                         }
                         else
                         {
-                            string lp = GlobalServices.GetRequiredService<IOptions<CookieOptions>>().Value.LoginPath;
-                            if (lp.StartsWith("/"))
+                            if (controller is BaseApiController)
                             {
-                                lp = "~" + lp;
+                                ContentResult cr = new ContentResult()
+                                {
+                                    Content = Mvc.Program._localizer["NeedLogin"],
+                                    ContentType = "text/html",
+                                    StatusCode = 401
+                                };
+                                context.Result = cr;
                             }
-                            if (lp.StartsWith("~/"))
+                            else
                             {
-                                lp = ctrl.Url.Content(lp);
+                                string lp = controller.KnifeVirgo.ConfigInfo.CookieOption.LoginPath;
+                                if (lp.StartsWith("/"))
+                                {
+                                    lp = "~" + lp;
+                                }
+                                if (lp.StartsWith("~/"))
+                                {
+                                    lp = ctrl.Url.Content(lp);
+                                }
+                                ContentResult cr = new ContentResult()
+                                {
+                                    Content = $"<script>window.location.href='{lp}';</script>",
+                                    ContentType = "text/html",
+                                    StatusCode = 200
+                                };
+                                //context.HttpContext.Response.Headers.Add("IsScript", "true");
+                                context.Result = cr;
+                                //context.Result = ctrl.Redirect(GlobalServices.GetRequiredService<IOptions<CookieOptions>>().Value.LoginPath);
                             }
-                            ContentResult cr = new ContentResult()
-                            {
-                                Content = $"<script>window.location.href='{lp}';</script>",
-                                ContentType = "text/html",
-                                StatusCode = 200
-                            };
-                            //context.HttpContext.Response.Headers.Add("IsScript", "true");
-                            context.Result = cr;
-                            //context.Result = ctrl.Redirect(GlobalServices.GetRequiredService<IOptions<CookieOptions>>().Value.LoginPath);
                         }
                     }
                 }
@@ -147,25 +166,39 @@ namespace KnifeZ.Virgo.Mvc.Filters
             {
                 if (isAllRights == false)
                 {
-                    bool canAccess = controller.LoginUserInfo.IsAccessable(controller.BaseUrl);
-                    if (canAccess == false && controller.ConfigInfo.IsQuickDebug == false)
+                    bool canAccess = controller.KnifeVirgo.IsAccessable(controller.KnifeVirgo.BaseUrl);
+                    if (canAccess == false && controller.KnifeVirgo.ConfigInfo.IsQuickDebug == false)
                     {
                         if (controller is ControllerBase ctrl)
                         {
-                            if (ctrl.HttpContext.Request.Headers.ContainsKey("Authorization"))
-                            {
-                                context.Result = ctrl.Forbid(JwtBearerDefaults.AuthenticationScheme);
-                            }
-                            else
+                            //if it's a layui search request,returns a layui format message so that it can parse
+                            if (ctrl.Request.Headers.ContainsKey("layuisearch"))
                             {
                                 ContentResult cr = new ContentResult()
                                 {
-                                    Content = Program._localizer["NoPrivilege"],
-                                    ContentType = "text/html",
-                                    StatusCode = 403
+                                    Content = "{\"Data\":[],\"Count\":0,\"Page\":1,\"PageCount\":0,\"Msg\":\"" + Mvc.Program._localizer["NoPrivilege"] + "\",\"Code\":403}",
+                                    ContentType = "application/json",
+                                    StatusCode = 200
                                 };
                                 context.Result = cr;
+                            }
+                            else
+                            {
+                                if (ctrl.HttpContext.Request.Headers.ContainsKey("Authorization"))
+                                {
+                                    context.Result = ctrl.Forbid(JwtBearerDefaults.AuthenticationScheme);
+                                }
+                                else
+                                {
+                                    ContentResult cr = new ContentResult()
+                                    {
+                                        Content = Mvc.Program._localizer["NoPrivilege"],
+                                        ContentType = "text/html",
+                                        StatusCode = 403
+                                    };
+                                    context.Result = cr;
 
+                                }
                             }
                         }
                     }
@@ -174,7 +207,7 @@ namespace KnifeZ.Virgo.Mvc.Filters
             base.OnActionExecuting(context);
         }
 
-        private List<string> getAuthTypes(ControllerActionDescriptor ad)
+        private List<string> getAuthTypes (ControllerActionDescriptor ad)
         {
             var authenticationSchemes = new List<string>();
             if (ad.MethodInfo.IsDefined(typeof(AuthorizeAttribute), false))

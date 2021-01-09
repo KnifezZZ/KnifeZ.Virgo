@@ -41,6 +41,7 @@ namespace KnifeZ.Virgo.Core
         Custom1, Custom2, Custom3, Custom4, Custom5
     };
 
+
     /// <summary>
     /// ListVM的基类，所有ListVM应该继承这个类， 基类提供了搜索，导出等列表常用功能
     /// </summary>
@@ -54,7 +55,7 @@ namespace KnifeZ.Virgo.Core
         [JsonIgnore]
         public string TotalText { get; set; } = Program._localizer?["Total"];
 
-        public virtual DbCommand GetSearchCommand()
+        public virtual DbCommand GetSearchCommand ()
         {
             return null;
         }
@@ -65,11 +66,11 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 多级表头深度  默认 1级
         /// </summary>
-        public int GetChildrenDepth()
+        public int GetChildrenDepth ()
         {
             if (_childrenDepth == null)
             {
-                _childrenDepth = GetHeaderDepth();
+                _childrenDepth = _getHeaderDepth();
             }
             return _childrenDepth.Value;
         }
@@ -84,7 +85,7 @@ namespace KnifeZ.Virgo.Core
         /// GetHeaders
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<IGridColumn<TModel>> GetHeaders()
+        public IEnumerable<IGridColumn<TModel>> GetHeaders ()
         {
             if (GridHeaders == null)
             {
@@ -97,7 +98,7 @@ namespace KnifeZ.Virgo.Core
         /// 计算多级表头深度
         /// </summary>
         /// <returns></returns>
-        private int GetHeaderDepth()
+        private int _getHeaderDepth ()
         {
             IEnumerable<IGridColumn<TModel>> headers = GetHeaders();
             return headers.Max(x => x.MaxDepth);
@@ -107,11 +108,10 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 初始化 InitGridHeader，继承的类应该重载这个函数来设定数据的列和动作
         /// </summary>
-        protected virtual IEnumerable<IGridColumn<TModel>> InitGridHeader()
+        protected virtual IEnumerable<IGridColumn<TModel>> InitGridHeader ()
         {
             return new List<GridColumn<TModel>>();
         }
-
 
         #region GenerateExcel
 
@@ -119,7 +119,7 @@ namespace KnifeZ.Virgo.Core
         /// 生成Excel
         /// </summary>
         /// <returns>生成的Excel文件</returns>
-        public virtual byte[] GenerateExcel()
+        public virtual byte[] GenerateExcel ()
         {
             NeedPage = false;
 
@@ -145,11 +145,11 @@ namespace KnifeZ.Virgo.Core
             //如果是1，直接下载Excel，如果是多个，下载ZIP包
             if (ExportExcelCount == 1)
             {
-                return DownloadExcel();
+                return DownLoadExcel();
             }
             else
             {
-                return DownloadZipPackage(typeof(TModel).Name + "_" + DateTime.Now.ToString("yyyyMMddHHmmssffff"));
+                return DownLoadZipPackage(typeof(TModel).Name + "_" + DateTime.Now.ToString("yyyyMMddHHmmssffff"));
             }
         }
 
@@ -158,7 +158,7 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <param name="List"></param>
         /// <returns></returns>
-        private IWorkbook GenerateWorkBook(List<TModel> List)
+        private IWorkbook GenerateWorkBook (List<TModel> List)
         {
             IWorkbook book = new XSSFWorkbook();
             ISheet sheet = book.CreateSheet();
@@ -187,24 +187,24 @@ namespace KnifeZ.Virgo.Core
 
             //生成表头
             int max = MakeExcelHeader(sheet, GridHeaders, 0, 0, headerStyle);
+
+            //放入数据
+            var ColIndex = 0;
             for (int i = 0; i < List.Count; i++)
             {
-                //放入数据
-                int ColIndex = 0;
+                ColIndex = 0;
                 var DR = sheet.CreateRow(i + max);
                 foreach (var baseCol in GridHeaders)
                 {
-                    //处理枚举变量的多语言
-                    bool IsEmunBoolParp = false;
-                    var proType = baseCol.FieldType;
-                    if (proType.IsEnumOrNullableEnum())
-                    {
-                        IsEmunBoolParp = true;
-                    }
-
                     foreach (var col in baseCol.BottomChildren)
                     {
-                        //获取数据，并过滤特殊字符
+                        //处理枚举变量的多语言
+                        bool IsEmunBoolParp = false;
+                        var proType = col.FieldType;
+                        if (proType.IsEnumOrNullableEnum())
+                        {
+                            IsEmunBoolParp = true;
+                        }                       //获取数据，并过滤特殊字符
                         string text = Regex.Replace(col.GetText(List[i]).ToString(), @"<[^>]*>", String.Empty);
 
                         //处理枚举变量的多语言
@@ -236,14 +236,14 @@ namespace KnifeZ.Virgo.Core
                         ColIndex++;
                     }
                 }
-            }            
+            }
             return book;
         }
 
-        private byte[] DownloadExcel()
+        private byte[] DownLoadExcel ()
         {
             var book = GenerateWorkBook(EntityList);
-            byte[] rv = Array.Empty<byte>();
+            byte[] rv = new byte[] { };
             using (MemoryStream ms = new MemoryStream())
             {
                 book.Write(ms);
@@ -252,10 +252,10 @@ namespace KnifeZ.Virgo.Core
             return rv;
         }
 
-        private byte[] DownloadZipPackage(string FileName)
+        private byte[] DownLoadZipPackage (string FileName)
         {
-            //文件根目录
-            string RootPath = $"{GlobalServices.GetRequiredService<IWebHostEnvironment>().WebRootPath}\\{FileName}";
+            //文件根目录            
+            string RootPath = $"{Directory.GetCurrentDirectory()}\\{FileName}";
 
             //文件夹目录
             string FilePath = $"{RootPath}//FileFolder";
@@ -328,7 +328,7 @@ namespace KnifeZ.Virgo.Core
         /// <param name="colIndex"></param>
         /// <param name="style"></param>
         /// <returns></returns>
-        private int MakeExcelHeader(ISheet sheet, IEnumerable<IGridColumn<TModel>> cols, int rowIndex, int colIndex, ICellStyle style)
+        private int MakeExcelHeader (ISheet sheet, IEnumerable<IGridColumn<TModel>> cols, int rowIndex, int colIndex, ICellStyle style)
         {
             var row = sheet.GetRow(rowIndex);
             if (row == null)
@@ -350,7 +350,7 @@ namespace KnifeZ.Virgo.Core
                     rowspan = maxLevel - col.MaxLevel;
                 }
                 var cellRangeAddress = new CellRangeAddress(rowIndex, rowIndex + rowspan, colIndex, colIndex + bcount - 1);
-                //sheet.AddMergedRegion(cellRangeAddress); TODO 暂时注释，生成excel出错
+                sheet.AddMergedRegion(cellRangeAddress);
                 if (rowspan > 0 || bcount > 1)
                 {
                     cell.CellStyle.Alignment = HorizontalAlignment.Center;
@@ -377,7 +377,7 @@ namespace KnifeZ.Virgo.Core
         #endregion
 
         #region Old
-        public SortInfo CreateSortInfo(Expression<Func<TModel, object>> pro, SortDir dir)
+        public SortInfo CreateSortInfo (Expression<Func<TModel, object>> pro, SortDir dir)
         {
             SortInfo rv = new SortInfo
             {
@@ -455,16 +455,6 @@ namespace KnifeZ.Virgo.Core
         public TSearcher Searcher { get; set; }
 
         /// <summary>
-        /// 使用 VM 的 Id 来生成 SearcherDiv 的 Id
-        /// </summary>
-        [JsonIgnore]
-        public string SearcherDivId
-        {
-            get { return this.UniqueId + "Searcher"; }
-        }
-
-
-        /// <summary>
         /// 替换查询条件，如果被赋值，则列表会使用里面的Lambda来替换原有Query里面的Where条件
         /// </summary>
         [JsonIgnore()]
@@ -473,7 +463,7 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 构造函数
         /// </summary>
-        public BasePagedListVM()
+        public BasePagedListVM ()
         {
             //默认需要分页
             NeedPage = true;
@@ -487,7 +477,7 @@ namespace KnifeZ.Virgo.Core
         /// 获取数据列表
         /// </summary>
         /// <returns>数据列表</returns>
-        public IEnumerable<TModel> GetEntityList()
+        public IEnumerable<TModel> GetEntityList ()
         {
             if (IsSearched == false && (EntityList == null || EntityList.Count == 0))
             {
@@ -500,7 +490,7 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 调用InitListVM并触发OnAfterInitList事件
         /// </summary>
-        public void DoInitListVM()
+        public void DoInitListVM ()
         {
             InitListVM();
             OnAfterInitList?.Invoke(this);
@@ -510,16 +500,16 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 初始化ListVM，继承的类应该重载这个函数来设定数据的列和动作
         /// </summary>
-        protected virtual void InitListVM()
+        protected virtual void InitListVM ()
         {
         }
 
-        public virtual bool GetIsSelected(object item)
+        public virtual bool GetIsSelected (object item)
         {
             return false;
         }
 
-        public override void Validate()
+        public override void Validate ()
         {
             Searcher?.Validate();
             base.Validate();
@@ -530,7 +520,7 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <param name="entity">数据</param>
         /// <returns>前景颜色</returns>
-        public virtual string SetFullRowColor(object entity)
+        public virtual string SetFullRowColor (object entity)
         {
             return "";
         }
@@ -540,7 +530,7 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <param name="entity">数据</param>
         /// <returns>背景颜色</returns>
-        public virtual string SetFullRowBgColor(object entity)
+        public virtual string SetFullRowBgColor (object entity)
         {
             return "";
         }
@@ -549,7 +539,7 @@ namespace KnifeZ.Virgo.Core
         /// 设定搜索语句，继承的类应该重载这个函数来指定自己的搜索语句
         /// </summary>
         /// <returns>搜索语句</returns>
-        public virtual IOrderedQueryable<TModel> GetSearchQuery()
+        public virtual IOrderedQueryable<TModel> GetSearchQuery ()
         {
             return DC.Set<TModel>().OrderByDescending(x => x.ID);
         }
@@ -558,7 +548,7 @@ namespace KnifeZ.Virgo.Core
         /// 设定导出时搜索语句，继承的类应该重载这个函数来指定自己导出时的搜索语句，如不指定则默认和搜索用的搜索语句相同
         /// </summary>
         /// <returns>搜索语句</returns>
-        public virtual IOrderedQueryable<TModel> GetExportQuery()
+        public virtual IOrderedQueryable<TModel> GetExportQuery ()
         {
             return GetSearchQuery();
         }
@@ -567,7 +557,7 @@ namespace KnifeZ.Virgo.Core
         /// 设定搜索语句，继承的类应该重载这个函数来指定自己导出时的搜索语句，如不指定则默认和搜索用的搜索语句相同
         /// </summary>
         /// <returns>搜索语句</returns>
-        public virtual IOrderedQueryable<TModel> GetSelectorQuery()
+        public virtual IOrderedQueryable<TModel> GetSelectorQuery ()
         {
             return GetSearchQuery();
         }
@@ -576,7 +566,7 @@ namespace KnifeZ.Virgo.Core
         /// 设定勾选后导出的搜索语句，继承的类应该重载这个函数来指定自己导出时的搜索语句，如不指定则默认和搜索用的搜索语句相同
         /// </summary>
         /// <returns>搜索语句</returns>
-        public virtual IOrderedQueryable<TModel> GetCheckedExportQuery()
+        public virtual IOrderedQueryable<TModel> GetCheckedExportQuery ()
         {
             var baseQuery = GetBatchQuery();
             return baseQuery;
@@ -586,7 +576,7 @@ namespace KnifeZ.Virgo.Core
         /// 设定批量模式下的搜索语句，继承的类应重载这个函数来指定自己批量模式的搜索语句，如果不指定则默认使用Ids.Contains(x.Id)来代替搜索语句中的Where条件
         /// </summary>
         /// <returns>搜索语句</returns>
-        public virtual IOrderedQueryable<TModel> GetBatchQuery()
+        public virtual IOrderedQueryable<TModel> GetBatchQuery ()
         {
             var baseQuery = GetSearchQuery();
             if (ReplaceWhere == null)
@@ -606,7 +596,7 @@ namespace KnifeZ.Virgo.Core
         /// 设定主从模式的搜索语句，继承的类应该重载这个函数来指定自己主从模式的搜索语句，如不指定则默认和搜索用的搜索语句相同
         /// </summary>
         /// <returns>搜索语句</returns>
-        public virtual IOrderedQueryable<TModel> GetMasterDetailsQuery()
+        public virtual IOrderedQueryable<TModel> GetMasterDetailsQuery ()
         {
             return GetSearchQuery();
         }
@@ -614,22 +604,37 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 进行搜索
         /// </summary>
-        public virtual void DoSearch()
+        public virtual void DoSearch ()
         {
             var cmd = GetSearchCommand();
             if (cmd == null)
             {
+                IOrderedQueryable<TModel> query = null;
                 //根据搜索模式调用不同的函数
-                IOrderedQueryable<TModel> query = SearcherMode switch
+                switch (SearcherMode)
                 {
-                    ListVMSearchModeEnum.Search => GetSearchQuery(),
-                    ListVMSearchModeEnum.Export => GetExportQuery(),
-                    ListVMSearchModeEnum.Batch => GetBatchQuery(),
-                    ListVMSearchModeEnum.MasterDetail => GetMasterDetailsQuery(),
-                    ListVMSearchModeEnum.CheckExport => GetCheckedExportQuery(),
-                    ListVMSearchModeEnum.Selector => GetSelectorQuery(),
-                    _ => GetSearchQuery(),
-                };
+                    case ListVMSearchModeEnum.Search:
+                        query = GetSearchQuery();
+                        break;
+                    case ListVMSearchModeEnum.Export:
+                        query = GetExportQuery();
+                        break;
+                    case ListVMSearchModeEnum.Batch:
+                        query = GetBatchQuery();
+                        break;
+                    case ListVMSearchModeEnum.MasterDetail:
+                        query = GetMasterDetailsQuery();
+                        break;
+                    case ListVMSearchModeEnum.CheckExport:
+                        query = GetCheckedExportQuery();
+                        break;
+                    case ListVMSearchModeEnum.Selector:
+                        query = GetSelectorQuery();
+                        break;
+                    default:
+                        query = GetSearchQuery();
+                        break;
+                }
 
                 //如果设定了替换条件，则使用替换条件替换Query中的Where语句
                 if (ReplaceWhere != null)
@@ -702,7 +707,7 @@ namespace KnifeZ.Virgo.Core
         }
 
 
-        private void ProcessCommand(DbCommand cmd)
+        private void ProcessCommand (DbCommand cmd)
         {
             object total;
 
@@ -725,7 +730,7 @@ namespace KnifeZ.Virgo.Core
                     parms.Add(new MySqlParameter("@RecordsPerPage", Searcher.Limit));
                     parms.Add(new MySqlParameter("@Sort", Searcher.SortInfo?.Property));
                     parms.Add(new MySqlParameter("@SortDir", Searcher.SortInfo?.Direction));
-                    parms.Add(new MySqlParameter("@IDs", Ids == null ? "" : Ids.ToSpratedString()));
+                    parms.Add(new MySqlParameter("@IDs", Ids == null ? "" : Ids.ToSepratedString()));
 
                     MySqlParameter outp = new MySqlParameter("@TotalRecords", MySqlDbType.Int64)
                     {
@@ -762,7 +767,7 @@ namespace KnifeZ.Virgo.Core
                     parms.Add(new NpgsqlParameter("@RecordsPerPage", Searcher.Limit));
                     parms.Add(new NpgsqlParameter("@Sort", Searcher.SortInfo?.Property));
                     parms.Add(new NpgsqlParameter("@SortDir", Searcher.SortInfo?.Direction));
-                    parms.Add(new NpgsqlParameter("@IDs", Ids == null ? "" : Ids.ToSpratedString()));
+                    parms.Add(new NpgsqlParameter("@IDs", Ids == null ? "" : Ids.ToSepratedString()));
 
                     NpgsqlParameter outp = new NpgsqlParameter("@TotalRecords", NpgsqlDbType.Bigint)
                     {
@@ -799,7 +804,7 @@ namespace KnifeZ.Virgo.Core
                     parms.Add(new SqlParameter("@RecordsPerPage", Searcher.Limit));
                     parms.Add(new SqlParameter("@Sort", Searcher.SortInfo?.Property));
                     parms.Add(new SqlParameter("@SortDir", Searcher.SortInfo?.Direction));
-                    parms.Add(new SqlParameter("@IDs", Ids == null ? "" : Ids.ToSpratedString()));
+                    parms.Add(new SqlParameter("@IDs", Ids == null ? "" : Ids.ToSepratedString()));
 
                     SqlParameter outp = new SqlParameter("@TotalRecords", 0)
                     {
@@ -839,7 +844,7 @@ namespace KnifeZ.Virgo.Core
 
         }
 
-        public DateTime AddTime(DateTime dt, string type, int size)
+        public DateTime AddTime (DateTime dt, string type, int size)
         {
             switch (type)
             {
@@ -863,7 +868,7 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 搜索后运行的函数，继承的类如果需要在搜索结束后进行其他操作，可重载这个函数
         /// </summary>
-        public virtual void AfterDoSearcher()
+        public virtual void AfterDoSearcher ()
         {
             if (SearcherMode == ListVMSearchModeEnum.Selector && Ids != null && Ids.Count > 0 && EntityList != null && EntityList.Count > 0)
             {
@@ -881,7 +886,7 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 删除所有ActionGridColumn的列
         /// </summary>
-        public void RemoveActionColumn(object root = null)
+        public void RemoveActionColumn (object root = null)
         {
             if (root == null)
             {
@@ -907,7 +912,7 @@ namespace KnifeZ.Virgo.Core
             }
         }
 
-        public void RemoveActionAndIdColumn(IEnumerable<IGridColumn<TModel>> root = null)
+        public void RemoveActionAndIdColumn (IEnumerable<IGridColumn<TModel>> root = null)
         {
             if (root == null)
             {
@@ -921,7 +926,7 @@ namespace KnifeZ.Virgo.Core
             {
                 var aroot = root as List<GridColumn<TModel>>;
                 List<GridColumn<TModel>> remove = null;
-                var idpro = typeof(TModel).GetProperties().Where(x => x.Name.ToLower() == "id").Select(x => x.PropertyType).FirstOrDefault();
+                var idpro = typeof(TModel).GetSingleProperty("ID")?.PropertyType;
                 if (idpro == typeof(string))
                 {
                     remove = aroot.Where(x => x.ColumnType == GridColumnTypeEnum.Action || x.Hide == true || x.DisableExport).ToList();
@@ -948,7 +953,7 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 添加Error列，主要为批量模式使用
         /// </summary>
-        public void AddErrorColumn()
+        public void AddErrorColumn ()
         {
             GetHeaders();
             //寻找所有Header为错误信息的列，如果没有则添加
@@ -966,9 +971,9 @@ namespace KnifeZ.Virgo.Core
             }
         }
 
-        public void ProcessListError(List<TModel> Entities)
+        public void ProcessListError (List<TModel> Entities)
         {
-            if(Entities == null)
+            if (Entities == null)
             {
                 return;
             }
@@ -990,7 +995,7 @@ namespace KnifeZ.Virgo.Core
                             {
                                 if (int.TryParse(r.Match(item).Groups[1].Value, out int index))
                                 {
-                                    EntityList[index].BatchError = errors.Select(x => x.ErrorMessage).ToSpratedString();
+                                    EntityList[index].BatchError = errors.Select(x => x.ErrorMessage).ToSepratedString();
                                     keys.Add(item);
                                     haserror = true;
                                 }
@@ -1010,12 +1015,12 @@ namespace KnifeZ.Virgo.Core
             }
         }
 
-        public TModel CreateEmptyEntity()
+        public TModel CreateEmptyEntity ()
         {
             return typeof(TModel).GetConstructor(Type.EmptyTypes).Invoke(null) as TModel;
         }
 
-        public void ClearEntityList()
+        public void ClearEntityList ()
         {
             EntityList?.Clear();
         }
@@ -1024,12 +1029,12 @@ namespace KnifeZ.Virgo.Core
 
         #endregion
 
-        public virtual void UpdateEntityList(bool updateAllFields = false)
+        public virtual void UpdateEntityList (bool updateAllFields = false)
         {
             if (EntityList != null)
             {
                 var ftype = EntityList.GetType().GenericTypeArguments.First();
-                PropertyInfo[] itemPros = ftype.GetProperties();
+                var itemPros = ftype.GetAllProperties();
 
                 foreach (var newitem in EntityList)
                 {

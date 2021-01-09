@@ -13,6 +13,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using KnifeZ.Virgo.Core.Extensions;
 using KnifeZ.Virgo.Core.Support;
+using KnifeZ.Virgo.Core.Support.Json;
 
 namespace KnifeZ.Virgo.Core
 {
@@ -57,15 +58,14 @@ namespace KnifeZ.Virgo.Core
             return rv;
         }
 
-        public static FrameworkMenu FindMenu(string url)
+        public static SimpleMenu FindMenu (string url, List<SimpleMenu> menus)
         {
-            if(url == null)
+            if (url == null)
             {
                 return null;
             }
             url = url.ToLower();
-            var menus = GlobalServices.GetRequiredService<GlobalData>()?.AllMenus;
-            if(menus == null)
+            if (menus == null)
             {
                 return null;
             }
@@ -79,24 +79,23 @@ namespace KnifeZ.Virgo.Core
                 if (pos > 0)
                 {
                     url = url.Substring(0, pos);
-                    menu = menus.Where(x => x.Url != null && (x.Url.ToLower() == url || x.Url.ToLower()+"async" == url)).FirstOrDefault();
+                    menu = menus.Where(x => x.Url != null && (x.Url.ToLower() == url || x.Url.ToLower() + "async" == url)).FirstOrDefault();
                 }
             }
 
             //如果还没找到，则判断url是否为/controller/action/id这种格式，如果是则抹掉/id之后再对比
             if (menu == null && url.EndsWith("/index"))
             {
-                url = url[0..^6];
+                url = url.Substring(0, url.Length - 6);
                 menu = menus.Where(x => x.Url != null && x.Url.ToLower() == url).FirstOrDefault();
             }
             if (menu == null && url.EndsWith("/indexasync"))
             {
-                url = url[0..^11];
+                url = url.Substring(0, url.Length - 11);
                 menu = menus.Where(x => x.Url != null && x.Url.ToLower() == url).FirstOrDefault();
             }
             return menu;
         }
-
 
         public static string GetIdByName(string fieldName)
         {

@@ -41,31 +41,16 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         string VMFullName { get; }
 
-        ISessionService Session { get; set; }
+        ISessionService Session { get; }
 
-        LoginUserInfo LoginUserInfo { get; set; }
-        #region 未使用
+        LoginUserInfo LoginUserInfo { get; }
         /// <summary>
         /// 排序信息
         /// </summary>
         SortInfo SortInfo { get; set; }
         /// <summary>
-        /// 是否搜索树形结构数据
-        /// </summary>
-        bool TreeMode { get; set; }
-        /// <summary>
-        /// 树形结构数据父Id
-        /// </summary>
-        Guid? ParentId { get; set; }
-        /// <summary>
-        /// 是否有效，针对继承PersistPoco的Model
-        /// </summary>
-        bool? IsValid { get; set; }
-        /// <summary>
         /// 用于框架判断列表页是否全局刷新
         /// </summary>
-        bool IsPostBack { get; set; }
-        #endregion
 
         #endregion
 
@@ -87,17 +72,17 @@ namespace KnifeZ.Virgo.Core
         /// 将源 VM 的 FC 等内容复制到本VM中
         /// </summary>
         /// <param name="vm"></param>
-        void CopyContext(IBaseVM vm);
+        void CopyContext (IBaseVM vm);
 
         /// <summary>
         /// 调用 InitVM 并触发 OnAfterInit 事件
         /// </summary>
-        void DoInit();
+        void DoInit ();
 
         /// <summary>
         /// 调用 ReInitVM 并触发 OnAfterReInit 事件
         /// </summary>
-        void DoReInit();
+        void DoReInit ();
 
         #endregion
 

@@ -18,7 +18,6 @@ namespace $vmnamespace$
         protected override IEnumerable<IGridColumn<$classname$_View>> InitGridHeader()
         {
             return new List<GridColumn<$classname$_View>>{$headers$
-                this.MakeGridHeaderAction(width: 200)
             };
         }$format$
 

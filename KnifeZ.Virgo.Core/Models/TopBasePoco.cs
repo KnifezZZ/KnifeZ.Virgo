@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text.Json.Serialization;
+using KnifeZ.Virgo.Core.Extensions;
 
 namespace KnifeZ.Virgo.Core
 {
@@ -20,18 +21,7 @@ namespace KnifeZ.Virgo.Core
         [Key]
         public Guid ID
         {
-            get
-            {
-                if (_id == Guid.Empty)
-                {
-                    _id = Guid.NewGuid();
-                }
-                return _id;
-            }
-            set
-            {
-                _id = value;
-            }
+            get; set;
         }
 
         /// <summary>
@@ -39,8 +29,6 @@ namespace KnifeZ.Virgo.Core
         /// 标识当前行数据是否被选中
         /// </summary>
         [NotMapped]
-        //[JsonConverter(typeof(InternalBoolConverter))]
-        //[JsonProperty("LAY_CHECKED")]
         [JsonIgnore]
         public bool Checked { get; set; }
 
@@ -58,17 +46,24 @@ namespace KnifeZ.Virgo.Core
         [JsonIgnore]
         public long ExcelIndex { get; set; }
 
-        public object GetID()
+        public object GetID ()
         {
-            var idpro = this.GetType().GetProperties().Where(x => x.Name.ToLower() == "id").FirstOrDefault();
+            var idpro = this.GetType().GetSingleProperty("ID");
             var id = idpro.GetValue(this);
             return id;
         }
 
-        public Type GetIDType()
+        public Type GetIDType ()
         {
-            var idpro = this.GetType().GetProperties().Where(x => x.Name.ToLower() == "id").FirstOrDefault();
+            var idpro = this.GetType().GetSingleProperty("ID");
             return idpro.PropertyType;
+        }
+
+        public void SetID (object id)
+        {
+            var idpro = this.GetType().GetSingleProperty("ID");
+            idpro.SetValue(this, id.ConvertValue(idpro.PropertyType));
+
         }
     }
 }

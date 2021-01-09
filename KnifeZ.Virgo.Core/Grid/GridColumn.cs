@@ -13,11 +13,9 @@ namespace KnifeZ.Virgo.Core
     /// <typeparam name="T">列表的数据源类</typeparam>
     public class GridColumn<T> : IGridColumn<T> where T : TopBasePoco
     {
-        public bool? ShowTotal { get; set; }
         public GridColumn(Expression<Func<T, object>> columnExp, int? width)
         {
             ColumnExp = columnExp;
-            Width = width;
         }
 
         /// <summary>
@@ -69,34 +67,6 @@ namespace KnifeZ.Virgo.Core
         }
 
         /// <summary>
-        /// 列宽
-        /// </summary>
-        public int? Width { get; set; }
-        /// <summary>
-        /// //监听单元格事件
-        /// </summary>
-        public string Event { get; set; }
-        /// <summary>
-        /// 是否允许排序
-        /// </summary>
-        public bool? Sort { get; set; }
-
-        /// <summary>
-        /// 是否固定列
-        /// </summary>
-        public GridColumnFixedEnum? Fixed { get; set; }
-
-        /// <summary>
-        /// 对齐方式
-        /// </summary>
-        public GridColumnAlignEnum Align { get; set; }
-
-        /// <summary>
-        /// 是否可改变列宽
-        /// </summary>
-        public bool? UnResize { get; set; }
-
-        /// <summary>
         /// 隐藏列
         /// </summary>
         public bool? Hide { get; set; }
@@ -135,8 +105,6 @@ namespace KnifeZ.Virgo.Core
                 return _childrenLen.Value;
             }
         }
-
-        public EditTypeEnum? EditType { get; set; }
 
         public List<ComboSelectListItem> ListItems { get; set; }
 
@@ -475,7 +443,6 @@ namespace KnifeZ.Virgo.Core
             this.ColumnExp = ColumnExp;
             this.Format = Format;
             this.Title = Header;
-            this.Width = Width;
             this.NeedGroup = NeedGroup;
             this.ForeGroundFunc = ForeGroundFunc;
             this.BackGroundFunc = BackGroundFunc;

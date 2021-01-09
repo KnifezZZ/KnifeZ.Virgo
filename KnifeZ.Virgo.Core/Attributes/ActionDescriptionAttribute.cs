@@ -15,29 +15,29 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         public string Description { get; set; }
 
-        public IStringLocalizer Localizer { get; set; }
+        public IStringLocalizer _localizer { get; set; }
         /// <summary>
         /// 新建一个描述
         /// </summary>
-        public ActionDescriptionAttribute(string desc)
+        public ActionDescriptionAttribute (string desc)
         {
             this.Description = desc;
         }
 
-        public void SetLoccalizer(Type controllertype)
+        public void SetLoccalizer (Type controllertype)
         {
             if (Core.Program.Buildindll.Any(x => controllertype.FullName.StartsWith(x)))
             {
                 if (Core.Program._localizer != null)
                 {
-                    Localizer = Core.Program._localizer;
+                    _localizer = Core.Program._localizer;
                 }
             }
             else
             {
                 if (Core.Program.Callerlocalizer != null)
                 {
-                    Localizer = Core.Program.Callerlocalizer;
+                    _localizer = Core.Program.Callerlocalizer;
                 }
             }
         }

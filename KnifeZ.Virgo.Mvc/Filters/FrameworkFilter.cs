@@ -14,12 +14,15 @@ using System.Text;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using KnifeZ.Virgo.Core.Support.Json;
+using Microsoft.Extensions.DependencyInjection;
+using KnifeZ.Virgo.Core.Json;
 
 namespace KnifeZ.Virgo.Mvc.Filters
 {
     public class FrameworkFilter : ActionFilterAttribute
     {
-        public override void OnActionExecuting(ActionExecutingContext context)
+
+        public override void OnActionExecuting (ActionExecutingContext context)
         {
             var ctrl = context.Controller as IBaseController;
             if (ctrl == null)
@@ -27,8 +30,7 @@ namespace KnifeZ.Virgo.Mvc.Filters
                 base.OnActionExecuting(context);
                 return;
             }
-
-
+            context.SetVirgoContext();
             if (context.HttpContext.Items.ContainsKey("actionstarttime") == false)
             {
                 context.HttpContext.Items.Add("actionstarttime", DateTime.Now);
@@ -40,40 +42,23 @@ namespace KnifeZ.Virgo.Mvc.Filters
             var postDes = ctrlActDesc.MethodInfo.GetCustomAttributes(typeof(HttpPostAttribute), false).Cast<HttpPostAttribute>().FirstOrDefault();
             var validpostonly = ctrlActDesc.MethodInfo.GetCustomAttributes(typeof(ValidateFormItemOnlyAttribute), false).Cast<ValidateFormItemOnlyAttribute>().FirstOrDefault();
 
-            log.ITCode = ctrl.LoginUserInfo?.ITCode ?? string.Empty;
+            log.ITCode = ctrl.KnifeVirgo.LoginUserInfo?.ITCode ?? string.Empty;
             //给日志的多语言属性赋值
             log.ModuleName = ctrlDes?.GetDescription(ctrl) ?? ctrlActDesc.ControllerName;
             log.ActionName = actDes?.GetDescription(ctrl) ?? ctrlActDesc.ActionName + (postDes == null ? string.Empty : "[P]");
-            log.ActionUrl = ctrl.BaseUrl;
+            log.ActionUrl = ctrl.KnifeVirgo.BaseUrl;
             log.IP = context.HttpContext.Connection.RemoteIpAddress.ToString();
 
-            ctrl.Log = log;
+            ctrl.KnifeVirgo.Log = log;
             foreach (var item in context.ActionArguments)
             {
                 if (item.Value is BaseVM)
                 {
                     var model = item.Value as BaseVM;
-                    model.Session = new SessionServiceProvider(context.HttpContext.Session);
-                    model.Cache = ctrl.Cache;
-                    model.LoginUserInfo = ctrl.LoginUserInfo;
-                    model.DC = ctrl.DC;
-                    model.MSD = new ModelStateServiceProvider(ctrl.ModelState);
+                    model.KnifeVirgo = ctrl.KnifeVirgo;
                     model.FC = new Dictionary<string, object>();
                     model.CreatorAssembly = this.GetType().Assembly.FullName;
-                    model.FromFixedCon = ctrlActDesc.MethodInfo.IsDefined(typeof(FixConnectionAttribute), false) || ctrlActDesc.ControllerTypeInfo.IsDefined(typeof(FixConnectionAttribute), false); ;
-                    model.CurrentCS = ctrl.CurrentCS;
-                    model.Log = ctrl.Log;
-                    model.CurrentUrl = ctrl.BaseUrl;
-                    model.ConfigInfo = (Configs)context.HttpContext.RequestServices.GetService(typeof(Configs));
-                    model.DataContextCI = model.ConfigInfo.ConnectionStrings.Where(x => x.Key.ToLower() == ctrl.CurrentCS.ToLower()).Select(x => x.DcConstructor).FirstOrDefault();
-                    model.Controller = ctrl;
-                    model.ControllerName = ctrl.GetType().FullName;
-                    model.Localizer = ctrl.Localizer;
-                    var programtype = ctrl.GetType().Assembly.GetTypes().Where(x => x.Name == "Program").FirstOrDefault();
-                    if (programtype != null)
-                    {
-                        model.Localizer = GlobalServices.GetRequiredService(typeof(IStringLocalizer<>).MakeGenericType(programtype)) as IStringLocalizer;
-                    }
+                    model.ControllerName = context.HttpContext.Request.Path;
                     try
                     {
                         var f = context.HttpContext.Request.Form;
@@ -84,7 +69,7 @@ namespace KnifeZ.Virgo.Mvc.Filters
                                 model.FC.Add(key, f[key]);
                             }
                         }
-                        if (context.HttpContext.Request.QueryString.HasValue)
+                        if (context.HttpContext.Request.QueryString != QueryString.Empty)
                         {
                             foreach (var key in context.HttpContext.Request.Query.Keys)
                             {
@@ -103,14 +88,41 @@ namespace KnifeZ.Virgo.Mvc.Filters
                         if (context.HttpContext.Items.ContainsKey("DONOTUSE_REQUESTBODY"))
                         {
                             string body = context.HttpContext.Items["DONOTUSE_REQUESTBODY"].ToString();
-                            var obj = JsonSerializer.Deserialize<JsonElement>(body);
-                            var fields = GetJsonFields(obj);
-                            foreach (var field in fields)
+                            var joption = new JsonSerializerOptions();
+                            joption.Converters.Add(new BodyConverter());
+                            var obj = JsonSerializer.Deserialize<PostedBody>(body, joption);
+                            foreach (var field in obj.ProNames)
                             {
                                 model.FC.Add(field, null);
                             }
                         }
                     }
+                    //if (model is IBaseCRUDVM<TopBasePoco> crud)
+                    //{
+                    //    var pros = crud.Entity.GetType().GetProperties();
+                    //    foreach (var pro in pros)
+                    //    {
+                    //        if (model.FC.ContainsKey("Entity." + pro.Name))
+                    //        {
+                    //            //找到类型为List<xxx>的字段
+                    //            if (pro.PropertyType.GenericTypeArguments.Count() > 0)
+                    //            {
+                    //                //获取xxx的类型
+                    //                var ftype = pro.PropertyType.GenericTypeArguments.First();
+                    //                //如果xxx继承自TopBasePoco
+                    //                if (ftype.IsSubclassOf(typeof(TopBasePoco)))
+                    //                {
+                    //                    //界面传过来的子表数据
+
+                    //                    if (pro.GetValue(crud.Entity) is IEnumerable<TopBasePoco> list && list.Count() == 0)
+                    //                    {
+                    //                        pro.SetValue(crud.Entity, null);
+                    //                    }
+                    //                }
+                    //            }
+                    //        }
+                    //    }
+                    //}
                     //如果ViewModel T继承自IBaseBatchVM<BaseVM>，则自动为其中的ListVM和EditModel初始化数据
                     if (model is IBaseBatchVM<BaseVM>)
                     {
@@ -152,7 +164,7 @@ namespace KnifeZ.Virgo.Mvc.Filters
                     if (model is IBasePagedListVM<TopBasePoco, ISearcher> lvm)
                     {
                         var searcher = lvm.Searcher;
-                        searcher.CopyContext(lvm);                        
+                        searcher.CopyContext(lvm);
                     }
                     model.Validate();
                     var invalid = ctrl.ModelState.Where(x => x.Value.ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid).Select(x => x.Key).ToList();
@@ -166,7 +178,7 @@ namespace KnifeZ.Virgo.Mvc.Filters
                             }
                         }
                     }
-                    if (ctrl is BaseController)
+                    if (ctrl is BaseApiController)
                     {
                         var reinit = model.GetType().GetTypeInfo().GetCustomAttributes(typeof(ReInitAttribute), false).Cast<ReInitAttribute>().SingleOrDefault();
                         if (ctrl.ModelState.IsValid)
@@ -193,13 +205,10 @@ namespace KnifeZ.Virgo.Mvc.Filters
                     }
                 }
 
-                if(item.Value is BaseSearcher se)
+                if (item.Value is BaseSearcher se)
                 {
-                    se.Session = new SessionServiceProvider(context.HttpContext.Session);
-                    se.LoginUserInfo = ctrl.LoginUserInfo;
-                    se.DC = ctrl.DC;
                     se.FC = new Dictionary<string, object>();
-                    se.MSD = new ModelStateServiceProvider(ctrl.ModelState);
+                    se.KnifeVirgo = ctrl.KnifeVirgo;
                     se.Validate();
                 }
             }
@@ -209,12 +218,90 @@ namespace KnifeZ.Virgo.Mvc.Filters
 
 
 
-        public override void OnActionExecuted(ActionExecutedContext context)
+        public override void OnActionExecuted (ActionExecutedContext context)
         {
+            BaseApiController ctrl = context.Controller as BaseApiController;
+            if (ctrl == null)
+            {
+                base.OnActionExecuted(context);
+                return;
+            }
+            //ctrl.ViewData["DONOTUSE_COOKIEPRE"] = ctrl.KnifeVirgo.ConfigInfo.CookiePre; TODO
+            var ctrlActDesc = context.ActionDescriptor as ControllerActionDescriptor;
+            if (context.Result is PartialViewResult)
+            {
+                var model = (context.Result as PartialViewResult).ViewData?.Model as BaseVM;
+                if (model == null && (context.Result as PartialViewResult).Model == null && (context.Result as PartialViewResult).ViewData != null)
+                {
+                    model = ctrl.KnifeVirgo.CreateVM<BaseVM>();
+                    (context.Result as PartialViewResult).ViewData.Model = model;
+                }
+                // 为所有 PartialView 加上最外层的 Div
+                if (model != null)
+                {
+                    string pagetitle = string.Empty;
+                    var menu = Utils.FindMenu(context.HttpContext.Request.Path, ctrl.KnifeVirgo.GlobaInfo.AllMenus);
+                    if (menu == null)
+                    {
+                        var ctrlDes = ctrlActDesc.ControllerTypeInfo.GetCustomAttributes(typeof(ActionDescriptionAttribute), false).Cast<ActionDescriptionAttribute>().FirstOrDefault();
+                        var actDes = ctrlActDesc.MethodInfo.GetCustomAttributes(typeof(ActionDescriptionAttribute), false).Cast<ActionDescriptionAttribute>().FirstOrDefault();
+                        if (actDes != null)
+                        {
+                            if (ctrlDes != null)
+                            {
+                                pagetitle = ctrlDes.GetDescription(ctrl) + " - ";
+                            }
+                            pagetitle += actDes.GetDescription(ctrl);
+                        }
+                    }
+                    else
+                    {
+                        if (menu.ParentId != null)
+                        {
+                            var pmenu = ctrl.KnifeVirgo.GlobaInfo.AllMenus.Where(x => x.ID == menu.ParentId).FirstOrDefault();
+                            if (pmenu != null)
+                            {
+                                if (ctrl.Localizer[pmenu.PageName].ResourceNotFound == true)
+                                {
+                                    pmenu.PageName = Core.Program._localizer[pmenu.PageName];
+                                }
+                                else
+                                {
+                                    pmenu.PageName = ctrl.Localizer[pmenu.PageName];
+                                }
+
+                                pagetitle = pmenu.PageName + " - ";
+                            }
+                        }
+                        if (ctrl.Localizer[menu.PageName].ResourceNotFound == true)
+                        {
+                            menu.PageName = Core.Program._localizer[menu.PageName];
+                        }
+                        else
+                        {
+                            menu.PageName = ctrl.Localizer[menu.PageName];
+                        }
+                        pagetitle += menu.PageName;
+                    }
+                    if (string.IsNullOrEmpty(pagetitle) == false)
+                    {
+                        context.HttpContext.Response.Headers.Add("X-virgo-PageTitle", Convert.ToBase64String(Encoding.UTF8.GetBytes(pagetitle)));
+                    }
+                }
+            }
+            if (context.Result is ViewResult)
+            {
+                var model = (context.Result as ViewResult).ViewData?.Model as BaseVM;
+                if (model == null && (context.Result as ViewResult).Model == null && (context.Result as ViewResult).ViewData != null)
+                {
+                    model = ctrl.KnifeVirgo.CreateVM<BaseVM>();
+                    (context.Result as ViewResult).ViewData.Model = model;
+                }
+            }
             base.OnActionExecuted(context);
         }
 
-        public override void OnResultExecuted(ResultExecutedContext context)
+        public override void OnResultExecuted (ResultExecutedContext context)
         {
             var ctrl = context.Controller as IBaseController;
             if (ctrl == null)
@@ -224,100 +311,63 @@ namespace KnifeZ.Virgo.Mvc.Filters
             }
             var ctrlActDesc = context.ActionDescriptor as ControllerActionDescriptor;
             var nolog = ctrlActDesc.MethodInfo.IsDefined(typeof(NoLogAttribute), false) || ctrlActDesc.ControllerTypeInfo.IsDefined(typeof(NoLogAttribute), false);
-            if ( nolog == false)
-            {
-                    var log = new ActionLog();
-                    var ctrlDes = ctrlActDesc.ControllerTypeInfo.GetCustomAttributes(typeof(ActionDescriptionAttribute), false).Cast<ActionDescriptionAttribute>().FirstOrDefault();
-                    var actDes = ctrlActDesc.MethodInfo.GetCustomAttributes(typeof(ActionDescriptionAttribute), false).Cast<ActionDescriptionAttribute>().FirstOrDefault();
-                    var postDes = ctrlActDesc.MethodInfo.GetCustomAttributes(typeof(HttpPostAttribute), false).Cast<HttpPostAttribute>().FirstOrDefault();
 
-                    log.LogType = context.Exception == null ? ActionLogTypesEnum.Normal : ActionLogTypesEnum.Exception;
-                    log.ActionTime = DateTime.Now;
-                    log.ITCode = ctrl.LoginUserInfo?.ITCode ?? string.Empty;
-                    // 给日志的多语言属性赋值
-                    log.ModuleName = ctrlDes?.GetDescription(ctrl) ?? ctrlActDesc.ControllerName;
-                    log.ActionName = actDes?.GetDescription(ctrl) ?? ctrlActDesc.ActionName + (postDes == null ? string.Empty : "[P]");
-                    log.ActionUrl = context.HttpContext.Request.Path;
-                    log.IP = context.HttpContext.GetRemoteIpAddress();
-                    log.Remark = context.Exception?.ToString() ?? string.Empty;
-                    if (string.IsNullOrEmpty(log.Remark) == false && log.Remark.Length > 2000)
+            //如果是来自Error，则已经记录过日志，跳过
+            if (ctrlActDesc.ControllerName == "_Framework" && ctrlActDesc.ActionName == "Error")
+            {
+                return;
+            }
+            if (nolog == false)
+            {
+                var log = new ActionLog();
+                var ctrlDes = ctrlActDesc.ControllerTypeInfo.GetCustomAttributes(typeof(ActionDescriptionAttribute), false).Cast<ActionDescriptionAttribute>().FirstOrDefault();
+                var actDes = ctrlActDesc.MethodInfo.GetCustomAttributes(typeof(ActionDescriptionAttribute), false).Cast<ActionDescriptionAttribute>().FirstOrDefault();
+                var postDes = ctrlActDesc.MethodInfo.GetCustomAttributes(typeof(HttpPostAttribute), false).Cast<HttpPostAttribute>().FirstOrDefault();
+
+                log.LogType = context.Exception == null ? ActionLogTypesEnum.Normal : ActionLogTypesEnum.Exception;
+                log.ActionTime = DateTime.Now;
+                log.ITCode = ctrl.KnifeVirgo.LoginUserInfo?.ITCode ?? string.Empty;
+                // 给日志的多语言属性赋值
+                log.ModuleName = ctrlDes?.GetDescription(ctrl) ?? ctrlActDesc.ControllerName;
+                log.ActionName = actDes?.GetDescription(ctrl) ?? ctrlActDesc.ActionName + (postDes == null ? string.Empty : "[P]");
+                log.ActionUrl = context.HttpContext.Request.Path;
+                log.IP = context.HttpContext.GetRemoteIpAddress();
+                log.Remark = context.Exception?.ToString() ?? string.Empty;
+                if (string.IsNullOrEmpty(log.Remark) == false && log.Remark.Length > 2000)
+                {
+                    log.Remark = log.Remark.Substring(0, 2000);
+                }
+                var starttime = context.HttpContext.Items["actionstarttime"] as DateTime?;
+                if (starttime != null)
+                {
+                    log.Duration = DateTime.Now.Subtract(starttime.Value).TotalSeconds;
+                }
+                try
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<ActionLog>>();
+                    if (logger != null)
                     {
-                        log.Remark = log.Remark.Substring(0, 2000);
-                    }
-                    var starttime = context.HttpContext.Items["actionstarttime"] as DateTime?;
-                    if (starttime != null)
-                    {
-                        log.Duration = DateTime.Now.Subtract(starttime.Value).TotalSeconds;
-                    }
-                    try
-                    {
-                        GlobalServices.GetRequiredService<ILogger<ActionLog>>().Log<ActionLog>(LogLevel.Information, new EventId(), log, null, (a,b)=> {
+                        logger.Log<ActionLog>(LogLevel.Information, new EventId(), log, null, (a, b) =>
+                        {
                             return a.GetLogString();
                         });
                     }
-                    catch { }
+                }
+                catch { }
             }
             if (context.Exception != null)
             {
                 context.ExceptionHandled = true;
-                if (ctrl.ConfigInfo.IsQuickDebug == true)
+                if (ctrl.KnifeVirgo.ConfigInfo.IsQuickDebug == true)
                 {
                     context.HttpContext.Response.WriteAsync(context.Exception.ToString());
                 }
                 else
                 {
-                    context.HttpContext.Response.WriteAsync(Program._localizer["PageError"]);
+                    context.HttpContext.Response.WriteAsync(Mvc.Program._localizer["PageError"]);
                 }
             }
             base.OnResultExecuted(context);
-        }
-
-        private IEnumerable<string> GetJsonFields (JsonElement j)
-        {
-            var children = j.EnumerateObject();
-            while (children.MoveNext())
-            {
-                var rv = GetTokenFields(children.Current);
-                foreach (var item in rv)
-                {
-                    if (children.Current.Name != item)
-                    {
-                        yield return children.Current.Name + "." + item;
-                    }
-                    else
-                    {
-                        yield return item;
-                    }
-                }
-            }
-            yield break;
-        }
-
-        private IEnumerable<string> GetTokenFields (JsonProperty j)
-        {
-            if (j.Value.ValueKind == JsonValueKind.Object)
-            {
-                var children = j.Value.EnumerateObject();
-                while (children.MoveNext())
-                {
-                    var rv = GetTokenFields(children.Current);
-                    foreach (var item in rv)
-                    {
-                        if (item != children.Current.Name)
-                        {
-                            yield return children.Current.Name + "." + item;
-                        }
-                        else
-                        {
-                            yield return item;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                yield return j.Name;
-            }
         }
     }
 }

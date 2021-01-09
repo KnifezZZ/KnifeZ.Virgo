@@ -23,7 +23,7 @@ namespace KnifeZ.Virgo.Mvc
         /// <summary>
         /// Model namespace
         /// </summary>
-        public string ModelNS => CodeModel.ModelType?.Split(',').FirstOrDefault()?.Split('.').SkipLast(1).ToSpratedString(seperator: ".");
+        public string ModelNS => CodeModel.ModelType?.Split(',').FirstOrDefault()?.Split('.').SkipLast(1).ToSepratedString(seperator: ".");
         /// <summary>
         /// 基础路径
         /// </summary>
@@ -272,7 +272,6 @@ namespace KnifeZ.Virgo.Mvc
                     IsPublic = false,
                     IsInside = true,
                     DisplayOrder = 99,
-                    CreateTime = DateTime.Now
                 };
                 int order = 1;
                 //添加常规方法
@@ -295,7 +294,6 @@ namespace KnifeZ.Virgo.Mvc
                         IsPublic = false,
                         IsInside = true,
                         DisplayOrder = order++,
-                        CreateTime = DateTime.Now,
                         ParentId = menu.ID
                     };
                     if (item == "Get")
@@ -335,7 +333,6 @@ namespace KnifeZ.Virgo.Mvc
                                 IsPublic = false,
                                 IsInside = true,
                                 DisplayOrder = order++,
-                                CreateTime = DateTime.Now,
                                 ParentId = menu.ID
 
                             });
@@ -389,7 +386,7 @@ namespace KnifeZ.Virgo.Mvc
         [HttpGet(""[action]"")]
         public ActionResult Get{subtype.Name}List()
         {{
-            return Ok(DC.Set<{subtype.Name}>().GetSelectListItems(LoginUserInfo?.DataPrivileges, null, x => x.{item.SubField}));
+            return Ok(KnifeVirgo.DC.Set<{subtype.Name}>().GetSelectListItems(KnifeVirgo, null, x => x.{item.SubField}));
         }}");
                     }
                 }
@@ -507,55 +504,45 @@ namespace KnifeZ.Virgo.Mvc
                     else
                     {
                         var subtype = Type.GetType(pro.LinkedType);
-                        if (subtype == typeof(FileAttachment))
+
+                        var subpro = subtype.GetProperties().Where(x => x.Name == pro.SubField).FirstOrDefault();
+                        existSubPro.Add(subpro);
+                        string prefix = "";
+                        int count = existSubPro.Where(x => x.Name == subpro.Name).Count();
+                        if (count > 1)
                         {
-                            var filefk = DC.GetFKName2(modelType, pro.FieldName);
-                            headerstring += $@"
-                this.MakeGridHeader(x => x.{filefk}).SetFormat({filefk}Format),";
+                            prefix = count + "";
+                        }
+                        string subtypename = subpro.PropertyType.Name;
+                        if (subpro.PropertyType.IsNullable())
+                        {
+                            subtypename = subpro.PropertyType.GetGenericArguments()[0].Name + "?";
+                        }
+
+                        var subdisplay = subpro.GetCustomAttribute<DisplayAttribute>();
+                        headerstring += $@"
+                this.MakeGridHeader(x => x.{subpro.DeclaringType.Name + "_" + pro.SubField + prefix}),";
+                        if (pro.InfoType == FieldInfoType.One2Many)
+                        {
                             selectstring += $@"
-                    {filefk} = x.{filefk},";
-                            formatstring += GetResource("HeaderFormat.txt").Replace("$modelname$", ModelName).Replace("$field$", filefk).Replace("$classname$", $"{ModelName}");
+                    {subpro.DeclaringType.Name + "_" + pro.SubField + prefix} = x.{pro.FieldName}.{pro.SubField},";
                         }
                         else
                         {
-                            var subpro = subtype.GetProperties().Where(x => x.Name == pro.SubField).FirstOrDefault();
-                            existSubPro.Add(subpro);
-                            string prefix = "";
-                            int count = existSubPro.Where(x => x.Name == subpro.Name).Count();
-                            if (count > 1)
-                            {
-                                prefix = count + "";
-                            }
-                            string subtypename = subpro.PropertyType.Name;
-                            if (subpro.PropertyType.IsNullable())
-                            {
-                                subtypename = subpro.PropertyType.GetGenericArguments()[0].Name + "?";
-                            }
-
-                            var subdisplay = subpro.GetCustomAttribute<DisplayAttribute>();
-                            headerstring += $@"
-                this.MakeGridHeader(x => x.{subpro.DeclaringType.Name + "_" + pro.SubField + prefix}),";
-                            if (pro.InfoType == FieldInfoType.One2Many)
-                            {
-                                selectstring += $@"
-                    {subpro.DeclaringType.Name + "_" + pro.SubField + prefix} = x.{pro.FieldName}.{pro.SubField},";
-                            }
-                            else
-                            {
-                                var middleType = modelType.GetSingleProperty(pro.FieldName).PropertyType.GenericTypeArguments[0];
-                                var middlename = DC.GetPropertyNameByFk(middleType, pro.SubIdField);
-                                selectstring += $@"
-                    {subpro.DeclaringType.Name + "_" + pro.SubField + prefix} = x.{pro.FieldName}.Select(y=>y.{middlename}.{pro.SubField}).ToSpratedString(null,"",""), ";
-                            }
-                            if (subdisplay?.Name != null)
-                            {
-                                subprostring += $@"
-        [Display(Name = ""{subdisplay.Name}"")]";
-                            }
-                            subprostring += $@"
-        public {subtypename} {subpro.DeclaringType.Name + "_" + pro.SubField + prefix} {{ get; set; }}";
+                            var middleType = modelType.GetSingleProperty(pro.FieldName).PropertyType.GenericTypeArguments[0];
+                            var middlename = DC.GetPropertyNameByFk(middleType, pro.SubIdField);
+                            selectstring += $@"
+                    {subpro.DeclaringType.Name + "_" + pro.SubField + prefix} = x.{pro.FieldName}.Select(y=>y.{middlename}.{pro.SubField}).ToSepratedString(null,"",""), ";
                         }
+                        if (subdisplay?.Name != null)
+                        {
+                            subprostring += $@"
+        [Display(Name = ""{subdisplay.Name}"")]";
+                        }
+                        subprostring += $@"
+        public {subtypename} {subpro.DeclaringType.Name + "_" + pro.SubField + prefix} {{ get; set; }}";
                     }
+
 
                 }
                 var wherepros = CodeModel.FieldInfos.Where(x => x.IsSearcherField == true).ToList();
@@ -623,7 +610,7 @@ namespace KnifeZ.Virgo.Mvc
                     prostr += $@"
         public List<ComboSelectListItem> {fname} {{ get; set; }}";
                     initstr += $@"
-            {fname} = DC.Set<{subtype.Name}>().GetSelectListItems(LoginUserInfo?.DataPrivileges, null, y => y.{pro.SubField});";
+            {fname} = DC.Set<{subtype.Name}>().GetSelectListItems(KnifeVirgo, null, y => y.{pro.SubField});";
                     includestr += $@"
             SetInclude(x => x.{pro.FieldName});";
 
@@ -681,7 +668,7 @@ namespace KnifeZ.Virgo.Mvc
                         }
                         initstr += $@"
             {pro.FieldName + "_Excel"}.DataType = ColumnDataType.ComboBox;
-            {pro.FieldName + "_Excel"}.ListItems = DC.Set<{subtype.Name}>().GetSelectListItems(LoginUserInfo?.DataPrivileges, null, y => y.{pro.SubField});";
+            {pro.FieldName + "_Excel"}.ListItems = DC.Set<{subtype.Name}>().GetSelectListItems(KnifeVirgo, null, y => y.{pro.SubField});";
                     }
                     var proType = modelType.GetProperties().Where(x => x.Name == pro.FieldName).FirstOrDefault();
                     var display = proType.GetCustomAttribute<DisplayAttribute>();

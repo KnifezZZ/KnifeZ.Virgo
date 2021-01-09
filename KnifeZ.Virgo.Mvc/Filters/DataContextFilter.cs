@@ -11,19 +11,14 @@ namespace KnifeZ.Virgo.Mvc.Filters
 {
     public class DataContextFilter : ActionFilterAttribute
     {
-        private Func<ActionExecutingContext, string> _csfunc;
+        public static Func<ActionExecutingContext, string> _csfunc;
 
-        public DataContextFilter()
+        public DataContextFilter ()
         {
 
         }
 
-        public DataContextFilter(Func<ActionExecutingContext, string> CsSelector)
-        {
-            this._csfunc = CsSelector;
-        }
-
-        public override void OnActionExecuting(ActionExecutingContext context)
+        public override void OnActionExecuting (ActionExecutingContext context)
         {
             var controller = context.Controller as IBaseController;
             if (controller == null)
@@ -31,6 +26,7 @@ namespace KnifeZ.Virgo.Mvc.Filters
                 base.OnActionExecuting(context);
                 return;
             }
+            context.SetVirgoContext();
             string cs = "";
             DBTypeEnum? dbtype = null;
             ControllerActionDescriptor ad = context.ActionDescriptor as ControllerActionDescriptor;
@@ -58,27 +54,24 @@ namespace KnifeZ.Virgo.Mvc.Filters
                     }
                 }
                 dbtype = fixcontroller?.DbType ?? fixaction?.DbType;
-                cs = Utils.GetCS(cs, mode, controller.ConfigInfo);
+                cs = Utils.GetCS(cs, mode, controller.KnifeVirgo.ConfigInfo);
             }
             else
             {
-                if (_csfunc != null)
+                cs = _csfunc?.Invoke(context);
+                if (string.IsNullOrEmpty(cs))
                 {
-                    cs = _csfunc.Invoke(context);
-                }
-                else
-                {
-                    if(ispost != null)
+                    if (ispost != null)
                     {
                         mode = "Write";
                     }
                     cs = context.HttpContext.Request.Query["DONOTUSECSName"];
-                    cs = Utils.GetCS(cs, mode, controller.ConfigInfo);
+                    cs = Utils.GetCS(cs, mode, controller.KnifeVirgo.ConfigInfo);
                 }
             }
 
-            controller.CurrentCS = cs;
-            controller.CurrentDbType = dbtype;
+            controller.KnifeVirgo.CurrentCS = cs;
+            controller.KnifeVirgo.CurrentDbType = dbtype;
             base.OnActionExecuting(context);
         }
     }

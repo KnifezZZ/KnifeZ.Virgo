@@ -40,7 +40,7 @@ namespace KnifeZ.Virgo.Core
         #endregion
 
         #region 构造函数
-        public BaseTemplateVM()
+        public BaseTemplateVM ()
         {
             ValidityTemplateType = true;
             Parms = new Dictionary<string, string>();
@@ -51,12 +51,12 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 初始化Excel属性数据  包括动态列,列表中的下拉选项
         /// </summary>
-        public virtual void InitExcelData()
+        public virtual void InitExcelData ()
         {
 
         }
 
-        public virtual void InitCustomFormat()
+        public virtual void InitCustomFormat ()
         {
 
         }
@@ -67,7 +67,7 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 初始化模版数据
         /// </summary>
-        public virtual void SetTemplateDataValus()
+        public virtual void SetTemplateDataValus ()
         {
 
         }
@@ -79,7 +79,7 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <param name="displayName">文件名</param>
         /// <returns>生成的模版文件</returns>
-        public byte[] GenerateTemplate(out string displayName)
+        public byte[] GenerateTemplate (out string displayName)
         {
             //设置导出的文件名称
             string SheetName = !string.IsNullOrEmpty(FileDisplayName) ? FileDisplayName : this.GetType().Name;
@@ -136,7 +136,7 @@ namespace KnifeZ.Virgo.Core
             bool IsProtect = false;
 
             //循环类的属性，赋值给列
-            for (int porpetyIndex = 0; porpetyIndex < propetys.Count; porpetyIndex++)
+            for (int porpetyIndex = 0; porpetyIndex < propetys.Count(); porpetyIndex++)
             {
                 //依次获取属性字段
                 ExcelPropety excelPropety = (ExcelPropety)propetys[porpetyIndex].GetValue(this);
@@ -171,7 +171,7 @@ namespace KnifeZ.Virgo.Core
 
                 if (dateType == ColumnDataType.Dynamic)
                 {
-                    int dynamicColCount = excelPropety.DynamicColumns.Count;
+                    int dynamicColCount = excelPropety.DynamicColumns.Count();
                     for (int dynamicColIndex = 0; dynamicColIndex < dynamicColCount; dynamicColIndex++)
                     {
                         var dynamicCol = excelPropety.DynamicColumns.ToList()[dynamicColIndex];
@@ -226,7 +226,7 @@ namespace KnifeZ.Virgo.Core
                 {
                     DataRow tableRow = TemplateDataTable.Rows[i];
                     IRow dataRow = sheet.CreateRow(1 + i);
-                    for (int porpetyIndex = 0; porpetyIndex < propetys.Count; porpetyIndex++)
+                    for (int porpetyIndex = 0; porpetyIndex < propetys.Count(); porpetyIndex++)
                     {
                         string colName = propetys[porpetyIndex].Name;
                         tableRow[colName].ToString();
@@ -257,7 +257,7 @@ namespace KnifeZ.Virgo.Core
         #endregion
 
         #region 取得表头的样式
-        private static ICellStyle GetCellStyle(IWorkbook workbook, BackgroudColorEnum backgroudColor = BackgroudColorEnum.Grey)
+        private static ICellStyle GetCellStyle (IWorkbook workbook, BackgroudColorEnum backgroudColor = BackgroudColorEnum.Grey)
         {
             var headerStyle = workbook.CreateCellStyle();
 
@@ -295,7 +295,7 @@ namespace KnifeZ.Virgo.Core
         #endregion
 
         #region 初始化DataTable(不含动态列)
-        private void CreateDataTable()
+        private void CreateDataTable ()
         {
             TemplateDataTable = new DataTable();
             var propetys = this.GetType().GetFields().Where(x => x.FieldType == typeof(ExcelPropety)).ToList();

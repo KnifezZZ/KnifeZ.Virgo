@@ -42,7 +42,7 @@ namespace KnifeZ.Virgo.Core
     /// </summary>
     /// <typeparam name="TModel">批量修改的VM</typeparam>
     /// <typeparam name="TLinkModel">批量列表VM</typeparam>
-    public class BaseBatchVM<TModel, TLinkModel> : BaseVM, IBaseBatchVM<TLinkModel> where TModel : TopBasePoco,new() where TLinkModel : BaseVM
+    public class BaseBatchVM<TModel, TLinkModel> : BaseVM, IBaseBatchVM<TLinkModel> where TModel : TopBasePoco, new() where TLinkModel : BaseVM
     {
         /// <summary>
         /// 批量修改的VM
@@ -67,7 +67,7 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 构造函数
         /// </summary>
-        public BaseBatchVM()
+        public BaseBatchVM ()
         {
             //this.Ids = new List<Guid>();
             ErrorMessage = new Dictionary<string, string>();
@@ -78,7 +78,7 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <param name="e">错误</param>
         /// <param name="id">数据Id</param>
-        protected void SetExceptionMessage(Exception e, string id)
+        protected void SetExceptionMessage (Exception e, string id)
         {
             if (id != null)
             {
@@ -92,7 +92,7 @@ namespace KnifeZ.Virgo.Core
         /// <param name="id">数据Id</param>
         /// <param name="errorMessage">错误信息</param>
         /// <returns>true代表可以删除，false代表不能删除</returns>
-        protected virtual bool CheckIfCanDelete(object id, out string errorMessage)
+        protected virtual bool CheckIfCanDelete (object id, out string errorMessage)
         {
             errorMessage = null;
             return true;
@@ -102,15 +102,16 @@ namespace KnifeZ.Virgo.Core
         /// 批量删除，默认对Ids中包含的主键的数据进行删除。子类如果有特殊判断应重载本函数
         /// </summary>
         /// <returns>true代表成功，false代表失败</returns>
-        public virtual bool DoBatchDelete()
+        public virtual bool DoBatchDelete ()
         {
             bool rv = true;
             //循环所有数据Id
             List<string> idsData = Ids.ToList();
             for (int i = 0; i < idsData.Count; i++)
             {
+                string checkErro = null;
                 //检查是否可以删除，如不能删除则直接跳过
-                if (CheckIfCanDelete(idsData[i], out string checkErro) == false)
+                if (CheckIfCanDelete(idsData[i], out checkErro) == false)
                 {
                     ErrorMessage.Add(idsData[i], checkErro);
                     rv = false;
@@ -189,7 +190,7 @@ namespace KnifeZ.Virgo.Core
         /// 批量修改，默认对Ids中包含的数据进行修改，子类如果有特殊判断应重载本函数
         /// </summary>
         /// <returns>true代表成功，false代表失败</returns>
-        public virtual bool DoBatchEdit()
+        public virtual bool DoBatchEdit ()
         {
             //获取批量修改VM的所有属性
             var pros = LinkedVM.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.DeclaredOnly);
@@ -229,7 +230,7 @@ namespace KnifeZ.Virgo.Core
                         if (proToSet != null && val != null)
                         {
                             var hasvalue = true;
-                            if ( val is StringValues sv && StringValues.IsNullOrEmpty(sv) == true)
+                            if (val is StringValues sv && StringValues.IsNullOrEmpty(sv) == true)
                             {
                                 hasvalue = false;
                             }
@@ -241,11 +242,11 @@ namespace KnifeZ.Virgo.Core
                     }
 
                     //调用controller方法验证model
-                    try
-                    {
-                        Controller.GetType().GetMethod("RedoValidation").Invoke(Controller, new object[] { entity });
-                    }
-                    catch { }
+                    //try
+                    //{
+                    //    Controller.GetType().GetMethod("RedoValidation").Invoke(Controller, new object[] { entity });
+                    //}
+                    //catch { }
                     //如果有对应的BaseCRUDVM则使用其进行数据验证
                     if (vm != null)
                     {
@@ -258,7 +259,7 @@ namespace KnifeZ.Virgo.Core
                             {
                                 if (errors[key].Count > 0)
                                 {
-                                    error += errors[key].Select(x => x.ErrorMessage).ToSpratedString();
+                                    error += errors[key].Select(x => x.ErrorMessage).ToSepratedString();
                                 }
                             }
                             if (error != "")

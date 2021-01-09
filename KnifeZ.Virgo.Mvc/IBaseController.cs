@@ -9,25 +9,12 @@ namespace KnifeZ.Virgo.Mvc
 {
     public interface IBaseController
     {
-        Configs ConfigInfo { get; }
-        GlobalData GlobaInfo { get; }
-        string CurrentCS { get; set; }
-
-        DBTypeEnum? CurrentDbType { get; set; }
-
-        IDataContext DC { get; set; }
-        LoginUserInfo LoginUserInfo { get; set; }
-
-        IDistributedCache Cache { get; }
-
-        string BaseUrl { get; set; }
-
-        SimpleLog Log { get; set; }
-
-        IDataContext CreateDC(bool isLog = false);
+        /// <summary>
+        /// KnifeZ.Virgo统一入口
+        /// </summary>
+        VirgoContext KnifeVirgo { get; set; }
 
         ModelStateDictionary ModelState { get; }
-
         IStringLocalizer Localizer { get; }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using KnifeZ.Virgo.Core.ConfigOptions;
 
 namespace KnifeZ.Virgo.Core
@@ -111,49 +112,6 @@ namespace KnifeZ.Virgo.Core
 
         #endregion
 
-        #region File attachment save mode
-
-        private SaveFileModeEnum? _saveFileMode;
-
-        /// <summary>
-        /// File attachment save mode
-        /// </summary>
-        [Obsolete("use Configs.FileUploadOptions instead")]
-        public SaveFileModeEnum? SaveFileMode
-        {
-            get
-            {
-                return _saveFileMode;
-            }
-            set
-            {
-                _saveFileMode = value;
-            }
-        }
-
-        #endregion
-
-        #region File attachment upload path
-        private string _uploadDir;
-
-        /// <summary>
-        /// File attachment upload path
-        /// </summary>
-        [Obsolete("use Configs.FileUploadOptions instead")]
-        public string UploadDir
-        {
-            get
-            {
-                return _uploadDir;
-            }
-            set
-            {
-                _uploadDir = value;
-            }
-        }
-
-        #endregion
-
         #region Auto sync db
 
         private bool? _syncdb;
@@ -170,31 +128,6 @@ namespace KnifeZ.Virgo.Core
             set
             {
                 _syncdb = value;
-            }
-        }
-
-        #endregion
-
-        #region Database type
-
-        private DBTypeEnum? _dbtype;
-
-        /// <summary>
-        /// Database type
-        /// </summary>
-        public DBTypeEnum DbType
-        {
-            get
-            {
-                if (_dbtype == null)
-                {
-                    _dbtype = DBTypeEnum.SqlServer;
-                }
-                return _dbtype.Value;
-            }
-            set
-            {
-                _dbtype = value;
             }
         }
 
@@ -316,21 +249,9 @@ namespace KnifeZ.Virgo.Core
                     _fileUploadOptions = new FileUploadOptions()
                     {
                         UploadLimit = DefaultConfigConsts.DEFAULT_UPLOAD_LIMIT,
-                        SaveFileMode = SaveFileModeEnum.Database,
-                        UploadDir = DefaultConfigConsts.DEFAULT_UPLOAD_DIR
+                        SaveFileMode = SaveFileModeEnum.Local,
+                        Settings = new Dictionary<string, List<FileHandlerOptions>>()
                     };
-                }
-                // TODO下个版本中删除 else里面的逻辑
-                else
-                {
-                    if (!string.IsNullOrEmpty(_uploadDir))
-                    {
-                        _fileUploadOptions.UploadDir = _uploadDir;
-                    }
-                    if (_saveFileMode.HasValue)
-                    {
-                        _fileUploadOptions.SaveFileMode = _saveFileMode.Value;
-                    }
                 }
                 return _fileUploadOptions;
             }
@@ -445,5 +366,69 @@ namespace KnifeZ.Virgo.Core
         }
 
         #endregion
+
+
+        public string HostRoot { get; set; } = "";
+
+
+        #region CookieOption configs
+
+        private CookieOption _cookieOption;
+
+        /// <summary>
+        ///  Cors configs
+        /// </summary>
+        public CookieOption CookieOption
+        {
+            get
+            {
+                if (_cookieOption == null)
+                {
+                    _cookieOption = new CookieOption();
+                }
+                return _cookieOption;
+            }
+            set
+            {
+                _cookieOption = value;
+            }
+        }
+
+        #endregion
+
+        #region JwtOption configs
+
+        private JwtOption _jwtOption;
+
+        /// <summary>
+        ///  Cors configs
+        /// </summary>
+        public JwtOption JwtOption
+        {
+            get
+            {
+                if (_jwtOption == null)
+                {
+                    _jwtOption = new JwtOption();
+                }
+                return _jwtOption;
+            }
+            set
+            {
+                _jwtOption = value;
+            }
+        }
+
+        #endregion
+
+        public IDataContext CreateDC (string csName = null)
+        {
+            if (string.IsNullOrEmpty(csName))
+            {
+                csName = "default";
+            }
+            var cs = ConnectionStrings.Where(x => x.Key.ToLower() == csName.ToLower()).SingleOrDefault();
+            return cs?.CreateDC();
+        }
     }
 }

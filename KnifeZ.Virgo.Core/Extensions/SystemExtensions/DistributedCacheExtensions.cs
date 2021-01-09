@@ -42,8 +42,7 @@ namespace KnifeZ.Virgo.Core.Extensions
 
         private static readonly JsonSerializerOptions jsonSerializerSettings = new JsonSerializerOptions
         {
-            PropertyNamingPolicy = null,
-            IgnoreNullValues=false,
+            IgnoreNullValues = true,
         };
 
         private static string _instanceName;
@@ -59,7 +58,7 @@ namespace KnifeZ.Virgo.Core.Extensions
             }
         }
 
-        public static void SetInstanceName(
+        public static void SetInstanceName (
             this IDistributedCache cache,
             string instanceName)
         {
@@ -68,7 +67,7 @@ namespace KnifeZ.Virgo.Core.Extensions
 
         #region Get
 
-        public static T Get<T>(
+        public static T Get<T> (
             this IDistributedCache cache,
             string key)
         {
@@ -79,7 +78,7 @@ namespace KnifeZ.Virgo.Core.Extensions
                 return JsonSerializer.Deserialize<T>(value);
         }
 
-        public static async Task<T> GetAsync<T>(
+        public static async Task<T> GetAsync<T> (
             this IDistributedCache cache,
             string key,
             CancellationToken token = default)
@@ -91,7 +90,7 @@ namespace KnifeZ.Virgo.Core.Extensions
                 return JsonSerializer.Deserialize<T>(value);
         }
 
-        public static bool TryGetValue<T>(
+        public static bool TryGetValue<T> (
             this IDistributedCache cache,
             string key,
             out T outValue)
@@ -113,7 +112,7 @@ namespace KnifeZ.Virgo.Core.Extensions
 
         #region Set
 
-        public static void Add<T>(
+        public static void Add<T> (
             this IDistributedCache cache,
             string key,
             T value,
@@ -125,7 +124,7 @@ namespace KnifeZ.Virgo.Core.Extensions
                 cache.Set(InstanceName + key.ToLower(), Encoding.UTF8.GetBytes(JsonSerializer.Serialize(value, jsonSerializerSettings)), options);
         }
 
-        public static async Task AddAsync<T>(
+        public static async Task AddAsync<T> (
             this IDistributedCache cache,
             string key,
             T value,
@@ -143,14 +142,14 @@ namespace KnifeZ.Virgo.Core.Extensions
 
         #region Delete
 
-        public static void Delete(
+        public static void Delete (
             this IDistributedCache cache,
             string key)
         {
             cache.Remove(InstanceName + key.ToLower());
         }
 
-        public static async Task DeleteAsync(
+        public static async Task DeleteAsync (
             this IDistributedCache cache,
             string key,
             CancellationToken token = default)

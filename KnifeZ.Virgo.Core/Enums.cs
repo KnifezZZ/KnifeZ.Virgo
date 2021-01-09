@@ -1,36 +1,20 @@
 namespace KnifeZ.Virgo.Core
 {
     /// <summary>
+    /// 数据库类型
+    /// </summary>
+    public enum DBTypeEnum { SqlServer, MySql, PgSql, Memory, SQLite, Oracle }
+
+    /// <summary>
     /// 上传图片存储方式
     /// </summary>
     public enum SaveFileModeEnum
     {
         Local = 0,//本地
-        Database = 1,//数据库
-        DFS = 2 //DFS
+        Database = 1,
+        TenOSS = 2,
+        AliOSS = 3,
     };
-
-    /// <summary>
-    /// 数据库类型
-    /// 暂不支持Oracle数据库
-    /// </summary>
-    public enum DBTypeEnum { SqlServer, MySql, PgSql, Memory, SQLite, Oracle }
-
-
-    ///// <summary>
-    ///// 上传类型
-    ///// </summary>
-    //public enum UploadTypesEnum
-    //{
-    //    AllFiles,
-    //    ImageFile,
-    //    ZipFile,
-    //    ExcelFile,
-    //    WordFile,
-    //    PDFFile,
-    //    TextFile,
-    //    Custom
-    //};
 
     /// <summary>
     /// 日期类型
@@ -64,23 +48,12 @@ namespace KnifeZ.Virgo.Core
         Time
     };
 
-
-    public enum VTypeEnum { url, email, Date, Time, IPaddress, Int, UInt, Double, UDouble, Color, Phone, Tel }
-    public enum HiddenModeEnum { Display, Visibility, Offsets }
-    public enum RegionEnum { North, South, West, East, Center }
-    public enum LayoutEnum { absolute, border, box, fit, center }
-    public enum LabelAlignEnum { left, right, top }
-    public enum DockDirEnum { top, left, right, bottom }
-    public enum BoxAlignEnum { Stretch, Begin, Middle, End, StretchMax }
-    public enum BoxPackEnum { Start, Middle, End }
-    public enum BoxDirectionEnum { H, V }
-    public enum MsgTargetEnum { qtip, title, under, side, none }
     public enum FieldTypeEnum { String, Int, Bool, Date }
-    public enum IconAlignEnum { Left, Right, Bottom, Top }
+    /// <summary>
+    /// 上传类型
+    /// </summary>
     public enum UploadTypeEnum { AllFiles, ImageFile, ZipFile, ExcelFile, WordFile, PDFFile, TextFile }
     public enum ComponentRenderMode { Normal, Declare, Get, Reference }
-
-    public enum BoolComboTypes { YesNo, ValidInvalid, MaleFemale, HaveNotHave, Custom }
 
     public enum SortDir { Asc, Desc }
 

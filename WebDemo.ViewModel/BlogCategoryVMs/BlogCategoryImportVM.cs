@@ -30,7 +30,7 @@ namespace WebDemo.ViewModel.BlogCategoryVMs
 	    protected override void InitVM()
         {
             Parent_Excel.DataType = ColumnDataType.ComboBox;
-            Parent_Excel.ListItems = DC.Set<BlogCategory>().GetSelectListItems(LoginUserInfo?.DataPrivileges, null, y => y.Name);
+            Parent_Excel.ListItems = DC.Set<BlogCategory>().GetSelectListItems(KnifeVirgo, null, y => y.Name);
         }
 
     }

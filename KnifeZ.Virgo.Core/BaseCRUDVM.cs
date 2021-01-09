@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 using KnifeZ.Virgo.Core.Extensions;
 using System.Text.Json.Serialization;
 using System.ComponentModel.DataAnnotations;
+using KnifeZ.Virgo.Core.Support.FileHandlers;
+using Microsoft.Extensions.DependencyInjection;
+using System.Collections;
 
 namespace KnifeZ.Virgo.Core
 {
@@ -16,84 +19,84 @@ namespace KnifeZ.Virgo.Core
     /// 单表增删改查VM的接口
     /// </summary>
     /// <typeparam name="T">继承TopBasePoco的类</typeparam>
-    public interface IBaseCRUDVM<out T> where T : TopBasePoco,new()
+    public interface IBaseCRUDVM<out T> where T : TopBasePoco, new()
     {
         T Entity { get; }
         /// <summary>
         /// 根据主键Id获取Entity
         /// </summary>
         /// <param name="id">主键Id</param>
-        void SetEntityById(object id);
+        void SetEntityById (object id);
 
         /// <summary>
         /// 设置Entity
         /// </summary>
         /// <param name="entity">要设定的TopBasePoco</param>
-        void SetEntity(object entity);
+        void SetEntity (object entity);
 
         /// <summary>
         /// 添加
         /// </summary>
-        void DoAdd();
+        void DoAdd ();
 
-        Task DoAddAsync();
+        Task DoAddAsync ();
 
         /// <summary>
         /// 修改
         /// </summary>
-        void DoEdit(bool updateAllFields);
-        Task DoEditAsync(bool updateAllFields);
+        void DoEdit (bool updateAllFields);
+        Task DoEditAsync (bool updateAllFields);
 
         /// <summary>
         /// 删除，对于TopBasePoco进行物理删除，对于PersistPoco把IsValid修改为false
         /// </summary>
-        void DoDelete();
-        Task DoDeleteAsync();
+        void DoDelete ();
+        Task DoDeleteAsync ();
 
         /// <summary>
         /// 彻底删除，对PersistPoco进行物理删除
         /// </summary>
-        void DoRealDelete();
-        Task DoRealDeleteAsync();
+        void DoRealDelete ();
+        Task DoRealDeleteAsync ();
 
         /// <summary>
         /// 将源VM的上数据库上下文，Session，登录用户信息，模型状态信息，缓存信息等内容复制到本VM中
         /// </summary>
         /// <param name="vm">复制的源</param>
-        void CopyContext(BaseVM vm);
+        void CopyContext (BaseVM vm);
 
         /// <summary>
         /// 是否跳过基类的唯一性验证，批量导入的时候唯一性验证会由存储过程完成，不需要单独调用本类的验证方法
         /// </summary>
         bool ByPassBaseValidation { get; set; }
 
-        void Validate();
-        IModelStateService MSD { get; set; }
+        void Validate ();
+        IModelStateService MSD { get; }
     }
 
     /// <summary>
     /// 单表增删改查基类，所有单表操作的VM应该继承这个基类
     /// </summary>
     /// <typeparam name="TModel">继承TopBasePoco的类</typeparam>
-    public class BaseCRUDVM<TModel> : BaseVM, IBaseCRUDVM<TModel> where TModel : TopBasePoco,new()
+    public class BaseCRUDVM<TModel> : BaseVM, IBaseCRUDVM<TModel> where TModel : TopBasePoco, new()
     {
         public TModel Entity { get; set; }
         [JsonIgnore]
         public bool ByPassBaseValidation { get; set; }
 
         //保存读取时Include的内容
-        private List<Expression<Func<TModel, object>>> ToInclude { get; set; }
+        private List<Expression<Func<TModel, object>>> _toInclude { get; set; }
 
         /// <summary>
         /// 构造函数
         /// </summary>
-        public BaseCRUDVM()
+        public BaseCRUDVM ()
         {
             //初始化Entity
             var ctor = typeof(TModel).GetConstructor(Type.EmptyTypes);
             Entity = ctor.Invoke(null) as TModel;
             //初始化VM中所有List<>的类
-            var lists = typeof(TModel).GetProperties().Where(x => x.PropertyType.IsGeneric(typeof(List<>)));
+            var lists = typeof(TModel).GetAllProperties().Where(x => x.PropertyType.IsGeneric(typeof(List<>)));
             foreach (var li in lists)
             {
                 var gs = li.PropertyType.GetGenericArguments();
@@ -102,7 +105,7 @@ namespace KnifeZ.Virgo.Core
             }
         }
 
-        public IQueryable<TModel> GetBaseQuery()
+        public IQueryable<TModel> GetBaseQuery ()
         {
             return DC.Set<TModel>();
         }
@@ -110,7 +113,7 @@ namespace KnifeZ.Virgo.Core
         /// 设定添加和修改时对于重复数据的判断，子类进行相关操作时应重载这个函数
         /// </summary>
         /// <returns>唯一性属性</returns>
-        public virtual DuplicatedInfo<TModel> SetDuplicatedCheck()
+        public virtual DuplicatedInfo<TModel> SetDuplicatedCheck ()
         {
             return null;
         }
@@ -119,17 +122,17 @@ namespace KnifeZ.Virgo.Core
         /// 设定读取是Include的内容
         /// </summary>
         /// <param name="exps">需要关联的类</param>
-        public void SetInclude(params Expression<Func<TModel, object>>[] exps)
+        public void SetInclude (params Expression<Func<TModel, object>>[] exps)
         {
-            ToInclude ??= new List<Expression<Func<TModel, object>>>();
-            ToInclude.AddRange(exps);
+            _toInclude = _toInclude ?? new List<Expression<Func<TModel, object>>>();
+            _toInclude.AddRange(exps);
         }
 
         /// <summary>
         /// 根据主键Id设定Entity
         /// </summary>
         /// <param name="id">主键Id</param>
-        public void SetEntityById(object id)
+        public void SetEntityById (object id)
         {
             this.Entity = GetById(id);
         }
@@ -138,7 +141,7 @@ namespace KnifeZ.Virgo.Core
         /// 设置Entity
         /// </summary>
         /// <param name="entity">要设定的TopBasePoco</param>
-        public void SetEntity(object entity)
+        public void SetEntity (object entity)
         {
             this.Entity = entity as TModel;
         }
@@ -148,15 +151,15 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <param name="Id">主键Id</param>
         /// <returns>Entity</returns>
-        protected virtual TModel GetById(object Id)
+        protected virtual TModel GetById (object Id)
         {
             TModel rv = null;
             //建立基础查询
             var query = DC.Set<TModel>().AsQueryable();
             //循环添加其他设定的Include
-            if (ToInclude != null)
+            if (_toInclude != null)
             {
-                foreach (var item in ToInclude)
+                foreach (var item in _toInclude)
                 {
                     query = query.Include(item);
                 }
@@ -175,27 +178,17 @@ namespace KnifeZ.Virgo.Core
                 throw new Exception("数据不存在");
             }
             //如果TopBasePoco有关联的附件，则自动Include 附件名称
-            var fa = typeof(TModel).GetProperties().Where(x => x.PropertyType == typeof(FileAttachment)).ToList();
+            var fa = typeof(TModel).GetAllProperties().Where(x => x.PropertyType == typeof(FileAttachment)).ToList();
             foreach (var f in fa)
             {
                 var fname = DC.GetFKName2<TModel>(f.Name);
-                var fid = typeof(TModel).GetSingleProperty(fname).GetValue(rv) as Guid?;
-                var file = DC.Set<FileAttachment>().Where(x => x.ID == fid).Select(x => new FileAttachment {
-                    ID = x.ID,
-                    CreateBy = x.CreateBy,
-                    CreateTime = x.CreateTime,
-                    UpdateBy = x.UpdateBy,
-                    UpdateTime = x.UpdateTime,
-                    UploadTime = x.UploadTime,
-                    FileExt = x.FileExt,
-                    FileName = x.FileName,
-                    Length = x.Length,
-                    GroupName = x.GroupName,
-                    IsTemprory = x.IsTemprory,
-                    Path = x.Path,
-                    SaveFileMode = x.SaveFileMode
-                }).FirstOrDefault();
-                rv.SetPropertyValue(f.Name, file);
+                var fid = typeof(TModel).GetSingleProperty(fname).GetValue(rv);
+                if (fid != null)
+                {
+                    var fp = KnifeVirgo.HttpContext.RequestServices.GetRequiredService<VirgoFileProvider>();
+                    var file = fp.GetFile(fid?.ToString(), false, DC);
+                    rv.SetPropertyValue(f.Name, file);
+                }
             }
 
             return rv;
@@ -204,43 +197,41 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 添加，进行默认的添加操作。子类如有自定义操作应重载本函数
         /// </summary>
-        public virtual void DoAdd()
+        public virtual void DoAdd ()
         {
             DoAddPrepare();
             //删除不需要的附件
-            if (DeletedFileIds != null)
+            if (DeletedFileIds != null && DeletedFileIds.Count > 0)
             {
+                var fp = KnifeVirgo.HttpContext.RequestServices.GetRequiredService<VirgoFileProvider>();
+
                 foreach (var item in DeletedFileIds)
                 {
-                    FileAttachmentVM ofa = new FileAttachmentVM();
-                    ofa.CopyContext(this);
-                    ofa.SetEntityById(item);
-                    ofa.DoDelete();
+                    fp.DeleteFile(item.ToString(), DC);
                 }
             }
             DC.SaveChanges();
         }
 
-        public virtual async Task DoAddAsync()
+        public virtual async Task DoAddAsync ()
         {
             DoAddPrepare();
             //删除不需要的附件
-            if (DeletedFileIds != null)
+            if (DeletedFileIds != null && DeletedFileIds.Count > 0)
             {
+                var fp = KnifeVirgo.HttpContext.RequestServices.GetRequiredService<VirgoFileProvider>();
+
                 foreach (var item in DeletedFileIds)
                 {
-                    FileAttachmentVM ofa = new FileAttachmentVM();
-                    ofa.CopyContext(this);
-                    ofa.SetEntityById(item);
-                    await ofa.DoDeleteAsync();
+                    fp.DeleteFile(item.ToString(), DC.ReCreate());
                 }
             }
             await DC.SaveChangesAsync();
         }
 
-        private void DoAddPrepare()
+        private void DoAddPrepare ()
         {
-            var pros = typeof(TModel).GetProperties();
+            var pros = typeof(TModel).GetAllProperties();
             //将所有TopBasePoco的属性赋空值，防止添加关联的重复内容
             if (typeof(TModel) != typeof(FileAttachment))
             {
@@ -284,10 +275,10 @@ namespace KnifeZ.Virgo.Core
                     {
                         //界面传过来的子表数据
                         IEnumerable<TopBasePoco> list = pro.GetValue(Entity) as IEnumerable<BasePoco>;
-                        if (!(list == null || !list.Any()))
+                        if (list != null && list.Any())
                         {
                             string fkname = DC.GetFKName<TModel>(pro.Name);
-                            PropertyInfo[] itemPros = ftype.GetProperties();
+                            var itemPros = ftype.GetAllProperties();
 
                             bool found = false;
                             foreach (var newitem in list)
@@ -316,7 +307,7 @@ namespace KnifeZ.Virgo.Core
                             //循环页面传过来的子表数据,自动设定添加日期和添加人
                             foreach (var newitem in list)
                             {
-                                //var subtype = newitem.GetType();
+                                var subtype = newitem.GetType();
                                 BasePoco ent = newitem as BasePoco;
                                 if (ent.CreateTime == null)
                                 {
@@ -343,44 +334,41 @@ namespace KnifeZ.Virgo.Core
         /// 修改，进行默认的修改操作。子类如有自定义操作应重载本函数
         /// </summary>
         /// <param name="updateAllFields">为true时，框架会更新当前Entity的全部值，为false时，框架会检查Request.Form里的key，只更新表单提交的字段</param>
-        public virtual void DoEdit(bool updateAllFields = false)
+        public virtual void DoEdit (bool updateAllFields = false)
         {
             DoEditPrepare(updateAllFields);
 
             DC.SaveChanges();
             //删除不需要的附件
-            if (DeletedFileIds != null)
+            if (DeletedFileIds != null && DeletedFileIds.Count > 0)
             {
+                var fp = KnifeVirgo.HttpContext.RequestServices.GetRequiredService<VirgoFileProvider>();
                 foreach (var item in DeletedFileIds)
                 {
-                    FileAttachmentVM ofa = new FileAttachmentVM();
-                    ofa.CopyContext(this);
-                    ofa.SetEntityById(item);
-                    ofa.DoDelete();
+                    fp.DeleteFile(item.ToString(), DC.ReCreate());
                 }
             }
 
         }
 
-        public virtual async Task DoEditAsync(bool updateAllFields = false)
+        public virtual async Task DoEditAsync (bool updateAllFields = false)
         {
             DoEditPrepare(updateAllFields);
 
             await DC.SaveChangesAsync();
             //删除不需要的附件
-            if (DeletedFileIds != null)
+            if (DeletedFileIds != null && DeletedFileIds.Count > 0)
             {
+                var fp = KnifeVirgo.HttpContext.RequestServices.GetRequiredService<VirgoFileProvider>();
+
                 foreach (var item in DeletedFileIds)
                 {
-                    FileAttachmentVM ofa = new FileAttachmentVM();
-                    ofa.CopyContext(this);
-                    ofa.SetEntityById(item);
-                    await ofa.DoDeleteAsync();
+                    fp.DeleteFile(item.ToString(), DC.ReCreate());
                 }
             }
         }
 
-        private void DoEditPrepare(bool updateAllFields)
+        private void DoEditPrepare (bool updateAllFields)
         {
             if (typeof(TModel).GetTypeInfo().IsSubclassOf(typeof(BasePoco)))
             {
@@ -394,7 +382,7 @@ namespace KnifeZ.Virgo.Core
                     ent.UpdateBy = LoginUserInfo?.ITCode;
                 }
             }
-            var pros = typeof(TModel).GetProperties();
+            var pros = typeof(TModel).GetAllProperties();
 
             #region 更新子表
             foreach (var pro in pros)
@@ -413,7 +401,7 @@ namespace KnifeZ.Virgo.Core
                         {
                             //获取外键字段名称
                             string fkname = DC.GetFKName<TModel>(pro.Name);
-                            PropertyInfo[] itemPros = ftype.GetProperties();
+                            var itemPros = ftype.GetAllProperties();
 
                             bool found = false;
                             foreach (var newitem in list)
@@ -462,8 +450,10 @@ namespace KnifeZ.Virgo.Core
                                 _entity = ndc.Set<TModel>().Include(pro.Name).AsNoTracking().CheckID(Entity.GetID()).FirstOrDefault();
                             }
                             //比较子表原数据和新数据的区别
+                            IEnumerable<TopBasePoco> toadd = null;
+                            IEnumerable<TopBasePoco> toremove = null;
                             IEnumerable<TopBasePoco> data = _entity.GetType().GetSingleProperty(pro.Name).GetValue(_entity) as IEnumerable<TopBasePoco>;
-                            Utils.CheckDifference(data, list, out IEnumerable<TopBasePoco> toremove, out IEnumerable<TopBasePoco> toadd);
+                            Utils.CheckDifference(data, list, out toremove, out toadd);
                             //设定子表应该更新的字段
                             List<string> setnames = new List<string>();
                             foreach (var field in FC.Keys)
@@ -548,9 +538,9 @@ namespace KnifeZ.Virgo.Core
                                 DC.AddEntity(item);
                             }
                         }
-                        else if (FC.Keys.Contains("Entity." + pro.Name + ".DONOTUSECLEAR") || (FC.ContainsKey("Entity."+pro.Name) && pro.GetValue(Entity) is IEnumerable<TopBasePoco> list2 && list2?.Count() == 0))
+                        else if (FC.Keys.Contains("Entity." + pro.Name + ".DONOTUSECLEAR") || (FC.ContainsKey("Entity." + pro.Name) && pro.GetValue(Entity) is IEnumerable<TopBasePoco> list2 && list2?.Count() == 0))
                         {
-                            PropertyInfo[] itemPros = ftype.GetProperties();
+                            var itemPros = ftype.GetAllProperties();
                             var _entity = DC.Set<TModel>().Include(pro.Name).AsNoTracking().CheckID(Entity.GetID()).FirstOrDefault();
                             if (_entity != null)
                             {
@@ -592,25 +582,18 @@ namespace KnifeZ.Virgo.Core
 
 
             if (updateAllFields == false)
-            { 
-                //排除更新主键
-                PropertyInfo pkProp = typeof(TModel).GetProperties().Where(p => p.GetCustomAttributes(typeof(KeyAttribute), false).Length > 0).FirstOrDefault();
+            {
                 foreach (var field in FC.Keys)
                 {
-                    if (field.StartsWith("Entity."))
+                    if (field.StartsWith("Entity.") && !field.Contains("["))
                     {
                         string name = field.Replace("Entity.", "");
-                        if (name == pkProp.Name)
-                        {
-                            continue;
-                        }
                         try
                         {
                             DC.UpdateProperty(Entity, name);
                         }
-                        catch (Exception ea)
+                        catch (Exception)
                         {
-                            DoLog(ea.Message, ActionLogTypesEnum.Exception);
                         }
                     }
                 }
@@ -635,7 +618,7 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 删除，进行默认的删除操作。子类如有自定义操作应重载本函数
         /// </summary>
-        public virtual void DoDelete()
+        public virtual void DoDelete ()
         {
             //如果是PersistPoco，则把IsValid设为false，并不进行物理删除
             if (typeof(TModel).GetTypeInfo().IsSubclassOf(typeof(PersistPoco)))
@@ -652,7 +635,7 @@ namespace KnifeZ.Virgo.Core
             }
         }
 
-        public virtual async Task DoDeleteAsync()
+        public virtual async Task DoDeleteAsync ()
         {
             //如果是PersistPoco，则把IsValid设为false，并不进行物理删除
             if (typeof(TModel).GetTypeInfo().IsSubclassOf(typeof(PersistPoco)))
@@ -682,12 +665,12 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 物理删除，对于普通的TopBasePoco和Delete操作相同，对于PersistPoco则进行真正的删除。子类如有自定义操作应重载本函数
         /// </summary>
-        public virtual void DoRealDelete()
+        public virtual void DoRealDelete ()
         {
             try
             {
                 List<Guid> fileids = new List<Guid>();
-                var pros = typeof(TModel).GetProperties();
+                var pros = typeof(TModel).GetAllProperties();
 
                 //如果包含附件，则先删除附件
                 var fa = pros.Where(x => x.PropertyType == typeof(FileAttachment) || typeof(TopBasePoco).IsAssignableFrom(x.PropertyType)).ToList();
@@ -703,7 +686,8 @@ namespace KnifeZ.Virgo.Core
                 var fas = pros.Where(x => typeof(IEnumerable<ISubFile>).IsAssignableFrom(x.PropertyType)).ToList();
                 foreach (var f in fas)
                 {
-                    if (f.GetValue(Entity) is IEnumerable<ISubFile> subs)
+                    var subs = f.GetValue(Entity) as IEnumerable<ISubFile>;
+                    if (subs != null)
                     {
                         foreach (var sub in subs)
                         {
@@ -724,12 +708,10 @@ namespace KnifeZ.Virgo.Core
                 }
                 DC.DeleteEntity(Entity);
                 DC.SaveChanges();
+                var fp = KnifeVirgo.HttpContext.RequestServices.GetRequiredService<VirgoFileProvider>();
                 foreach (var item in fileids)
                 {
-                    FileAttachmentVM ofa = new FileAttachmentVM();
-                    ofa.CopyContext(this);
-                    ofa.SetEntityById(item);
-                    ofa.DoDelete();
+                    fp.DeleteFile(item.ToString(), DC.ReCreate());
                 }
             }
             catch (Exception)
@@ -739,12 +721,12 @@ namespace KnifeZ.Virgo.Core
         }
 
 
-        public virtual async Task DoRealDeleteAsync()
+        public virtual async Task DoRealDeleteAsync ()
         {
             try
             {
                 List<Guid> fileids = new List<Guid>();
-                var pros = typeof(TModel).GetProperties();
+                var pros = typeof(TModel).GetAllProperties();
 
                 //如果包含附件，则先删除附件
                 var fa = pros.Where(x => x.PropertyType == typeof(FileAttachment) || typeof(TopBasePoco).IsAssignableFrom(x.PropertyType)).ToList();
@@ -779,17 +761,14 @@ namespace KnifeZ.Virgo.Core
                 }
                 DC.DeleteEntity(Entity);
                 await DC.SaveChangesAsync();
+                var fp = KnifeVirgo.HttpContext.RequestServices.GetRequiredService<VirgoFileProvider>();
                 foreach (var item in fileids)
                 {
-                    FileAttachmentVM ofa = new FileAttachmentVM();
-                    ofa.CopyContext(this);
-                    ofa.SetEntityById(item);
-                    await ofa.DoDeleteAsync();
+                    fp.DeleteFile(item.ToString(), DC.ReCreate());
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                DoLog(e.Message, ActionLogTypesEnum.Exception);
                 MSD.AddModelError("", Program._localizer["DeleteFailed"]);
             }
         }
@@ -799,7 +778,7 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <param name="FieldExps">重复数据信息</param>
         /// <returns>重复数据信息</returns>
-        protected DuplicatedInfo<TModel> CreateFieldsInfo(params DuplicatedField<TModel>[] FieldExps)
+        protected DuplicatedInfo<TModel> CreateFieldsInfo (params DuplicatedField<TModel>[] FieldExps)
         {
             DuplicatedInfo<TModel> d = new DuplicatedInfo<TModel>();
             d.AddGroup(FieldExps);
@@ -811,7 +790,7 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <param name="FieldExp">重复数据的字段</param>
         /// <returns>重复数据信息</returns>
-        public static DuplicatedField<TModel> SimpleField(Expression<Func<TModel, object>> FieldExp)
+        public static DuplicatedField<TModel> SimpleField (Expression<Func<TModel, object>> FieldExp)
         {
             return new DuplicatedField<TModel>(FieldExp);
         }
@@ -823,7 +802,7 @@ namespace KnifeZ.Virgo.Core
         /// <param name="MiddleExp">指向关联表类数组的Lambda</param>
         /// <param name="FieldExps">指向最终字段的Lambda</param>
         /// <returns>重复数据信息</returns>
-        public static DuplicatedField<TModel> SubField<V>(Expression<Func<TModel, List<V>>> MiddleExp, params Expression<Func<V, object>>[] FieldExps)
+        public static DuplicatedField<TModel> SubField<V> (Expression<Func<TModel, List<V>>> MiddleExp, params Expression<Func<V, object>>[] FieldExps)
         {
             return new ComplexDuplicatedField<TModel, V>(MiddleExp, FieldExps);
         }
@@ -832,11 +811,61 @@ namespace KnifeZ.Virgo.Core
         /// 验证数据，默认验证重复数据。子类如需要其他自定义验证，则重载这个函数
         /// </summary>
         /// <returns>验证结果</returns>
-        public override void Validate()
+        public override void Validate ()
         {
-            //验证多语言数据
             if (ByPassBaseValidation == false)
             {
+                base.Validate();
+                //如果msd是BasicMSD，则认为他是手动创建的，也就是说并没有走asp.net core默认的模型验证
+                //那么手动验证模型
+                if (KnifeVirgo?.MSD is BasicMSD)
+                {
+                    var valContext = new ValidationContext(this.Entity);
+                    List<ValidationResult> error = new List<ValidationResult>();
+                    if (!Validator.TryValidateObject(Entity, valContext, error, true))
+                    {
+                        foreach (var item in error)
+                        {
+                            string key = item.MemberNames.FirstOrDefault();
+                            if (MSD.Keys.Contains(key) == false)
+                            {
+                                MSD.AddModelError($"Entity.{key}", item.ErrorMessage);
+                            }
+                        }
+                    }
+                    var list = typeof(TModel).GetAllProperties().Where(x => x.PropertyType.IsListOf<TopBasePoco>());
+                    foreach (var item in list)
+                    {
+                        var it = item.GetValue(Entity) as IEnumerable;
+                        if (it == null)
+                        {
+                            continue;
+                        }
+                        var contextset = false;
+                        foreach (var e in it)
+                        {
+                            if (contextset == false)
+                            {
+                                valContext = new ValidationContext(e);
+                                contextset = true;
+                            }
+
+                            if (!Validator.TryValidateObject(e, valContext, error, true))
+                            {
+                                foreach (var err in error)
+                                {
+                                    string key = err.MemberNames.FirstOrDefault();
+                                    if (MSD.Keys.Contains(key) == false)
+                                    {
+                                        MSD.AddModelError($"Entity.{item.Name}.{key}", err.ErrorMessage);
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                }
+
                 //验证重复数据
                 ValidateDuplicateData();
             }
@@ -845,7 +874,7 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 验证重复数据
         /// </summary>
-        protected void ValidateDuplicateData()
+        protected void ValidateDuplicateData ()
         {
             //获取设定的重复字段信息
             var checkCondition = SetDuplicatedCheck();
@@ -860,7 +889,7 @@ namespace KnifeZ.Virgo.Core
                 {
                     List<Expression> conditions = new List<Expression>();
                     //生成一个表达式，类似于 x=>x.Id != id，这是为了当修改数据时验证重复性的时候，排除当前正在修改的数据
-                    var idproperty = typeof(TModel).GetProperties().Where(x => x.Name.ToLower() == "id").FirstOrDefault();
+                    var idproperty = typeof(TModel).GetSingleProperty("ID");
                     MemberExpression idLeft = Expression.Property(para, idproperty);
                     ConstantExpression idRight = Expression.Constant(Entity.GetID());
                     BinaryExpression idNotEqual = Expression.NotEqual(idLeft, idRight);
@@ -878,11 +907,11 @@ namespace KnifeZ.Virgo.Core
                         props.AddRange(field.GetProperties());
                     }
                     //如果要求判断id不重复，则去掉id不相等的判断，加入id相等的判断
-                    if(props.Any(x=>x.Name.ToLower() == "id"))
+                    if (props.Any(x => x.Name.ToLower() == "id"))
                     {
                         conditions.RemoveAt(0);
                         BinaryExpression idEqual = Expression.Equal(idLeft, idRight);
-                        conditions.Insert(0,idEqual);
+                        conditions.Insert(0, idEqual);
                     }
                     int count = 0;
                     if (conditions.Count > 1)
@@ -928,7 +957,7 @@ namespace KnifeZ.Virgo.Core
                         //如果多个字段重复，则拼接形成 xx，yy，zz组合字段重复 这种提示
                         else if (props.Count > 1)
                         {
-                             MSD.AddModelError(GetValidationFieldName(props.First())[0], Program._localizer["DuplicateGroupError", AllName]);
+                            MSD.AddModelError(GetValidationFieldName(props.First())[0], Program._localizer["DuplicateGroupError", AllName]);
                         }
                     }
                 }
@@ -941,10 +970,11 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         /// <param name="pi">属性信息</param>
         /// <returns>验证字段名称数组，用于ValidationResult</returns>
-        private static string[] GetValidationFieldName(PropertyInfo pi)
+        private static string[] GetValidationFieldName (PropertyInfo pi)
         {
             return new[] { "Entity." + pi.Name };
         }
+
 
     }
 }

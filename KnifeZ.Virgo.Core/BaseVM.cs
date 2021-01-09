@@ -24,28 +24,21 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// BaseVM
         /// </summary>
-        public BaseVM()
+        public BaseVM ()
         {
             FC = new Dictionary<string, object>();
         }
 
-        /// <summary>
-        /// BaseVM
-        /// </summary>
-        /// <param name="dc">使用的DataContext</param>
-        public BaseVM(IDataContext dc)
-        {
-            DC = dc;
-        }
-
         #region Property
+
+        [JsonIgnore]
+        public VirgoContext KnifeVirgo { get; set; }
 
         private Guid _uniqueId;
         /// <summary>
         /// VM实例的Id
         /// </summary>
         [JsonIgnore]
-        [BindNever]
         public string UniqueId
         {
             get
@@ -58,18 +51,34 @@ namespace KnifeZ.Virgo.Core
             }
         }
 
+        private IDataContext _dc;
         /// <summary>
         /// 数据库环境
         /// </summary>
         [JsonIgnore]
-        [BindNever]
-        public IDataContext DC { get; set; }
+        public IDataContext DC
+        {
+            get
+            {
+                if (_dc == null)
+                {
+                    return KnifeVirgo?.DC;
+                }
+                else
+                {
+                    return _dc;
+                }
+            }
+            set
+            {
+                _dc = value;
+            }
+        }
 
         /// <summary>
         /// 获取VM的全名
         /// </summary>
         [JsonIgnore]
-        [BindNever]
         public string VMFullName
         {
             get
@@ -84,7 +93,6 @@ namespace KnifeZ.Virgo.Core
         /// 获取VM所在Dll
         /// </summary>
         [JsonIgnore]
-        [BindNever]
         public string CreatorAssembly
         {
             get; set;
@@ -94,90 +102,58 @@ namespace KnifeZ.Virgo.Core
         /// 获取当前使用的连接字符串
         /// </summary>
         [JsonIgnore]
-        public string CurrentCS { get; set; }
-
-        /// <summary>
-        /// 指示是否使用固定连接字符串
-        /// </summary>
-        [JsonIgnore]
-        [BindNever]
-        public bool FromFixedCon { get; set; }
+        public string CurrentCS { get => KnifeVirgo?.CurrentCS; }
 
         /// <summary>
         /// 记录Controller中传递过来的表单数据
         /// </summary>
         [JsonIgnore]
-        [BindNever]
         public Dictionary<string, object> FC { get; set; }
 
         /// <summary>
         /// 获取配置文件的信息
         /// </summary>
         [JsonIgnore]
-        [BindNever]
-        public Configs ConfigInfo { get; set; }
-
-        /// <summary>
-        /// 获取DbContext构造函数
-        /// </summary>
-        [JsonIgnore]
-        [BindNever]
-        public ConstructorInfo DataContextCI { get; set; }
+        public Configs ConfigInfo { get => KnifeVirgo?.ConfigInfo; }
 
         [JsonIgnore]
-        [BindNever]
-        public object Controller { get; set; }
-
-        [JsonIgnore]
-        [BindNever]
-        public IDistributedCache Cache { get; set; }
+        public IDistributedCache Cache { get => KnifeVirgo?.Cache; }
 
         /// <summary>
         /// 当前登录人信息
         /// </summary>
         [JsonIgnore]
-        [BindNever]
-        public LoginUserInfo LoginUserInfo { get; set; }
+        public LoginUserInfo LoginUserInfo { get => KnifeVirgo?.LoginUserInfo; }
 
         /// <summary>
         /// 当前Url
         /// </summary>
         [JsonIgnore]
-        public string CurrentUrl { get; set; }
+        public string CurrentUrl { get => KnifeVirgo?.BaseUrl; }
 
         /// <summary>
         /// Session信息
         /// </summary>
         [JsonIgnore]
-        [BindNever]
-        public ISessionService Session { get; set; }
+        public ISessionService Session { get => KnifeVirgo?.Session; }
 
         /// <summary>
         /// Controller传递过来的ModelState信息
         /// </summary>
         [JsonIgnore]
-        [BindNever]
-        public IModelStateService MSD { get; set; }
-
-        /// <summary>
-        /// 日志信息
-        /// </summary>
-        [JsonIgnore]
-        [BindNever]
-        public SimpleLog Log { get; set; }
+        public IModelStateService MSD { get => KnifeVirgo?.MSD; }
 
         /// <summary>
         /// 用于保存删除的附件ID
         /// </summary>
         [JsonIgnore]
-        public List<Guid> DeletedFileIds { get; set; }
+        public List<string> DeletedFileIds { get; set; } = new List<string>();
 
         [JsonIgnore]
         public string ControllerName { get; set; }
 
         [JsonIgnore]
-        [BindNever]
-        public IStringLocalizer Localizer { get; set; }
+        public IStringLocalizer Localizer { get => KnifeVirgo?.Localizer; }
         #endregion
 
         #region Event
@@ -198,7 +174,7 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 调用 InitVM 并触发 OnAfterInit 事件
         /// </summary>
-        public void DoInit()
+        public void DoInit ()
         {
             InitVM();
             OnAfterInit?.Invoke(this);
@@ -207,7 +183,7 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 调用 ReInitVM 并触发 OnAfterReInit 事件
         /// </summary>
-        public void DoReInit()
+        public void DoReInit ()
         {
             ReInitVM();
             OnAfterReInit?.Invoke(this);
@@ -218,14 +194,14 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 初始化ViewModel，框架会在创建VM实例之后自动调用本函数
         /// </summary>
-        protected virtual void InitVM()
+        protected virtual void InitVM ()
         {
         }
 
         /// <summary>
         /// 从新初始化ViewModel，框架会在验证失败时自动调用本函数
         /// </summary>
-        protected virtual void ReInitVM()
+        protected virtual void ReInitVM ()
         {
             InitVM();
         }
@@ -234,7 +210,7 @@ namespace KnifeZ.Virgo.Core
         /// 验证函数，MVC会在提交数据的时候自动调用本函数
         /// </summary>
         /// <returns></returns>
-        public virtual void Validate()
+        public virtual void Validate ()
         {
             return;
         }
@@ -243,71 +219,11 @@ namespace KnifeZ.Virgo.Core
         /// 将源VM的上数据库上下文，Session，登录用户信息，模型状态信息，缓存信息等内容复制到本VM中
         /// </summary>
         /// <param name="vm">复制的源</param>
-        public void CopyContext(BaseVM vm)
+        public void CopyContext (BaseVM vm)
         {
-            DC = vm.DC;
+            KnifeVirgo = vm.KnifeVirgo;
             FC = vm.FC;
-            CurrentCS = vm.CurrentCS;
             CreatorAssembly = vm.CreatorAssembly;
-            MSD = vm.MSD;
-            Session = vm.Session;
-            ConfigInfo = vm.ConfigInfo;
-            DataContextCI = vm.DataContextCI;
-            LoginUserInfo = vm.LoginUserInfo;
-            Localizer = vm.Localizer;
-        }
-
-        /// <summary>
-        /// Create DbContext
-        /// </summary>
-        /// <param name="csName">ConnectionString key, "default" will be used if not set</param>
-        /// <param name="dbtype">DataBase type, appsettings dbtype will be used if not set</param>
-        /// <returns>data context</returns>
-        public virtual IDataContext CreateDC(string csName = null, DBTypeEnum? dbtype = null)
-        {
-            if (string.IsNullOrEmpty(csName))
-            {
-                csName = CurrentCS ?? "default";
-            }
-            var dbt = dbtype ?? ConfigInfo.DbType;
-            return (IDataContext)DataContextCI?.Invoke(new object[] { ConfigInfo.ConnectionStrings.Where(x => x.Key.ToLower() == csName).Select(x => x.Value).FirstOrDefault(), dbt });
-        }
-
-        /// <summary>
-        /// DoLog
-        /// </summary>
-        /// <param name="msg"></param>
-        /// <param name="logtype"></param>
-        public void DoLog(string msg, ActionLogTypesEnum logtype = ActionLogTypesEnum.Debug)
-        {
-            var log = this.Log.GetActionLog();
-            log.LogType = logtype;
-            log.ActionTime = DateTime.Now;
-            log.Remark = msg;
-            LogLevel ll = LogLevel.Information;
-            switch (logtype)
-            {
-                case ActionLogTypesEnum.Normal:
-                    ll = LogLevel.Information;
-                    break;
-                case ActionLogTypesEnum.Exception:
-                    ll = LogLevel.Error;
-                    break;
-                case ActionLogTypesEnum.Debug:
-                    ll = LogLevel.Debug;
-                    break;
-                default:
-                    break;
-            }
-            GlobalServices.GetRequiredService<ILogger<ActionLog>>().Log<ActionLog>(ll, new EventId(), log, null, (a, b) => {
-                return $@"
-===Log Start===
-内容:{a.Remark}
-地址:{a.ActionUrl}
-时间:{a.ActionTime}
-===Log End===
-";
-            });
         }
 
         #endregion

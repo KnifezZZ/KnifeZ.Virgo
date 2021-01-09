@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using KnifeZ.Virgo.Core.Support.Json;
 
 namespace KnifeZ.Virgo.Core
 {
@@ -9,6 +11,7 @@ namespace KnifeZ.Virgo.Core
     /// </summary>
     public class GlobalData
     {
+
         /// <summary>
         /// 程序集
         /// </summary>
@@ -20,38 +23,37 @@ namespace KnifeZ.Virgo.Core
         public List<string> AllAccessUrls { get; set; }
 
 
-        private Func<List<FrameworkModule>> ModuleGetFunc;
-        private List<FrameworkModule> _allModules;
         /// <summary>
         /// 模块
         /// </summary>
-        public List<FrameworkModule> AllModule
-        {
-            get
-            {
-                if(_allModules == null)
-                {
-                    _allModules = ModuleGetFunc?.Invoke();
-                }
-                return _allModules;
-            }
-        }
+        public List<SimpleModule> AllModule { get; set; }
 
-        /// <summary>
-        /// 数据库模型
-        /// </summary>
-        public List<Type> AllModels { get; set; }
+        private Func<List<SimpleMenu>> MenuGetFunc;
 
-        private Func<List<FrameworkMenu>> MenuGetFunc;
-
-        public List<FrameworkMenu> AllMenus => MenuGetFunc?.Invoke();
+        public List<SimpleMenu> AllMenus => MenuGetFunc?.Invoke();
 
         /// <summary>
         /// 设置菜单委托
         /// </summary>
         /// <param name="func"></param>
-        public void SetMenuGetFunc(Func<List<FrameworkMenu>> func) => MenuGetFunc = func;
-        public void SetModuleGetFunc(Func<List<FrameworkModule>> func) => ModuleGetFunc = func;
+        public void SetMenuGetFunc (Func<List<SimpleMenu>> func) => MenuGetFunc = func;
+
+        public List<Type> GetTypesAssignableFrom<T> ()
+        {
+            var rv = new List<Type>();
+            foreach (var ass in AllAssembly)
+            {
+                var types = new List<Type>();
+                try
+                {
+                    types.AddRange(ass.GetExportedTypes());
+                }
+                catch { }
+
+                rv.AddRange(types.Where(x => typeof(T).IsAssignableFrom(x) && x != typeof(T) && x.IsAbstract == false).ToList());
+            }
+            return rv;
+        }
 
     }
 }

@@ -5,10 +5,11 @@ using System.Data.Common;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
-
+using KnifeZ.Virgo.Core.Support.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 
@@ -25,7 +26,7 @@ namespace KnifeZ.Virgo.Core.Extensions
         /// </summary>
         /// <typeparam name="T">数据源类型</typeparam>
         /// <param name="baseQuery">基础查询</param>
-        /// <param name="dps">数据权限</param>
+        /// <param name="knifeVirgo">wtm context</param>
         /// <param name="whereCondition">条件语句</param>
         /// <param name="textField">表达式用来获取Text字段对应的值</param>
         /// <param name="valueField">表达式用来获取Value字段对应的值，不指定则默认使用Id字段</param>
@@ -37,8 +38,7 @@ namespace KnifeZ.Virgo.Core.Extensions
         /// <param name="SortByName">是否根据Text字段排序，默认为是</param>
         /// <returns>SelectListItem列表</returns>
         public static List<TreeSelectListItem> GetTreeSelectListItems<T> (this IQueryable<T> baseQuery
-            , List<DataPrivilege> dps
-            , Expression<Func<T, bool>> whereCondition
+            , VirgoContext knifeVirgo
             , Expression<Func<T, string>> textField
             , Expression<Func<T, string>> valueField = null
             , Expression<Func<T, string>> iconField = null
@@ -47,19 +47,15 @@ namespace KnifeZ.Virgo.Core.Extensions
             , Expression<Func<T, bool>> expandField = null
             , bool ignorDataPrivilege = false
             , bool SortByName = true)
-            where T : TopBasePoco, ITreeData<T>
+            where T : TreePoco
         {
+            var dps = knifeVirgo?.LoginUserInfo?.DataPrivileges;
             var query = baseQuery;
 
-            //如果条件不为空，则拼上条件
-            if (whereCondition != null)
-            {
-                query = query.Where(whereCondition);
-            }
             //如果没有指定忽略权限，则拼接权限过滤的where条件
             if (ignorDataPrivilege == false)
             {
-                query = AppendSelfDPWhere(query, dps);
+                query = AppendSelfDPWhere(query, knifeVirgo, dps);
             }
 
             //处理后面要使用的expression
@@ -169,29 +165,23 @@ namespace KnifeZ.Virgo.Core.Extensions
         /// </summary>
         /// <typeparam name="T">数据源类型</typeparam>
         /// <param name="baseQuery">基础查询</param>
-        /// <param name="dps">数据权限</param>
-        /// <param name="whereCondition">条件语句</param>
+        /// <param name="knifeVirgo">Virgo Context</param>
         /// <param name="textField">SelectListItem中Text字段对应的值</param>
         /// <param name="valueField">SelectListItem中Value字段对应的值，默认为Id列</param>
         /// <param name="ignorDataPrivilege">忽略数据权限判断</param>
         /// <param name="SortByName">是否根据Text字段排序，默认为是</param>
         /// <returns>SelectListItem列表</returns>
         public static List<ComboSelectListItem> GetSelectListItems<T> (this IQueryable<T> baseQuery
-            , List<DataPrivilege> dps
-            , Expression<Func<T, bool>> whereCondition
+            , VirgoContext knifeVirgo
             , Expression<Func<T, string>> textField
             , Expression<Func<T, object>> valueField = null
             , bool ignorDataPrivilege = false
             , bool SortByName = true)
             where T : TopBasePoco
         {
+            var dps = knifeVirgo?.LoginUserInfo?.DataPrivileges;
             var query = baseQuery;
 
-            //如果条件不为空，则拼上条件
-            if (whereCondition != null)
-            {
-                query = query.Where(whereCondition);
-            }
             //如果value字段为空，则默认使用Id字段作为value值
             if (valueField == null)
             {
@@ -199,9 +189,9 @@ namespace KnifeZ.Virgo.Core.Extensions
             }
 
             //如果没有指定忽略权限，则拼接权限过滤的where条件
-            if (ignorDataPrivilege == false || dps != null)
+            if (ignorDataPrivilege == false)
             {
-                query = AppendSelfDPWhere(query, dps);
+                query = AppendSelfDPWhere(query, knifeVirgo, dps);
             }
 
             if (typeof(T).IsSubclassOf(typeof(PersistPoco)))
@@ -230,12 +220,12 @@ namespace KnifeZ.Virgo.Core.Extensions
             //如果是树形结构，给ParentId赋值
             MemberBinding parentBind = null;
             var parentMI = typeof(ComboSelectListItem).GetMember("ParentId")[0];
-            if (typeof(ITreeData<T>).IsAssignableFrom(typeof(T)))
+            if (typeof(TreePoco<>).IsAssignableFrom(typeof(T)))
             {
-                var parentMember = Expression.MakeMemberAccess(pe, typeof(ITreeData).GetSingleProperty("ParentId"));
-                var p = Expression.Call(parentMember, "ToString", Array.Empty<Type>());
-                var p1 = Expression.Call(p, "ToLower", Array.Empty<Type>());
-                parentBind = Expression.Bind(parentMI, p1);
+                var parentMember = Expression.MakeMemberAccess(pe, typeof(TreePoco<>).GetSingleProperty("ParentId"));
+                var p = Expression.Call(parentMember, "ToString", new Type[] { });
+                //var p1 = Expression.Call(p, "ToLower", new Type[] { });
+                parentBind = Expression.Bind(parentMI, p);
             }
             else
             {
@@ -249,34 +239,34 @@ namespace KnifeZ.Virgo.Core.Extensions
             var lambda = Expression.Lambda<Func<T, ComboSelectListItem>>(init, pe);
 
 
-            List<ComboSelectListItem> rv = new List<ComboSelectListItem>();
+            IQueryable<ComboSelectListItem> rv = null;
             //根据Text对下拉菜单数据排序
             if (SortByName == true)
             {
-                rv = query.Select(lambda).OrderBy(x => x.Text).ToList();
+                rv = query.Select(lambda).OrderBy(x => x.Text);
             }
             else
             {
-                rv = query.Select(lambda).ToList();
+                rv = query.Select(lambda);
             }
 
-            return rv;
+            return rv.ToList();
         }
 
         #endregion
-
         /// <summary>
         /// 拼接本表的数据权限过滤
         /// </summary>
         /// <typeparam name="T">数据类</typeparam>
         /// <param name="query">源query</param>
+        /// <param name="knifeVirgo">Virgo context</param>
         /// <param name="dps">数据权限列表</param>
         /// <returns>拼接好where条件的query</returns>
-        private static IQueryable<T> AppendSelfDPWhere<T> (IQueryable<T> query, List<DataPrivilege> dps) where T : TopBasePoco
+        private static IQueryable<T> AppendSelfDPWhere<T> (IQueryable<T> query, VirgoContext knifeVirgo, List<SimpleDataPri> dps) where T : TopBasePoco
         {
-            var dpsSetting = GlobalServices.GetService<Configs>().DataPrivilegeSettings;
+            var dpsSetting = knifeVirgo?.DataPrivilegeSettings;
             ParameterExpression pe = Expression.Parameter(typeof(T));
-            Expression peid = Expression.Property(pe, typeof(T).GetProperties().Where(x => x.Name.ToLower() == "id").FirstOrDefault());
+            Expression peid = Expression.Property(pe, typeof(T).GetSingleProperty("ID"));
             //循环数据权限，加入到where条件中，达到自动过滤的效果
             if (dpsSetting?.Where(x => x.ModelName == query.ElementType.Name).SingleOrDefault() != null)
             {
@@ -310,11 +300,12 @@ namespace KnifeZ.Virgo.Core.Extensions
         /// </summary>
         /// <typeparam name="T">源数据类</typeparam>
         /// <param name="baseQuery">源Query</param>
-        /// <param name="dps">数据权限</param>
+        /// <param name="knifeVirgo"></param>
         /// <param name="IdFields">关联表外键</param>
         /// <returns>修改后的查询语句</returns>
-        public static IQueryable<T> DPWhere<T> (this IQueryable<T> baseQuery, List<DataPrivilege> dps, params Expression<Func<T, object>>[] IdFields)
+        public static IQueryable<T> DPWhere<T> (this IQueryable<T> baseQuery, VirgoContext knifeVirgo, params Expression<Func<T, object>>[] IdFields) where T : TopBasePoco
         {
+            var dps = knifeVirgo?.LoginUserInfo?.DataPrivileges;
             //循环所有关联外键
             List<string> tableNameList = new List<string>();
             foreach (var IdField in IdFields)
@@ -339,7 +330,7 @@ namespace KnifeZ.Virgo.Core.Extensions
 
             }
             //var test = DPWhere(baseQuery, dps, tableNameList, IdFields);
-            return DPWhere(baseQuery, dps, tableNameList, IdFields);
+            return DPWhere(baseQuery, knifeVirgo, tableNameList, IdFields);
         }
 
         #region AddBy YOUKAI 20160310
@@ -348,12 +339,14 @@ namespace KnifeZ.Virgo.Core.Extensions
         /// </summary>
         /// <typeparam name="T">源数据类</typeparam>
         /// <param name="baseQuery">源Query</param>
-        /// <param name="dps">数据权限</param>
+        /// <param name="knifeVirgo">wtm context</param>
         /// <param name="tableName">关联数据权限的表名,如果关联外键为自身，则参数第一个为自身</param>
         /// <param name="IdFields">关联表外键</param>
         /// <returns>修改后的查询语句</returns>
-        public static IQueryable<T> DPWhere<T> (this IQueryable<T> baseQuery, List<DataPrivilege> dps, List<string> tableName, params Expression<Func<T, object>>[] IdFields)
+        public static IQueryable<T> DPWhere<T> (this IQueryable<T> baseQuery, VirgoContext knifeVirgo, List<string> tableName, params Expression<Func<T, object>>[] IdFields) where T : TopBasePoco
         {
+            var dps = knifeVirgo?.LoginUserInfo?.DataPrivileges;
+
             // var dpsSetting = BaseVM.AllDPS;
             ParameterExpression pe = Expression.Parameter(typeof(T));
             Expression left1 = Expression.Constant(1);
@@ -361,7 +354,7 @@ namespace KnifeZ.Virgo.Core.Extensions
             Expression trueExp = Expression.Equal(left1, right1);
             Expression falseExp = Expression.NotEqual(left1, right1);
             Expression finalExp = null;
-            int index = 0;
+            int tindex = 0;
             //循环所有关联外键
             foreach (var IdField in IdFields)
             {
@@ -416,9 +409,9 @@ namespace KnifeZ.Virgo.Core.Extensions
                     //如果是Id，则本身就是关联的类
                     else
                     {
-                        fieldName = tableName[index];
+                        fieldName = tableName[tindex];
                     }
-                    var dpsSetting = GlobalServices.GetService<Configs>().DataPrivilegeSettings;
+                    var dpsSetting = knifeVirgo.DataPrivilegeSettings;
 
                     //循环系统设定的数据权限，如果没有和关联类一样的表，则跳过
                     if (dpsSetting.Where(x => x.ModelName == fieldName).SingleOrDefault() == null)
@@ -470,7 +463,7 @@ namespace KnifeZ.Virgo.Core.Extensions
                             }
                             else
                             {
-                                exp = ids.GetContainIdExpression<T>(peid).Body;
+                                exp = ids.GetContainIdExpression(typeof(T), pe, peid).Body;
                             }
                         }
                     }
@@ -484,7 +477,7 @@ namespace KnifeZ.Virgo.Core.Extensions
                 {
                     finalExp = Expression.OrElse(finalExp, exp);
                 }
-                index++;
+                tindex++;
             }
             //如果没有进行任何修改，则还返回baseQuery
             if (finalExp == null)
@@ -509,7 +502,7 @@ namespace KnifeZ.Virgo.Core.Extensions
                 if (defaultSorts == null || defaultSorts.Length == 0)
                 {
                     ParameterExpression pe = Expression.Parameter(typeof(T));
-                    var idproperty = typeof(T).GetProperties().Where(x => x.Name.ToLower() == "id").FirstOrDefault();
+                    var idproperty = typeof(T).GetSingleProperty("ID");
                     Expression pro = Expression.Property(pe, idproperty);
                     Type proType = typeof(Guid);
                     Expression final = Expression.Call(
@@ -528,13 +521,13 @@ namespace KnifeZ.Virgo.Core.Extensions
             }
             else
             {
-                var temp = System.Text.Json.JsonSerializer.Deserialize<List<SortInfo>>(sortInfo);
+                var temp = JsonSerializer.Deserialize<List<SortInfo>>(sortInfo);
                 info.AddRange(temp);
             }
             foreach (var item in info)
             {
                 ParameterExpression pe = Expression.Parameter(typeof(T));
-                var idproperty = typeof(T).GetProperties().Where(x => x.Name == item.Property).FirstOrDefault();
+                var idproperty = typeof(T).GetSingleProperty(item.Property);
                 Expression pro = Expression.Property(pe, idproperty);
                 Type proType = typeof(T).GetSingleProperty(item.Property).PropertyType;
                 if (item.Direction == SortDir.Asc)
@@ -587,15 +580,45 @@ namespace KnifeZ.Virgo.Core.Extensions
             return rv;
         }
 
-        public static IQueryable<T> CheckID<T> (this IQueryable<T> baseQuery, object val)
+        public static IQueryable<T> CheckID<T> (this IQueryable<T> baseQuery, object val, MemberExpression member = null)
         {
             ParameterExpression pe = Expression.Parameter(typeof(T));
-            var idproperty = typeof(T).GetProperties().Where(x => x.Name.ToLower() == "id").FirstOrDefault();
+            PropertyInfo idproperty = null;
+            if (member == null)
+            {
+                idproperty = typeof(T).GetSingleProperty("ID");
+            }
+            else
+            {
+                idproperty = typeof(T).GetSingleProperty(member.Member.Name);
+            }
             Expression peid = Expression.Property(pe, idproperty);
             var convertid = PropertyHelper.ConvertValue(val, idproperty.PropertyType);
             return baseQuery.Where(Expression.Lambda<Func<T, bool>>(Expression.Equal(peid, Expression.Constant(convertid)), pe));
-
         }
+
+        public static IQueryable<T> CheckNotNull<T> (this IQueryable<T> baseQuery, Expression<Func<T, object>> member)
+        {
+            return baseQuery.CheckNotNull<T>(member.GetPropertyName());
+        }
+
+        public static IQueryable<T> CheckNotNull<T> (this IQueryable<T> baseQuery, string member)
+        {
+            ParameterExpression pe = Expression.Parameter(typeof(T));
+            PropertyInfo idproperty = typeof(T).GetSingleProperty(member);
+            Expression peid = Expression.Property(pe, idproperty);
+            return baseQuery.Where(Expression.Lambda<Func<T, bool>>(Expression.NotEqual(peid, Expression.Constant(null)), pe));
+        }
+
+
+        public static IQueryable<T> CheckNull<T> (this IQueryable<T> baseQuery, Expression<Func<T, object>> member)
+        {
+            ParameterExpression pe = Expression.Parameter(typeof(T));
+            PropertyInfo idproperty = typeof(T).GetSingleProperty(member.GetPropertyName());
+            Expression peid = Expression.Property(pe, idproperty);
+            return baseQuery.Where(Expression.Lambda<Func<T, bool>>(Expression.Equal(peid, Expression.Constant(null)), pe));
+        }
+
 
         public static IQueryable<T> CheckWhere<T, S> (this IQueryable<T> baseQuery, S val, Expression<Func<T, bool>> where)
         {
@@ -741,17 +764,27 @@ where S : struct
             }
         }
 
+        public static IQueryable<string> DynamicSelect<T> (this IQueryable<T> baseQuery, string fieldName)
+        {
+            ParameterExpression pe = Expression.Parameter(typeof(T));
+            var idproperty = typeof(T).GetSingleProperty(fieldName);
+            Expression pro = Expression.Property(pe, idproperty);
+            Expression tostring = Expression.Call(pro, "ToString", Array.Empty<Type>());
+            Type proType = typeof(string);
+            Expression final = Expression.Call(
+                                           typeof(Queryable),
+                                           "Select",
+                                           new Type[] { typeof(T), proType },
+                                           baseQuery.Expression,
+                                           Expression.Lambda(tostring, new ParameterExpression[] { pe }));
+            var rv = baseQuery.Provider.CreateQuery<string>(final) as IOrderedQueryable<string>;
+            return rv;
+        }
+
+
         public static string GetTableName<T> (this IDataContext self)
         {
-            return self.GetTableName<T>();
-            //if (self.DBType == DBTypeEnum.PgSql)
-            //{
-            //    return self.Model.FindEntityType(typeof(T)).Npgsql().TableName;
-            //}
-            //else
-            //{
-            //    return self.Model.FindEntityType(typeof(T)).SqlServer().TableName;
-            //}
+            return self.Model.FindEntityType(typeof(T)).GetTableName();
         }
 
         /// <summary>
@@ -843,33 +876,7 @@ where S : struct
         public static string GetFieldName<T> (this IDataContext self, string fieldname)
         {
             var rv = self.Model.FindEntityType(typeof(T)).FindProperty(fieldname);
-            if (rv == null)
-            {
-                return "";
-            }
-            // TODO
-            return rv.GetColumnName(new Microsoft.EntityFrameworkCore.Metadata.StoreObjectIdentifier()
-            {
-            });
-            //switch (self.DBType)
-            //{
-            //    case DBTypeEnum.SqlServer:
-            //        rv.GetAnnotations().FirstOrDefault(x=>x.Name=="SqlServer")
-            //        return rv.SqlServer().ColumnName;
-            //    case DBTypeEnum.MySql:
-            //        return rv.MySql().ColumnName;
-            //    case DBTypeEnum.PgSql:
-            //        return rv.Npgsql().ColumnName;
-            //    case DBTypeEnum.Memory:
-            //        return rv.SqlServer().ColumnName;
-            //    case DBTypeEnum.SQLite:
-            //        return rv.Sqlite().ColumnName;
-            //    //case DBTypeEnum.Oracle:
-            //    //    return rv.Oracle().ColumnName;
-            //    default:
-            //        return rv.SqlServer().ColumnName;
-            //}
-
+            return rv?.GetColumnName(new Microsoft.EntityFrameworkCore.Metadata.StoreObjectIdentifier());
         }
 
         public static string GetPropertyNameByFk (this IDataContext self, Type sourceType, string fkname)
@@ -895,25 +902,6 @@ where S : struct
 
         public static Expression<Func<TModel, bool>> GetContainIdExpression<TModel> (this List<string> Ids, Expression peid = null)
         {
-            //if (Ids == null)
-            //{
-            //    Ids = new List<string>();
-            //}
-
-            //ParameterExpression pe = Expression.Parameter(typeof(TModel));
-            //if (peid == null)
-            //{
-            //    peid = Expression.Property(pe, typeof(TModel).GetProperties().Where(x => x.Name.ToLower() == "id").FirstOrDefault());
-            //}
-            //List<object> newids = new List<object>();
-            //foreach (var item in Ids)
-            //{
-            //    newids.Add(PropertyHelper.ConvertValue(item, peid.Type));
-            //}
-            //Expression dpleft = Expression.Constant(newids, typeof(IEnumerable<object>));
-            //Expression dpleft2 = Expression.Call(typeof(Enumerable), "Cast", new Type[] { peid.Type }, dpleft);
-            //Expression dpleft3 = Expression.Call(typeof(Enumerable), "ToList", new Type[] { peid.Type }, dpleft2);
-            //Expression dpcondition = Expression.Call(typeof(Enumerable), "Contains", new Type[] { peid.Type }, dpleft3, peid);
             ParameterExpression pe = Expression.Parameter(typeof(TModel));
             var rv = Ids.GetContainIdExpression(typeof(TModel), pe, peid) as Expression<Func<TModel, bool>>;
             return rv;
@@ -929,6 +917,11 @@ where S : struct
             {
                 peid = Expression.Property(pe, modeltype.GetProperties().Where(x => x.Name.ToLower() == "id").FirstOrDefault());
             }
+            else
+            {
+                ChangePara cp = new ChangePara();
+                peid = cp.Change(peid, pe);
+            }
             List<object> newids = new List<object>();
             foreach (var item in Ids)
             {
@@ -941,7 +934,6 @@ where S : struct
             var rv = Expression.Lambda(typeof(Func<,>).MakeGenericType(modeltype, typeof(bool)), dpcondition, pe);
             return rv;
         }
-
 
         /// <summary>
         /// 开始一个事务，当使用同一IDataContext时，嵌套的两个事务不会引起冲突，当嵌套的事务执行时引起的异常会通过回滚方法向上层抛出异常

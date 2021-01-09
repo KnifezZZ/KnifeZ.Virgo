@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -20,45 +21,47 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         bool IsFake { get; set; }
 
+        bool IsDebug { get; set; }
+
         DBTypeEnum DBType { get; set; }
         /// <summary>
         /// AddEntity
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="entity"></param>
-        void AddEntity<T>(T entity) where T : TopBasePoco;
+        void AddEntity<T> (T entity) where T : TopBasePoco;
 
         /// <summary>
         /// UpdateEntity
         /// </summary>
-        void UpdateEntity<T>(T entity) where T : TopBasePoco;
+        void UpdateEntity<T> (T entity) where T : TopBasePoco;
 
         /// <summary>
         /// UpdateProperty
         /// </summary>
-        void UpdateProperty<T>(T entity, Expression<Func<T, object>> fieldExp) where T : TopBasePoco;
+        void UpdateProperty<T> (T entity, Expression<Func<T, object>> fieldExp) where T : TopBasePoco;
 
         /// <summary>
         /// UpdateProperty
         /// </summary>
-        void UpdateProperty<T>(T entity, string fieldName) where T : TopBasePoco;
+        void UpdateProperty<T> (T entity, string fieldName) where T : TopBasePoco;
 
         /// <summary>
         /// DeleteEntity
         /// </summary>
-        void DeleteEntity<T>(T entity) where T : TopBasePoco;
+        void DeleteEntity<T> (T entity) where T : TopBasePoco;
 
         /// <summary>
         /// CascadeDelete
         /// </summary>
-        void CascadeDelete<T>(T entity) where T : TopBasePoco, ITreeData<T>;
+        void CascadeDelete<T> (T entity) where T : TreePoco;
 
         /// <summary>
         /// Set
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        DbSet<T> Set<T>() where T : class;
+        DbSet<T> Set<T> () where T : class;
 
         /// <summary>
         /// Model
@@ -81,25 +84,25 @@ namespace KnifeZ.Virgo.Core
         /// SaveChanges
         /// </summary>
         /// <returns></returns>
-        int SaveChanges();
+        int SaveChanges ();
 
         /// <summary>
         /// SaveChanges
         /// </summary>
         /// <returns></returns>
-        int SaveChanges(bool acceptAllChangesOnSuccess);
+        int SaveChanges (bool acceptAllChangesOnSuccess);
 
         /// <summary>
         /// SaveChangesAsync
         /// </summary>
         /// <returns></returns>
-        Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default);
+        Task<int> SaveChangesAsync (bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// SaveChangesAsync
         /// </summary>
         /// <returns></returns>
-        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+        Task<int> SaveChangesAsync (CancellationToken cancellationToken = default(CancellationToken));
 
         #endregion
 
@@ -107,11 +110,12 @@ namespace KnifeZ.Virgo.Core
         /// 初始化
         /// </summary>
         /// <param name="AllModel"></param>
+        /// <param name="IsSpa"></param>
         /// <returns>返回true即数据新建完成，进入初始化操作，返回false即数据库已经存在</returns>
-        Task<bool> DataInit(object AllModel);
+        Task<bool> DataInit (object AllModel, bool IsSpa);
 
-        IDataContext CreateNew();
-        IDataContext ReCreate();
+        IDataContext CreateNew ();
+        IDataContext ReCreate ();
 
         /// <summary>
         /// 执行存储过程，返回datatable
@@ -119,8 +123,8 @@ namespace KnifeZ.Virgo.Core
         /// <param name="command">存储过程名称</param>
         /// <param name="paras">参数</param>
         /// <returns></returns>
-        DataTable RunSP(string command, params object[] paras);
-        IEnumerable<TElement> RunSP<TElement>(string command, params object[] paras);
+        DataTable RunSP (string command, params object[] paras);
+        IEnumerable<TElement> RunSP<TElement> (string command, params object[] paras);
 
         /// <summary>
         /// 执行sql语句，返回datatable
@@ -128,10 +132,13 @@ namespace KnifeZ.Virgo.Core
         /// <param name="command">查询sql语句</param>
         /// <param name="paras">参数</param>
         /// <returns></returns>
-        DataTable RunSQL(string command, params object[] paras);
-        IEnumerable<TElement> RunSQL<TElement>(string sql, params object[] paras);
-        DataTable Run(string sql, CommandType commandType, params object[] paras);
-        IEnumerable<TElement> Run<TElement>(string sql, CommandType commandType, params object[] paras);
-        object CreateCommandParameter(string name, object value, ParameterDirection dir);
+        DataTable RunSQL (string command, params object[] paras);
+        IEnumerable<TElement> RunSQL<TElement> (string sql, params object[] paras);
+        DataTable Run (string sql, CommandType commandType, params object[] paras);
+        IEnumerable<TElement> Run<TElement> (string sql, CommandType commandType, params object[] paras);
+        object CreateCommandParameter (string name, object value, ParameterDirection dir);
+
+        void SetLoggerFactory (ILoggerFactory factory);
+        void Dispose ();
     }
 }

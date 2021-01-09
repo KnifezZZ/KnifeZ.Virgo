@@ -10,6 +10,9 @@ namespace KnifeZ.Virgo.Core
     public interface IBaseVM
     {
         #region Property
+
+        VirgoContext KnifeVirgo { get; set; }
+
         /// <summary>
         /// UniqueId
         /// </summary>
@@ -31,23 +34,19 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         string CurrentCS { get; }
         /// <summary>
-        /// FromFixedCon
-        /// </summary>
-        bool FromFixedCon { get; set; }
-        /// <summary>
         /// FC
         /// </summary>
         Dictionary<string, object> FC { get; set; }
-        ///// <summary>
-        ///// Config
-        ///// </summary>
-        //Configs Config { get; set; }
-        IModelStateService MSD { get; set; }
-        ISessionService Session { get; set; }
+        /// <summary>
+        /// Config
+        /// </summary>
+        Configs ConfigInfo { get; }
 
-        IDistributedCache Cache { get; set; }
+        ISessionService Session { get; }
 
-        LoginUserInfo LoginUserInfo { get; set; }
+        IDistributedCache Cache { get; }
+
+        LoginUserInfo LoginUserInfo { get; }
         #endregion
 
         #region Event
@@ -67,12 +66,12 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// 调用 InitVM 并触发 OnAfterInit 事件
         /// </summary>
-        void DoInit();
+        void DoInit ();
 
         /// <summary>
         /// 调用 ReInitVM 并触发 OnAfterReInit 事件
         /// </summary>
-        void DoReInit();
+        void DoReInit ();
         #endregion
     }
 }

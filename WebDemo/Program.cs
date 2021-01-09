@@ -23,7 +23,7 @@ namespace WebDemo
                 logging.ClearProviders();
                 logging.AddConsole();
                 logging.AddDebug();
-                logging.AddKnifeLogger();
+                logging.AddVirgoLogger();
             })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {

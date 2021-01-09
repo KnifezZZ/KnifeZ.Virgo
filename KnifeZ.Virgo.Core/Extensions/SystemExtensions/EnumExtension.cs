@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 namespace KnifeZ.Virgo.Core.Extensions
 {
+
     /// <summary>
     /// 枚举扩展函数
     /// </summary>
@@ -17,7 +18,7 @@ namespace KnifeZ.Virgo.Core.Extensions
         /// <param name="value">value</param>
         /// <param name="pleaseSelect">pleaseSelect</param>
         /// <returns>下拉菜单数据列表</returns>
-        public static List<ComboSelectListItem> ToListItems(this Type self, object value = null, bool pleaseSelect = false)
+        public static List<ComboSelectListItem> ToListItems (this Type self, object value = null)
         {
             string[] names = null;
             Array values = null;
@@ -37,11 +38,11 @@ namespace KnifeZ.Virgo.Core.Extensions
             List<ComboSelectListItem> rv = new List<ComboSelectListItem>();
             if (names != null)
             {
-                for(int i=0;i<names.Length;i++)
+                for (int i = 0; i < names.Length; i++)
                 {
                     var name = names[i];
                     var newitem = new ComboSelectListItem { Text = PropertyHelper.GetEnumDisplayName(self, name), Value = ((int)values.GetValue(i)).ToString() };
-                    if(value is string)
+                    if (value is string)
                     {
                         if (value != null)
                         {
@@ -49,7 +50,7 @@ namespace KnifeZ.Virgo.Core.Extensions
                             var vs = v.Split(',');
                             foreach (var item in vs)
                             {
-                                if (item != null && (newitem.Value.ToString() == item.ToString())||name == item.ToString())
+                                if (item != null && (newitem.Value.ToString() == item.ToString()) || name == item.ToString())
                                 {
                                     newitem.Selected = true;
                                     break;
@@ -79,10 +80,6 @@ namespace KnifeZ.Virgo.Core.Extensions
                     }
                     rv.Add(newitem);
                 }
-            }
-            if (pleaseSelect == true)
-            {
-                rv.Insert(0, new ComboSelectListItem { Text = Program._localizer["PleaseSelect"], Value = "" });
             }
             return rv;
         }

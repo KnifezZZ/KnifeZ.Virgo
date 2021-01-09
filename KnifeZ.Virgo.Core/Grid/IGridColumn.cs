@@ -4,51 +4,6 @@ using System.Drawing;
 
 namespace KnifeZ.Virgo.Core
 {
-    /// <summary>
-    /// Grid Column Content Fixed Enum
-    /// </summary>
-    public enum GridColumnFixedEnum
-    {
-        /// <summary>
-        /// 规定在左侧
-        /// </summary>
-        Left = 0,
-        /// <summary>
-        /// 规定在右侧
-        /// </summary>
-        Right
-    }
-
-    /// <summary>
-    /// Grid Column Edit Type Enum
-    /// </summary>
-    public enum EditTypeEnum
-    {
-        Text,
-        TextBox,
-        ComboBox,
-        Datetime,
-        CheckBox
-    }
-
-    /// <summary>
-    /// Grid Column Content Align Enum
-    /// </summary>
-    public enum GridColumnAlignEnum
-    {
-        /// <summary>
-        /// Center
-        /// </summary>
-        Center = 0,
-        /// <summary>
-        /// Left
-        /// </summary>
-        Left,
-        /// <summary>
-        /// Right
-        /// </summary>
-        Right
-    }
 
     /// <summary>
     /// Grid Column Type Enum
@@ -90,43 +45,11 @@ namespace KnifeZ.Virgo.Core
         /// </summary>
         string Title { get; set; }
 
-        /// <summary>
-        /// 列宽
-        /// </summary>
-        int? Width { get; set; }
-        /// <summary>
-        /// //监听单元格事件
-        /// </summary>
-        string Event { get; set; }
-        /// <summary>
-        /// 是否允许排序
-        /// </summary>
-        bool? Sort { get; set; }
-
-        /// <summary>
-        /// 是否固定列
-        /// </summary>
-        GridColumnFixedEnum? Fixed { get; set; }
-
-        /// <summary>
-        /// 对齐方式
-        /// </summary>
-        GridColumnAlignEnum Align { get; set; }
-
-        /// <summary>
-        /// 是否可改变列宽
-        /// </summary>
-        bool? UnResize { get; set; }
 
         /// <summary>
         /// 隐藏列
         /// </summary>
         bool? Hide { get; set; }
-
-        /// <summary>
-        /// 是否显示汇总
-        /// </summary>
-        bool? ShowTotal { get; set; }
 
         /// <summary>
         /// 子列
@@ -137,9 +60,6 @@ namespace KnifeZ.Virgo.Core
         /// 底层子列数量
         /// </summary>
         int ChildrenLength { get; }
-
-        EditTypeEnum? EditType { get; set; }
-
         List<ComboSelectListItem> ListItems { get; set; }
 
         #region 只读属性 生成 Excel 及其 表头用
