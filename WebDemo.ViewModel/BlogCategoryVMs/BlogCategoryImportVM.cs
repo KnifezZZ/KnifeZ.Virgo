@@ -20,7 +20,7 @@ namespace WebDemo.ViewModel.BlogCategoryVMs
         public ExcelPropety Icon_Excel = ExcelPropety.CreateProperty<BlogCategory>(x => x.Icon);
         [Display(Name = "类别名称")]
         public ExcelPropety Name_Excel = ExcelPropety.CreateProperty<BlogCategory>(x => x.Name);
-        [Display(Name = "Parent")]
+        [Display(Name = "ParentFolder")]
         public ExcelPropety Parent_Excel = ExcelPropety.CreateProperty<BlogCategory>(x => x.ParentId);
         [Display(Name = "排序")]
         public ExcelPropety Sort_Excel = ExcelPropety.CreateProperty<BlogCategory>(x => x.Sort);

@@ -27,7 +27,7 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
                         this.MakeGridHeader(x => x.DisplayOrder),
                         this.MakeGridHeader(x => x.ICon),
                         this.MakeGridHeader(x => x.Children),
-                        this.MakeGridHeader(x=>x.ParentID).SetHide()
+                        this.MakeGridHeader(x=>x.ParentId)
                     });
             return rv;
         }
@@ -62,7 +62,7 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
                 IsPublic = x.IsPublic,
                 DisplayOrder = x.DisplayOrder,
                 ExtraOrder = order++,
-                ParentID = x.ParentId,
+                ParentId = x.ParentId,
                 ICon = x.ICon,
                 HasChild = (x.Children != null && x.Children.Count > 0)
             }).OrderBy(x => x.ExtraOrder).ToList();

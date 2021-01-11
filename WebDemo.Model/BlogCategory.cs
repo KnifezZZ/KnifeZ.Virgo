@@ -11,6 +11,7 @@ namespace WebDemo.Model
     {
         [Display(Name = "类别名称")]
         public string Name { get; set; }
+
         [Display(Name = "类别描述")]
         public string Description { get; set; }
 

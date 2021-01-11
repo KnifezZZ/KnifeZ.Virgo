@@ -381,13 +381,26 @@ namespace KnifeZ.Virgo.Mvc
                     int count = existSubPro.Where(x => x == key).Count();
                     if (count == 1)
                     {
-                        other.AppendLine($@"
+                        if (subtype.BaseType.BaseType.Name == "TreePoco"|| subtype.BaseType.BaseType.Name == "TreeBasePoco")
+                        {
+                            other.AppendLine($@"
+        [ActionDescription(""获取{subtype.Name}列表"")]
+        [HttpGet(""[action]"")]
+        public ActionResult Get{subtype.Name}List()
+        {{
+            return Ok(KnifeVirgo.DC.Set<{subtype.Name}>().GetTreeSelectListItems(KnifeVirgo, x => x.{item.SubField}));
+        }}");
+                        }
+                        else
+                        {
+                            other.AppendLine($@"
         [ActionDescription(""获取{subtype.Name}列表"")]
         [HttpGet(""[action]"")]
         public ActionResult Get{subtype.Name}List()
         {{
             return Ok(KnifeVirgo.DC.Set<{subtype.Name}>().GetSelectListItems(KnifeVirgo, x => x.{item.SubField}));
         }}");
+                        }
                     }
                 }
             }
@@ -522,10 +535,19 @@ namespace KnifeZ.Virgo.Mvc
                         var subdisplay = subpro.GetCustomAttribute<DisplayAttribute>();
                         headerstring += $@"
                 this.MakeGridHeader(x => x.{subpro.DeclaringType.Name + "_" + pro.SubField + prefix}),";
+                        headerstring += $@"
+                this.MakeGridHeader(x => x.{pro.FieldName}Id),";
                         if (pro.InfoType == FieldInfoType.One2Many)
                         {
                             selectstring += $@"
                     {subpro.DeclaringType.Name + "_" + pro.SubField + prefix} = x.{pro.FieldName}.{pro.SubField},";
+                            if (subtype.GetProperties().Where(x => x.Name == "Parent").Any() &&
+                                subtype.GetProperties().Where(x => x.Name == "Children").Any()
+                                && subtype.Name == ModelName)
+                            {
+                                selectstring += $@"
+                    {pro.FieldName}Id = x.{pro.FieldName}Id,";
+                            }
                         }
                         else
                         {
@@ -706,6 +728,7 @@ namespace KnifeZ.Virgo.Mvc
             StringBuilder sbExtAPIs = new StringBuilder();
             StringBuilder sbFields = new StringBuilder();
             List<string> existSubPro = new List<string>();
+            var isUseTreeTable = false;
             var modelType = Type.GetType(CodeModel.ModelType);
             var modelProps = modelType.GetProperties();
             //循环所有字段
@@ -753,11 +776,22 @@ namespace KnifeZ.Virgo.Mvc
                         }
                     }
                 }
+
                 //列表展示
                 if (item.IsListField)
                 {
                     sbColumns.Append($@"
 				{{ key: '{newname}', title: '{label}' }},");
+                    if (item.InfoType == FieldInfoType.One2Many)
+                    {
+                        var subtype = Type.GetType(item.LinkedType);
+                        var subpros = subtype.GetProperties();
+                        if (subpros.Where(x => x.Name == "Parent").Any() && subpros.Where(x => x.Name == "Children").Any()
+                            &&subtype.Name==ModelName)
+                        {
+                            isUseTreeTable = true;
+                        }
+                    }
                 }
 
 
@@ -766,7 +800,6 @@ namespace KnifeZ.Virgo.Mvc
                 {
                     checktype = mpro.PropertyType.GetGenericArguments()[0];
                 }
-
                 //查询条件
                 if (item.IsSearcherField)
                 {
@@ -975,6 +1008,15 @@ namespace KnifeZ.Virgo.Mvc
             }
             if (name == "index")
             {
+                if (isUseTreeTable)
+                {
+                    rv = rv.Replace("$isTree$", $@":useTree=""true""
+				:pagination=""false""");
+                }
+                else
+                {
+                    rv = rv.Replace("$isTree$", $@":useTree=""false""");
+                }
                 rv = rv.Replace("$queryFields$", sbQueryFields.ToString())
                     .Replace("$columns$", sbColumns.ToString());
             }

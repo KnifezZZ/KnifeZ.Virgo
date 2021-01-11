@@ -70,9 +70,9 @@ namespace WebDemo
             {
                 options.JsonSerializerOptions.PropertyNamingPolicy = null;
                 options.JsonSerializerOptions.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(UnicodeRanges.All);
-                //options.JsonSerializerOptions.NumberHandling =
-                //    JsonNumberHandling.AllowReadingFromString |
-                //    JsonNumberHandling.WriteAsString;
+                options.JsonSerializerOptions.NumberHandling =
+                    JsonNumberHandling.AllowReadingFromString |
+                    JsonNumberHandling.WriteAsString;
                 //options.JsonSerializerOptions.Converters.Add(new StringIgnoreLTGTConverter());
                 options.JsonSerializerOptions.Converters.Add(new DateRangeConverter());
             })

@@ -14,6 +14,11 @@ namespace WebDemo.ViewModel.BlogCategoryVMs
 {
     public partial class BlogCategoryListVM : BasePagedListVM<BlogCategory_View, BlogCategorySearcher>
     {
+    
+        public BlogCategoryListVM ()
+        {
+            this.NeedPage = Searcher.Limit > 0;
+        }
 
         protected override IEnumerable<IGridColumn<BlogCategory_View>> InitGridHeader()
         {
@@ -22,6 +27,7 @@ namespace WebDemo.ViewModel.BlogCategoryVMs
                 this.MakeGridHeader(x => x.Icon),
                 this.MakeGridHeader(x => x.Name),
                 this.MakeGridHeader(x => x.BlogCategory_Name),
+                this.MakeGridHeader(x => x.ParentId),
                 this.MakeGridHeader(x => x.Sort),
                 this.MakeGridHeader(x => x.Url),
             };
@@ -39,6 +45,7 @@ namespace WebDemo.ViewModel.BlogCategoryVMs
                     Icon = x.Icon,
                     Name = x.Name,
                     BlogCategory_Name = x.Parent.Name,
+                    ParentId = x.ParentId,
                     Sort = x.Sort,
                     Url = x.Url,
                 })

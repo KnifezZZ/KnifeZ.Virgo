@@ -33,6 +33,7 @@ namespace KnifeZ.Virgo.Core
         public bool IsInherit { get; set; }
 
         [Display(Name = "Privileges")]
+        [JsonIgnore]
         public List<FunctionPrivilege> Privileges { get; set; }
 
         /// <summary>
@@ -51,6 +52,7 @@ namespace KnifeZ.Virgo.Core
         public Guid? DomainId { get; set; }
 
         [Display(Name = "Domain")]
+        [JsonIgnore]
         public FrameworkDomain Domain { get; set; }
 
         [Display(Name = "ShowOnMenu")]

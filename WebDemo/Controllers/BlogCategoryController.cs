@@ -26,7 +26,7 @@ namespace WebDemo.Controllers
         [HttpPost("[action]")]
         public string Search (BlogCategorySearcher searcher)
         {
-            var vm =KnifeVirgo.CreateVM <BlogCategoryListVM > ();
+            var vm = KnifeVirgo.CreateVM <BlogCategoryListVM > ();
             vm.Searcher = searcher;
             return vm.GetJson();
         }
@@ -166,7 +166,7 @@ namespace WebDemo.Controllers
         [HttpGet("[action]")]
         public ActionResult GetBlogCategoryList()
         {
-            return Ok(KnifeVirgo.DC.Set<BlogCategory>().GetSelectListItems(KnifeVirgo, x => x.Name));
+            return Ok(KnifeVirgo.DC.Set<BlogCategory>().GetTreeSelectListItems(KnifeVirgo, x => x.Name));
         }
 
     }

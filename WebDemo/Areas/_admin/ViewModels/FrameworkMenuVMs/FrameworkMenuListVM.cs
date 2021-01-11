@@ -37,7 +37,7 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
                 case ListVMSearchModeEnum.Custom2:
                     rv.AddRange(new GridColumn<FrameworkMenu_ListView>[] {
                         this.MakeGridHeader(x => x.PageName),
-                         this.MakeGridHeader(x => x.ParentID),
+                         this.MakeGridHeader(x => x.ParentId),
                    });
                     break;
                 default:
@@ -102,10 +102,10 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
                         ActionName = y.ActionName
                     }),
                     ExtraOrder = order++,
-                    ParentID = x.ParentId,
+                    ParentId = x.ParentId,
                     Parent = x.Parent,
                     IsInside = x.IsInside,
-                    HasChild = (x.Children != null && x.Children.Count() > 0) ? true : false,
+                    HasChild = x.Children != null && x.Children.Count > 0,
                     Allowed = allowed.Contains(x.ID),
                     Denied = denied.Contains(x.ID)
                 }).OrderBy(x => x.ExtraOrder);
@@ -126,9 +126,9 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
                     DisplayOrder = x.DisplayOrder,
                     ExtraOrder = order++,
 
-                    ParentID = x.ParentId,
+                    ParentId = x.ParentId,
                     ICon = x.ICon,
-                    HasChild = (x.Children != null && x.Children.Count() > 0) ? true : false
+                    HasChild = x.Children != null && x.Children.Count > 0
                 }).OrderBy(x => x.ExtraOrder);
 
                 return data2.AsQueryable() as IOrderedQueryable<FrameworkMenu_ListView>;
@@ -179,7 +179,7 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
 
         public FrameworkMenu Parent { get; set; }
 
-        public Guid? ParentID { get; set; }
+        public Guid? ParentId { get; set; }
 
         public int ExtraOrder { get; set; }
 

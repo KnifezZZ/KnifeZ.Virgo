@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace KnifeZ.Virgo.Core
 {
@@ -67,6 +68,8 @@ namespace KnifeZ.Virgo.Core
         public string Tag { get; set; }
         public bool Leaf => Children == null || Children.Count == 0;
         public bool Selected { get; set; }
+
+        [JsonPropertyName("children")]
         public List<TreeSelectListItem> Children { get; set; }
     }
 }

@@ -66,8 +66,7 @@ namespace KnifeZ.Virgo.Core.Json
                     depth--;
                     if(reader.IsFinalBlock == true)
                     {
-                        reader.Read();
-                        break;
+                        continue;
                     }
                 }
             }

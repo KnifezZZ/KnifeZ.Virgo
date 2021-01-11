@@ -20,7 +20,7 @@ namespace KnifeZ.Virgo.Admin.Api
     {
         [ActionDescription("Search")]
         [HttpPost("[action]")]
-        public string Search(FrameworkMenuSearcher searcher)
+        public string Search (FrameworkMenuSearcher searcher)
         {
             var vm = KnifeVirgo.CreateVM<FrameworkMenuListVM2>();
             vm.Searcher = searcher;
@@ -29,7 +29,7 @@ namespace KnifeZ.Virgo.Admin.Api
 
         [ActionDescription("Get")]
         [HttpGet("{id}")]
-        public FrameworkMenuVM2 Get(Guid id)
+        public FrameworkMenuVM2 Get (Guid id)
         {
             var vm = KnifeVirgo.CreateVM<FrameworkMenuVM2>(id);
             return vm;
@@ -37,7 +37,7 @@ namespace KnifeZ.Virgo.Admin.Api
 
         [ActionDescription("Create")]
         [HttpPost("[action]")]
-        public IActionResult Add(FrameworkMenuVM2 vm)
+        public IActionResult Add (FrameworkMenuVM2 vm)
         {
             if (!ModelState.IsValid)
             {
@@ -60,7 +60,7 @@ namespace KnifeZ.Virgo.Admin.Api
 
         [ActionDescription("Edit")]
         [HttpPut("[action]")]
-        public IActionResult Edit(FrameworkMenuVM2 vm)
+        public IActionResult Edit (FrameworkMenuVM2 vm)
         {
             if (!ModelState.IsValid)
             {
@@ -82,7 +82,7 @@ namespace KnifeZ.Virgo.Admin.Api
 
         [HttpPost("BatchDelete")]
         [ActionDescription("Delete")]
-        public IActionResult BatchDelete(string[] ids)
+        public IActionResult BatchDelete (string[] ids)
         {
             var vm = KnifeVirgo.CreateVM<FrameworkMenuBatchVM>();
             if (ids != null && ids.Length > 0)
@@ -105,7 +105,7 @@ namespace KnifeZ.Virgo.Admin.Api
 
         [ActionDescription("Export")]
         [HttpPost("[action]")]
-        public IActionResult ExportExcel(FrameworkMenuSearcher searcher)
+        public IActionResult ExportExcel (FrameworkMenuSearcher searcher)
         {
             var vm = KnifeVirgo.CreateVM<FrameworkMenuListVM2>();
             vm.Searcher = searcher;
@@ -115,7 +115,7 @@ namespace KnifeZ.Virgo.Admin.Api
 
         [ActionDescription("ExportByIds")]
         [HttpPost("[action]")]
-        public IActionResult ExportExcelByIds(string[] ids)
+        public IActionResult ExportExcelByIds (string[] ids)
         {
             var vm = KnifeVirgo.CreateVM<FrameworkMenuListVM2>();
             if (ids != null && ids.Length > 0)
@@ -129,7 +129,7 @@ namespace KnifeZ.Virgo.Admin.Api
         #region 未设置页面
         [ActionDescription("UnsetPages")]
         [HttpGet("[action]")]
-        public string UnsetPages()
+        public string UnsetPages ()
         {
             var vm = KnifeVirgo.CreateVM<FrameworkActionListVM>();
             return vm.GetJson();
@@ -139,7 +139,7 @@ namespace KnifeZ.Virgo.Admin.Api
         #region 刷新菜单
         [ActionDescription("RefreshMenu")]
         [HttpGet("[action]")]
-        public async Task<ActionResult> RefreshMenu()
+        public async Task<ActionResult> RefreshMenu ()
         {
             KnifeVirgo.Cache.Delete("FFMenus");
             var userids = KnifeVirgo.DC.Set<FrameworkUserBase>().Select(x => x.ID.ToString().ToLower()).ToArray();
@@ -150,9 +150,18 @@ namespace KnifeZ.Virgo.Admin.Api
 
         [ActionDescription("GetActionsByModelId")]
         [HttpGet("GetActionsByModel")]
-        public ActionResult GetActionsByModel(string ModelName)
+        public ActionResult GetActionsByModel (string ModelName)
         {
-            var m = KnifeVirgo.GlobaInfo.AllModule.Where(x => x.IsApi == true && x.FullName.ToLower() == ModelName.ToLower()).SelectMany(x => x.Actions).ToList();
+            if (ModelName.StartsWith("MenuKey."))
+            {
+                ModelName = Localizer[ModelName];
+            }
+            var menu = KnifeVirgo.GlobaInfo.AllModule.Where(x => x.IsApi == true && x.ModuleName.ToLower() == ModelName.ToLower()).FirstOrDefault();
+            if (menu == null)
+            {
+                return Ok(new List<ComboSelectListItem>());
+            }
+            var m = menu.Actions;
             List<SimpleAction> toremove = new List<SimpleAction>();
             foreach (var item in m)
             {
@@ -172,12 +181,13 @@ namespace KnifeZ.Virgo.Admin.Api
         public ActionResult GetAllModules ()
         {
             List<ComboSelectListItem> comboSelects = new List<ComboSelectListItem>();
-            foreach (var item in KnifeVirgo.GlobaInfo.AllModule)
+            var menus = KnifeVirgo.GlobaInfo.AllModule.Where(x => x.IsApi == true).ToList();
+            foreach (var item in menus)
             {
                 comboSelects.Add(new ComboSelectListItem()
                 {
                     Text = item.ModuleName,
-                    Value = item.ModuleName
+                    Value = item.FullName
                 });
             }
             return Ok(comboSelects);
@@ -186,7 +196,7 @@ namespace KnifeZ.Virgo.Admin.Api
         [AllRights]
         [ActionDescription("GetFolders")]
         [HttpGet("GetFolders")]
-        public ActionResult GetFolders()
+        public ActionResult GetFolders ()
         {
             var AllParents = KnifeVirgo.DC.Set<FrameworkMenu>().Where(x => x.FolderOnly == true).OrderBy(x => x.DisplayOrder).GetSelectListItems(KnifeVirgo, x => x.PageName);
             foreach (var p in AllParents)

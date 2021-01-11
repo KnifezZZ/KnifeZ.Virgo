@@ -6,6 +6,7 @@ using System.Linq;
 using KnifeZ.Virgo.Core;
 using KnifeZ.Virgo.Core.Extensions;
 using KnifeZ.Virgo.Core.Support.Json;
+using System.Text.Json.Serialization;
 
 namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
 {
@@ -20,7 +21,7 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
 
         [Display(Name = "AllowedRole")]
         public List<Guid> SelectedRolesIDs { get; set; }
-
+        [JsonIgnore]
         public List<SimpleModule> SimpleModules { get => KnifeVirgo?.GlobaInfo?.AllModule; }
 
         public FrameworkMenuVM2()

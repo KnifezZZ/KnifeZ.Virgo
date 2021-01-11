@@ -14,6 +14,11 @@ namespace $vmnamespace$
 {
     public partial class $classname$ListVM : BasePagedListVM<$classname$_View, $classname$Searcher>
     {$actions$
+    
+        public $classname$ListVM ()
+        {
+            this.NeedPage = Searcher.Limit > 0;
+        }
 
         protected override IEnumerable<IGridColumn<$classname$_View>> InitGridHeader()
         {

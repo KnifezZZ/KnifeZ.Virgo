@@ -154,6 +154,14 @@ namespace KnifeZ.Virgo.Mvc
                 {
                     continue;
                 }
+                if(areaattr.Length==0&& model.ClassName == "Account")
+                {
+                    continue;
+                }
+                if (areaattr.Length == 0 && model.ClassName == "FileApi")
+                {
+                    continue;
+                }
                 if (pubattr1.Length > 0 || pubattr12.Length > 0 || rightattr.Length > 0 || debugattr.Length > 0)
                 {
                     model.IgnorePrivillege = true;
@@ -646,17 +654,7 @@ namespace KnifeZ.Virgo.Mvc
             var lg = app.ApplicationServices.GetRequiredService<LinkGenerator>();
             var gd = app.ApplicationServices.GetRequiredService<GlobalData>();
             //获取所有程序集
-            gd.AllAssembly = Utils.GetAllAssembly();
-            //var mvc = GetRuntimeAssembly("KnifeZ.Virgo.Mvc");
-            //if (mvc != null && gd.AllAssembly.Contains(mvc) == false)
-            //{
-            //    gd.AllAssembly.Add(mvc);
-            //}
-            //var core = GetRuntimeAssembly("KnifeZ.Virgo.Core");
-            //if (core != null && gd.AllAssembly.Contains(core) == false)
-            //{
-            //    gd.AllAssembly.Add(core);
-            //}
+            gd.AllAssembly = Utils.GetAllAssembly().Distinct().ToList();
 
             //set Core's _Callerlocalizer to use localizer point to the EntryAssembly's Program class
             var programType = Assembly.GetEntryAssembly().GetTypes().Where(x => x.Name == "Program").FirstOrDefault();
