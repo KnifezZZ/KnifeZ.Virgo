@@ -13,8 +13,8 @@ namespace WebDemo.ViewModel.BlogCategoryVMs
 {
     public partial class BlogCategorySearcher : BaseSearcher
     {
-        [Display(Name = "类别名称")]
-        public String Name { get; set; }
+        [Display(Name = "类别描述")]
+        public String Description { get; set; }
         [Display(Name = "静态地址")]
         public String Url { get; set; }
 

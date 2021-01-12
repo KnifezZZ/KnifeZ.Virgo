@@ -1,6 +1,6 @@
 ﻿<template>
 	<v-form-dialog :use-dialog="$isDialog$">
-		<v-form :fields="fields" :events="events" @closed="closed"></v-form>
+		<v-form :fields="fields" :events="events" :rules="rules" @closed="closed"></v-form>
 	</v-form-dialog>
 </template>
 
@@ -26,6 +26,8 @@ export default {
 					hidden: true,
 				},
 			],
+			rules: {$rules$
+			},
 		}
 	},
 	methods: {

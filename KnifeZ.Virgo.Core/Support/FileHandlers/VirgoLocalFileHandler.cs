@@ -21,7 +21,7 @@ namespace KnifeZ.Virgo.Core.Support.FileHandlers
 
         public override Stream GetFileData (IVirgoFile file)
         {
-            return File.OpenRead(file.Path);
+            return File.OpenRead(Path.GetFullPath(_config.HostRoot+ file.Path));
         }
 
 
@@ -77,8 +77,9 @@ namespace KnifeZ.Virgo.Core.Support.FileHandlers
             {
                 Directory.CreateDirectory(pathHeader);
             }
+
             var fullPath = Path.Combine(pathHeader, $"{Guid.NewGuid().ToString("N")}.{file.FileExt}");
-            file.Path = Path.GetFullPath(fullPath);
+            file.Path ="/"+Path.GetRelativePath(_config.HostRoot,Path.GetFullPath(fullPath)).Replace("\\","/");
             using (var fileStream = File.Create(fullPath))
             {
                 data.CopyTo(fileStream);

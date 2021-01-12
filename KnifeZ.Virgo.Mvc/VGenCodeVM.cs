@@ -727,6 +727,7 @@ namespace KnifeZ.Virgo.Mvc
             StringBuilder sbImports = new StringBuilder();
             StringBuilder sbExtAPIs = new StringBuilder();
             StringBuilder sbFields = new StringBuilder();
+            StringBuilder sbRules = new StringBuilder();
             List<string> existSubPro = new List<string>();
             var isUseTreeTable = false;
             var modelType = Type.GetType(CodeModel.ModelType);
@@ -887,6 +888,14 @@ namespace KnifeZ.Virgo.Mvc
                 //表单展示
                 if (item.IsFormField)
                 {
+                    if (mpro.CustomAttributes.Where(x => x.AttributeType == typeof(RequiredAttribute)).Any())
+                    {
+                        var msg =KnifeVirgo.Localizer[(string)mpro.CustomAttributes
+                            .FirstOrDefault(x => x.AttributeType == typeof(RequiredAttribute)).NamedArguments[0].TypedValue.Value, label];
+                        sbRules.Append($@"
+				{newname}: [{{ required: true, message: '{msg}', trigger: 'change' }}],");
+                    }
+
                     if (checktype.IsBoolOrNullableBool())
                     {
                         sbFields.Append($@"
@@ -1003,6 +1012,7 @@ namespace KnifeZ.Virgo.Mvc
 				}},");
 
                     }
+
                 }
 
             }
@@ -1022,7 +1032,8 @@ namespace KnifeZ.Virgo.Mvc
             }
             if (name == "views.dialog-form")
             {
-                rv = rv.Replace("$fields$", sbFields.ToString());
+                rv = rv.Replace("$fields$", sbFields.ToString())
+                    .Replace("$rules$",sbRules.ToString());
                 if (fields.Count(x => x.IsFormField) > 6)
                 {
                     rv = rv.Replace("$isDialog$", "false");
@@ -1210,7 +1221,7 @@ namespace KnifeZ.Virgo.Mvc
                     i--;
                 }
             }
-            var res = lv.AsQueryable().OrderBy(x => x.FieldName).ToList();
+            var res = lv.AsQueryable().ToList();
             return res;
         }
         //获取关联表字段

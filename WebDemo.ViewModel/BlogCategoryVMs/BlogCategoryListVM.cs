@@ -23,31 +23,31 @@ namespace WebDemo.ViewModel.BlogCategoryVMs
         protected override IEnumerable<IGridColumn<BlogCategory_View>> InitGridHeader()
         {
             return new List<GridColumn<BlogCategory_View>>{
+                this.MakeGridHeader(x => x.Name),
                 this.MakeGridHeader(x => x.Description),
                 this.MakeGridHeader(x => x.Icon),
-                this.MakeGridHeader(x => x.Name),
+                this.MakeGridHeader(x => x.Url),
+                this.MakeGridHeader(x => x.Sort),
                 this.MakeGridHeader(x => x.BlogCategory_Name),
                 this.MakeGridHeader(x => x.ParentId),
-                this.MakeGridHeader(x => x.Sort),
-                this.MakeGridHeader(x => x.Url),
             };
         }
 
         public override IOrderedQueryable<BlogCategory_View> GetSearchQuery()
         {
             var query = DC.Set<BlogCategory>()
-                .CheckContain(Searcher.Name, x=>x.Name)
+                .CheckContain(Searcher.Description, x=>x.Description)
                 .CheckContain(Searcher.Url, x=>x.Url)
                 .Select(x => new BlogCategory_View
                 {
 				    ID = x.ID,
+                    Name = x.Name,
                     Description = x.Description,
                     Icon = x.Icon,
-                    Name = x.Name,
+                    Url = x.Url,
+                    Sort = x.Sort,
                     BlogCategory_Name = x.Parent.Name,
                     ParentId = x.ParentId,
-                    Sort = x.Sort,
-                    Url = x.Url,
                 })
                 .OrderBy(x => x.ID);
             return query;

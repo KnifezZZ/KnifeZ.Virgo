@@ -175,12 +175,21 @@ namespace KnifeZ.Virgo.Core.Support.FileHandlers
 
         public string GetFileName(string id, IDataContext dc = null)
         {
-            string rv;
             if (dc == null)
             {
                 dc = _configs.CreateDC();
             }
-            rv = dc.Set<FileAttachment>().CheckID(id).Select(x => x.FileName).FirstOrDefault();
+            string rv = dc.Set<FileAttachment>().CheckID(id).Select(x => x.FileName).FirstOrDefault();
+            return rv;
+        }
+
+        public FileAttachment GetFileModel (string id, IDataContext dc = null)
+        {
+            if (dc == null)
+            {
+                dc = _configs.CreateDC();
+            }
+            FileAttachment rv = dc.Set<FileAttachment>().CheckID(id).FirstOrDefault();
             return rv;
         }
 

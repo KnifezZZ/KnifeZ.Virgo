@@ -9,6 +9,7 @@ namespace WebDemo.Model
 {
     public class BlogCategory : TreePoco<BlogCategory>
     {
+        [Required(ErrorMessage = "{0}required")]
         [Display(Name = "类别名称")]
         public string Name { get; set; }
 
