@@ -39,14 +39,33 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
 
             if (Entity.Url != null && Entity.IsInside == true)
             {
-                SelectedModule = SimpleModules.Where(x => x.IsApi == true && x.FullName == Entity.ClassName).FirstOrDefault().FullName;
+                if (string.IsNullOrEmpty(SelectedModule))
+                {
+                    SelectedModule = SimpleModules.Where(x => x.IsApi == true && x.FullName == Entity.ClassName).FirstOrDefault().FullName;
+                }
+                else
+                {
+                    Entity.ClassName = SelectedModule;
+                }
                 var urls = SimpleModules.Where(x => x.FullName == SelectedModule && x.IsApi == true).SelectMany(x => x.Actions).Where(x => x.IgnorePrivillege == false).Select(x => x.Url).ToList();
-                SelectedActionIDs = DC.Set<FrameworkMenu>().Where(x => urls.Contains(x.Url) && x.IsInside == true && x.FolderOnly == false).Select(x => x.MethodName).ToList();
+                if (SelectedActionIDs==null||!SelectedActionIDs.Any())
+                {
+                    SelectedActionIDs = DC.Set<FrameworkMenu>().Where(x => urls.Contains(x.Url) && x.IsInside == true && x.FolderOnly == false).Select(x => x.MethodName).ToList();
+                }
             }
         }
 
-        public override void Validate()
+        public override void Validate ()
         {
+            if (Entity.ModuleName != "")
+            {
+                Entity.IsInside = true;
+                Entity.Url = "/" + Entity.ModuleName.Split(',')[1].ToLower();
+            }
+            else
+            {
+                Entity.IsInside = false;
+            }
             if (Entity.IsInside == true && Entity.FolderOnly == false)
             {
                 var test = DC.Set<FrameworkMenu>().Where(x => x.ClassName == this.SelectedModule && string.IsNullOrEmpty(x.MethodName) && x.ID != Entity.ID).FirstOrDefault();

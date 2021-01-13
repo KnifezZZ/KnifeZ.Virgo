@@ -21,7 +21,12 @@ namespace KnifeZ.Virgo.Core.Support.FileHandlers
 
         public override Stream GetFileData (IVirgoFile file)
         {
-            return File.OpenRead(Path.GetFullPath(_config.HostRoot+ file.Path));
+            string fullPath = Path.GetFullPath(_config.HostRoot + file.Path);
+            if (!File.Exists(fullPath))
+            {
+                return null;
+            }
+            return File.OpenRead(fullPath);
         }
 
 

@@ -17,7 +17,7 @@ namespace KnifeZ.Virgo.Core
         /// <summary>
         /// ConnectionStrings
         /// </summary>
-        public List<CS> ConnectionStrings
+        public List<CS> DBconfigs
         {
             get
             {
@@ -427,7 +427,7 @@ namespace KnifeZ.Virgo.Core
             {
                 csName = "default";
             }
-            var cs = ConnectionStrings.Where(x => x.Key.ToLower() == csName.ToLower()).SingleOrDefault();
+            var cs = DBconfigs.Where(x => x.Key.ToLower() == csName.ToLower()).SingleOrDefault();
             return cs?.CreateDC();
         }
     }

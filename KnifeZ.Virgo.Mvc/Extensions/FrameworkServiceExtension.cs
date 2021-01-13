@@ -103,7 +103,7 @@ namespace KnifeZ.Virgo.Mvc
             {
                 try
                 {
-                    using (var dc = ConfigInfo.ConnectionStrings.Where(x => x.Key.ToLower() == "default").FirstOrDefault().CreateDC())
+                    using (var dc = ConfigInfo.DBconfigs.Where(x => x.Key.ToLower() == "default").FirstOrDefault().CreateDC())
                     {
                         menus.AddRange(dc?.Set<FrameworkMenu>()
                                 .Include(x => x.Domain)
@@ -155,10 +155,6 @@ namespace KnifeZ.Virgo.Mvc
                     continue;
                 }
                 if(areaattr.Length==0&& model.ClassName == "Account")
-                {
-                    continue;
-                }
-                if (areaattr.Length == 0 && model.ClassName == "FileApi")
                 {
                     continue;
                 }
@@ -481,9 +477,9 @@ namespace KnifeZ.Virgo.Mvc
                            builder =>
                            {
                                builder.WithOrigins(domains)
-                                                   .AllowAnyHeader()
-                                                   .AllowAnyMethod()
-                                                   .AllowCredentials();
+                               .AllowAnyHeader()
+                               .AllowAnyMethod()
+                               .AllowCredentials();
                            });
                     }
                 }
@@ -493,9 +489,9 @@ namespace KnifeZ.Virgo.Mvc
                         builder =>
                         {
                             builder.SetIsOriginAllowed((a) => true)
-                                                .AllowAnyHeader()
-                                                .AllowAnyMethod()
-                                                .AllowCredentials();
+                            .AllowAnyHeader()
+                            .AllowAnyMethod()
+                            .AllowCredentials();
                         });
                 }
             });
@@ -723,7 +719,7 @@ namespace KnifeZ.Virgo.Mvc
                 var fixdc = scope.ServiceProvider.GetRequiredService<IDataContext>();
                 if (fixdc is NullContext)
                 {
-                    var cs = configs.ConnectionStrings;
+                    var cs = configs.DBconfigs;
                     foreach (var item in cs)
                     {
                         var dc = item.CreateDC();

@@ -156,7 +156,7 @@ namespace KnifeZ.Virgo.Admin.Api
             {
                 ModelName = Localizer[ModelName];
             }
-            var menu = KnifeVirgo.GlobaInfo.AllModule.Where(x => x.IsApi == true && x.ModuleName.ToLower() == ModelName.ToLower()).FirstOrDefault();
+            var menu = KnifeVirgo.GlobaInfo.AllModule.Where(x => x.IsApi == true && x.FullName.ToLower() == ModelName.ToLower()).FirstOrDefault();
             if (menu == null)
             {
                 return Ok(new List<ComboSelectListItem>());

@@ -12,7 +12,7 @@ namespace KnifeZ.Virgo.Admin.Api
     [AuthorizeJwtWithCookie]
     [ApiController]
     [Route("api/_file")]
-    [Public]
+    [AllRights]
     [ActionDescription("File")]
     public class FileApiController : BaseApiController
     {
@@ -116,7 +116,7 @@ namespace KnifeZ.Virgo.Admin.Api
             return File(file.DataStream, contenttype, file.FileName ?? (Guid.NewGuid().ToString() + ext));
         }
 
-        [HttpDelete("[action]/{id}")]
+        [HttpDelete("[action]")]
         [ActionDescription("DeleteFile")]
         public IActionResult DeletedFile([FromServices] VirgoFileProvider fp, string id, string csName = null)
         {

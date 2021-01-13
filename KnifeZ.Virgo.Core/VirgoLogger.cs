@@ -30,14 +30,14 @@ namespace KnifeZ.Virgo.Core
         {
             if (_configs.Value != null)
             {
-                cs = _configs.Value.ConnectionStrings.Where(x => x.Key.ToLower() == "defaultlog").FirstOrDefault();
+                cs = _configs.Value.DBconfigs.Where(x => x.Key.ToLower() == "defaultlog").FirstOrDefault();
                 if (cs == null)
                 {
-                    cs = _configs.Value.ConnectionStrings.Where(x => x.Key.ToLower() == "default").FirstOrDefault();
+                    cs = _configs.Value.DBconfigs.Where(x => x.Key.ToLower() == "default").FirstOrDefault();
                 }
                 if (cs == null)
                 {
-                    cs = _configs.Value.ConnectionStrings.FirstOrDefault();
+                    cs = _configs.Value.DBconfigs.FirstOrDefault();
                 }
                 logConfig = _logConfig.Value;
             }
