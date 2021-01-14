@@ -19,9 +19,14 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkRoleVMs
 
         protected override void InitVM()
         {
-            var allowedids = DC.Set<FunctionPrivilege>()
-.Where(x => x.RoleId == Entity.ID && x.Allowed == true).Select(x => x.MenuItemId)
-.ToList();
+
+            var allowedids = new List<Guid>();
+            if (Entity != null)
+            {
+                allowedids = DC.Set<FunctionPrivilege>()
+    .Where(x => x.RoleId == Entity.ID && x.Allowed == true).Select(x => x.MenuItemId)
+    .ToList();
+            }
             var data = DC.Set<FrameworkMenu>().ToList();
             var topdata = data.Where(x => x.ParentId == null).ToList().FlatTree(x => x.DisplayOrder).Where(x => x.IsInside == false || x.FolderOnly == true || x.MethodName == null).ToList();
             int order = 0;
@@ -52,6 +57,7 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkRoleVMs
                 item.AllActions.Insert(0, new ComboSelectListItem { Text = Localizer["MainPage"], Value = item.ID.ToString() });
                 var ids = item.AllActions.Select(x => Guid.Parse(x.Value.ToString()));
                 item.Actions = ids.Where(x => allowedids.Contains(x)).ToList();
+
             }
             Pages = data2;
         }
@@ -117,6 +123,7 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkRoleVMs
         public Page_View Parent { get; set; }
 
         public int Level { get; set; }
+
 
     }
 

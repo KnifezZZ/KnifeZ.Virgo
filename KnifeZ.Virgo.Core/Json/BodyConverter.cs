@@ -21,23 +21,22 @@ namespace KnifeZ.Virgo.Core.Json
             prefix.Add("");
             int depth = 0;
             string lastObjecName = "";
-            //int insideArray = 0;
-            while(reader.Read())
+            int insideArray = 0;
+            while (reader.Read())
             {
-                //if(reader.TokenType == JsonTokenType.StartArray)
-                //{
-                //    insideArray++;
-                //}
-                //if(reader.TokenType == JsonTokenType.EndArray)
-                //{
-                //    insideArray--;
-                //}
-                //if(insideArray > 0)
-                //{
-                //    reader.Read();
-                //    continue;
-                //}
-                if(reader.TokenType == JsonTokenType.StartObject)
+                if (reader.TokenType == JsonTokenType.StartArray)
+                {
+                    insideArray++;
+                }
+                if (reader.TokenType == JsonTokenType.EndArray)
+                {
+                    insideArray--;
+                }
+                if (insideArray > 0)
+                {
+                    continue;
+                }
+                if (reader.TokenType == JsonTokenType.StartObject)
                 {
                     depth++;
                     if (prefix.Count < depth)

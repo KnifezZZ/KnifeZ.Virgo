@@ -32,7 +32,9 @@ export default {
 	},
 	methods: {
 		closed() {
-			this.$emit('reSearch')
+			if (res) {
+				this.$emit('reSearch')
+			}
 		},
 	},
 }

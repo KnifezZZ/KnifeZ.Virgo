@@ -57,10 +57,10 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
 
         public override void Validate ()
         {
-            if (Entity.ModuleName != "")
+            if (SelectedModule != "")
             {
                 Entity.IsInside = true;
-                Entity.Url = "/" + Entity.ModuleName.Split(',')[1].ToLower();
+                Entity.Url = "/" + SelectedModule.Split(',')[1].ToLower();
             }
             else
             {

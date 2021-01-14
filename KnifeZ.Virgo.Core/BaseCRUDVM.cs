@@ -124,7 +124,7 @@ namespace KnifeZ.Virgo.Core
         /// <param name="exps">需要关联的类</param>
         public void SetInclude (params Expression<Func<TModel, object>>[] exps)
         {
-            _toInclude = _toInclude ?? new List<Expression<Func<TModel, object>>>();
+            _toInclude ??= new List<Expression<Func<TModel, object>>>();
             _toInclude.AddRange(exps);
         }
 
@@ -175,7 +175,8 @@ namespace KnifeZ.Virgo.Core
             rv = query.CheckID(Id).AsNoTracking().SingleOrDefault();
             if (rv == null)
             {
-                throw new Exception("数据不存在");
+                return rv;
+                //throw new Exception("数据不存在");
             }
             //如果TopBasePoco有关联的附件，则自动Include 附件名称
             var fa = typeof(TModel).GetAllProperties().Where(x => x.PropertyType == typeof(FileAttachment)).ToList();

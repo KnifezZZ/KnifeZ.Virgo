@@ -114,7 +114,7 @@ namespace KnifeZ.Virgo.Admin.Api
         public async Task<IActionResult> BatchDelete(string[] ids)
         {
             var vm = KnifeVirgo.CreateVM<FrameworkRoleBatchVM>();
-            if (ids != null && ids.Count() > 0)
+            if (ids != null && ids.Length > 0)
             {
                 vm.Ids = ids;
             }
@@ -135,7 +135,7 @@ namespace KnifeZ.Virgo.Admin.Api
                 }
                 var userids =KnifeVirgo.DC.Set<FrameworkUserRole>().Where(x => roleids.Contains(x.RoleId)).Select(x => x.UserId.ToString()).ToArray();
                 await KnifeVirgo.RemoveUserCache(userids);
-                return Ok(ids.Count());
+                return Ok(ids.Length);
             }
         }
 
@@ -154,7 +154,7 @@ namespace KnifeZ.Virgo.Admin.Api
         public IActionResult ExportExcelByIds(string[] ids)
         {
             var vm = KnifeVirgo.CreateVM<FrameworkRoleListVM>();
-            if (ids != null && ids.Count() > 0)
+            if (ids != null && ids.Length > 0)
             {
                 vm.Ids = new List<string>(ids);
                 vm.SearcherMode = ListVMSearchModeEnum.CheckExport;
