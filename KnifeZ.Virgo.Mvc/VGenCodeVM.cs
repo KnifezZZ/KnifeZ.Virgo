@@ -766,12 +766,9 @@ namespace KnifeZ.Virgo.Mvc
                             if (name == "api.index")
                             {
                                 sbExtAPIs.AppendLine($@"
-	get{subtype.Name}List(data) {{
-		return request({{
-			url: reqPath + 'Get{subtype.Name}List',
-			method: 'get',
-			data: data,
-		}})
+	Get{subtype.Name}List: {{
+		url: reqPath + 'Get{subtype.Name}List',
+		method: 'get',
 	}},");
                             }
                         }
@@ -855,7 +852,7 @@ namespace KnifeZ.Virgo.Mvc
 					props: {{
 						treeCheckable: true,
 						items: [],
-						loadData: apiEvents.get{subtype.Name}List,
+						loadData:actions.Get{subtype.Name}List,
 					}}
 				}},");
                         }
@@ -869,7 +866,7 @@ namespace KnifeZ.Virgo.Mvc
 					props: {{
 						mode: 'multiple',
 						items: [],
-						loadData: apiEvents.get{subtype.Name}List,
+						loadData:actions.Get{subtype.Name}List,
 					}}
 				}},");
 
@@ -947,7 +944,7 @@ namespace KnifeZ.Virgo.Mvc
 					type: 'treeSelect',
 					props: {{
 						items: [],
-						loadData: apiEvents.get{subtype.Name}List,
+						loadData:actions.Get{subtype.Name}List,
 					}}
 				}},");
                         }
@@ -961,7 +958,7 @@ namespace KnifeZ.Virgo.Mvc
 					props: {{
 						mode: 'default',
 						items: [],
-						loadData: apiEvents.get{subtype.Name}List,
+						loadData:actions.Get{subtype.Name}List,
 					}}
 				}},");
 
@@ -982,7 +979,7 @@ namespace KnifeZ.Virgo.Mvc
 					props: {{
 						treeCheckable: true,
 						items: [],
-						loadData: apiEvents.get{subtype.Name}List,
+						loadData:actions.Get{subtype.Name}List,
 					}}
 				}},");
                         }
@@ -996,7 +993,7 @@ namespace KnifeZ.Virgo.Mvc
 					props: {{
 						mode: 'multiple',
 						items: [],
-						loadData: apiEvents.get{subtype.Name}List,
+						loadData:actions.Get{subtype.Name}List,
 					}}
 				}},");
 

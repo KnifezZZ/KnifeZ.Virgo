@@ -7,7 +7,8 @@
 <script>
 import VFormDialog from '@/components/page/v-form-dialog'
 import VForm from '@/components/page/v-form'
-import apiEvents from '../api/index'
+import actions from '../api/index'
+import _request from '@/utils/request'
 import { onMounted, ref } from 'vue'
 $imports$
 export default {
@@ -18,7 +19,7 @@ export default {
 	},
 	data() {
 		return {
-			events: apiEvents,
+			events: actions,
 			fields: [$fields$
 				{
 					key: 'ID',
