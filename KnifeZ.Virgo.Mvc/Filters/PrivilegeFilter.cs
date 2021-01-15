@@ -107,58 +107,45 @@ namespace KnifeZ.Virgo.Mvc.Filters
             {
                 if (controller is ControllerBase ctrl)
                 {
-                    //if it's a layui search request,returns a layui format message so that it can parse
-                    if (ctrl.Request.Headers.ContainsKey("layuisearch"))
+                    if (ctrl.HttpContext.Request.Headers.ContainsKey("Authorization"))
                     {
-                        ContentResult cr = new ContentResult()
-                        {
-                            Content = "{\"Data\":[],\"Count\":0,\"Page\":1,\"PageCount\":0,\"Msg\":\"" + Mvc.Program._localizer["NeedLogin"] + "\",\"Code\":401}",
-                            ContentType = "application/json",
-                            StatusCode = 200
-                        };
-                        context.Result = cr;
+                        context.Result = ctrl.Unauthorized(JwtBearerDefaults.AuthenticationScheme);
                     }
                     else
                     {
-                        if (ctrl.HttpContext.Request.Headers.ContainsKey("Authorization"))
+                        if (controller is BaseApiController)
                         {
-                            context.Result = ctrl.Unauthorized(JwtBearerDefaults.AuthenticationScheme);
+                            ContentResult cr = new ContentResult()
+                            {
+                                Content = Mvc.Program._localizer["NeedLogin"],
+                                ContentType = "text/html",
+                                StatusCode = 401
+                            };
+                            context.Result = cr;
                         }
                         else
                         {
-                            if (controller is BaseApiController)
+                            string lp = controller.KnifeVirgo.ConfigInfo.CookieOption.LoginPath;
+                            if (lp.StartsWith("/"))
                             {
-                                ContentResult cr = new ContentResult()
-                                {
-                                    Content = Mvc.Program._localizer["NeedLogin"],
-                                    ContentType = "text/html",
-                                    StatusCode = 401
-                                };
-                                context.Result = cr;
+                                lp = "~" + lp;
                             }
-                            else
+                            if (lp.StartsWith("~/"))
                             {
-                                string lp = controller.KnifeVirgo.ConfigInfo.CookieOption.LoginPath;
-                                if (lp.StartsWith("/"))
-                                {
-                                    lp = "~" + lp;
-                                }
-                                if (lp.StartsWith("~/"))
-                                {
-                                    lp = ctrl.Url.Content(lp);
-                                }
-                                ContentResult cr = new ContentResult()
-                                {
-                                    Content = $"<script>window.location.href='{lp}';</script>",
-                                    ContentType = "text/html",
-                                    StatusCode = 200
-                                };
-                                //context.HttpContext.Response.Headers.Add("IsScript", "true");
-                                context.Result = cr;
-                                //context.Result = ctrl.Redirect(GlobalServices.GetRequiredService<IOptions<CookieOptions>>().Value.LoginPath);
+                                lp = ctrl.Url.Content(lp);
                             }
+                            ContentResult cr = new ContentResult()
+                            {
+                                Content = $"<script>window.location.href='{lp}';</script>",
+                                ContentType = "text/html",
+                                StatusCode = 200
+                            };
+                            //context.HttpContext.Response.Headers.Add("IsScript", "true");
+                            context.Result = cr;
+                            //context.Result = ctrl.Redirect(GlobalServices.GetRequiredService<IOptions<CookieOptions>>().Value.LoginPath);
                         }
                     }
+
                 }
                 //context.HttpContext.ChallengeAsync().Wait();
             }
@@ -171,34 +158,20 @@ namespace KnifeZ.Virgo.Mvc.Filters
                     {
                         if (controller is ControllerBase ctrl)
                         {
-                            //if it's a layui search request,returns a layui format message so that it can parse
-                            if (ctrl.Request.Headers.ContainsKey("layuisearch"))
+                            if (ctrl.HttpContext.Request.Headers.ContainsKey("Authorization"))
                             {
-                                ContentResult cr = new ContentResult()
-                                {
-                                    Content = "{\"Data\":[],\"Count\":0,\"Page\":1,\"PageCount\":0,\"Msg\":\"" + Mvc.Program._localizer["NoPrivilege"] + "\",\"Code\":403}",
-                                    ContentType = "application/json",
-                                    StatusCode = 200
-                                };
-                                context.Result = cr;
+                                context.Result = ctrl.Forbid(JwtBearerDefaults.AuthenticationScheme);
                             }
                             else
                             {
-                                if (ctrl.HttpContext.Request.Headers.ContainsKey("Authorization"))
+                                ContentResult cr = new ContentResult()
                                 {
-                                    context.Result = ctrl.Forbid(JwtBearerDefaults.AuthenticationScheme);
-                                }
-                                else
-                                {
-                                    ContentResult cr = new ContentResult()
-                                    {
-                                        Content = Mvc.Program._localizer["NoPrivilege"],
-                                        ContentType = "text/html",
-                                        StatusCode = 403
-                                    };
-                                    context.Result = cr;
+                                    Content = Mvc.Program._localizer["NoPrivilege"],
+                                    ContentType = "text/html",
+                                    StatusCode = 403
+                                };
+                                context.Result = cr;
 
-                                }
                             }
                         }
                     }

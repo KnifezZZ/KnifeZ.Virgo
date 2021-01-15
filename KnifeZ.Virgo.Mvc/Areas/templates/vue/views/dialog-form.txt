@@ -31,7 +31,7 @@ export default {
 		}
 	},
 	methods: {
-		closed() {
+		closed(res) {
 			if (res) {
 				this.$emit('reSearch')
 			}

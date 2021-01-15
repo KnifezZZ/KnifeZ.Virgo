@@ -13,6 +13,7 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.DataPrivilegeVMs
         protected override IEnumerable<IGridColumn<DataPrivilege_ListView>> InitGridHeader()
         {
             return new List<GridColumn<DataPrivilege_ListView>>{
+                this.MakeGridHeader(x => x.ID),
                 this.MakeGridHeader(x => x.Name),
                 this.MakeGridHeader(x => x.TableName),
                 this.MakeGridHeader(x => x.RelateIDs),
