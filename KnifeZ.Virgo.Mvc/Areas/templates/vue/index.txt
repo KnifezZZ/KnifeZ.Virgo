@@ -14,7 +14,6 @@
 				ref="vtable"
 				:form-items="queryForm"
 				:columns="columns"
-				:actions="actions"
 				:events="events"
 				:useToolBar="true"
 				$isTree$				
@@ -54,7 +53,6 @@ export default {
 					actions: ['detail', 'edit', 'delete'],
 				},
 			],
-			actions: ['add', 'edit', 'detail', 'delete', 'exported', 'imported'],
 			events: actions,
 			queryFields: [$queryFields$
 			],
