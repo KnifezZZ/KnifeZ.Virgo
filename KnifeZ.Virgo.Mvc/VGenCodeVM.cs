@@ -521,7 +521,7 @@ namespace KnifeZ.Virgo.Mvc
                         var subpro = subtype.GetProperties().Where(x => x.Name == pro.SubField).FirstOrDefault();
                         existSubPro.Add(subpro);
                         string prefix = "";
-                        int count = existSubPro.Where(x => x.Name == subpro.Name).Count();
+                        int count = existSubPro.Where(x => x.Name == subpro.Name&&x.ReflectedType==subpro.ReflectedType).Count();
                         if (count > 1)
                         {
                             prefix = count + "";
@@ -535,10 +535,10 @@ namespace KnifeZ.Virgo.Mvc
                         var subdisplay = subpro.GetCustomAttribute<DisplayAttribute>();
                         headerstring += $@"
                 this.MakeGridHeader(x => x.{subpro.DeclaringType.Name + "_" + pro.SubField + prefix}),";
-                        headerstring += $@"
-                this.MakeGridHeader(x => x.{pro.FieldName}Id),";
                         if (pro.InfoType == FieldInfoType.One2Many)
                         {
+                            headerstring += $@"
+                this.MakeGridHeader(x => x.{pro.FieldName}Id),";
                             selectstring += $@"
                     {subpro.DeclaringType.Name + "_" + pro.SubField + prefix} = x.{pro.FieldName}.{pro.SubField},";
                             if (subtype.GetProperties().Where(x => x.Name == "Parent").Any() &&
@@ -1073,11 +1073,12 @@ namespace KnifeZ.Virgo.Mvc
                     if (existEnum.Contains(checktype.Name) == false && !content.Contains(item.FieldName + "Types"))
                     {
                         var es = checktype.ToListItems();
-                        enumstr.AppendLine($@"export const {item.FieldName}Types = [");
+                        enumstr.AppendLine($@"
+export const {item.FieldName}Types = [");
                         for (int a = 0; a < es.Count; a++)
                         {
                             var e = es[a];
-                            enumstr.Append($@"	{{ Text: '{e.Text}', Value: {e.Value} }}");
+                            enumstr.Append($@"	{{ Text: '{e.Text}', Value: {e.Value} }},");
                             enumstr.AppendLine();
                         }
                         enumstr.AppendLine($@"];");
