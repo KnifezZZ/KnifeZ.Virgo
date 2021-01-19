@@ -30,11 +30,11 @@ namespace KnifeZ.Virgo.Mvc.Filters
             }
             context.SetVirgoContext();
 
-            if (controller.KnifeVirgo.ConfigInfo.IsQuickDebug && controller is BaseApiController)
-            {
-                base.OnActionExecuting(context);
-                return;
-            }
+            //if (controller.KnifeVirgo.ConfigInfo.IsQuickDebug && controller is BaseApiController)
+            //{
+            //    base.OnActionExecuting(context);
+            //    return;
+            //}
             ControllerActionDescriptor ad = context.ActionDescriptor as ControllerActionDescriptor;
 
             var lg = context.HttpContext.RequestServices.GetRequiredService<LinkGenerator>();
@@ -71,10 +71,6 @@ namespace KnifeZ.Virgo.Mvc.Filters
             var isDebug = ad.MethodInfo.IsDefined(typeof(DebugOnlyAttribute), false) || ad.ControllerTypeInfo.IsDefined(typeof(DebugOnlyAttribute), false);
             if (controller.KnifeVirgo.ConfigInfo.IsFilePublic == true)
             {
-                if (ad.ControllerName == "_Framework" && (ad.MethodInfo.Name == "GetFile" || ad.MethodInfo.Name == "ViewFile"))
-                {
-                    isPublic = true;
-                }
                 if (ad.ControllerTypeInfo.FullName == "KnifeZ.Virgo.Admin.Api.FileApiController" && (ad.MethodInfo.Name == "GetFileName" || ad.MethodInfo.Name == "GetFile" || ad.MethodInfo.Name == "DownloadFile"))
                 {
                     isPublic = true;

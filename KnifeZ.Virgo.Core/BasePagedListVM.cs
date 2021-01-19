@@ -243,7 +243,7 @@ namespace KnifeZ.Virgo.Core
         private byte[] DownLoadExcel ()
         {
             var book = GenerateWorkBook(EntityList);
-            byte[] rv = new byte[] { };
+            byte[] rv = Array.Empty<byte>();
             using (MemoryStream ms = new MemoryStream())
             {
                 book.Write(ms);
