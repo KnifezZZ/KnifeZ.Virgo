@@ -665,7 +665,12 @@ namespace KnifeZ.Virgo.Mvc
                     }
                 }
 
-                rv = rv.Replace("$pros$", "").Replace("$init$", "").Replace("$include$", includestr).Replace("$add$", "").Replace("$edit$", "");
+                rv = rv
+                    .Replace("$pros$", prostr)
+                    .Replace("$init$", initstr)
+                    .Replace("$include$", includestr)
+                    .Replace("$add$", addstr)
+                    .Replace("$edit$", editstr);
                 rv = GetRelatedNamespace(pros, rv);
             }
             if (name == "ImportVM")
@@ -844,7 +849,7 @@ namespace KnifeZ.Virgo.Mvc
                         var subpros = subtype.GetProperties();
                         if (subpros.Where(x => x.Name == "Parent").Any() && subpros.Where(x => x.Name == "Children").Any())
                         {
-                            sbFields.Append($@"
+                            sbQueryFields.Append($@"
 				{{
 					title: '{label}',
 					key: '{item.FieldName}Id',
@@ -858,10 +863,45 @@ namespace KnifeZ.Virgo.Mvc
                         }
                         else
                         {
-                            sbFields.Append($@"
+                            sbQueryFields.Append($@"
 				{{
 					title: '{label}',
 					key: '{item.FieldName}Id',
+					type: 'select',
+					props: {{
+						mode: 'multiple',
+						items: [],
+						loadData:actions.Get{subtype.Name}List,
+					}}
+				}},");
+
+                        }
+                    }
+                    //多对多 --select 多选
+                    else if (item.InfoType == FieldInfoType.Many2Many)
+                    {
+                        var subtype = Type.GetType(item.LinkedType);
+                        var subpros = subtype.GetProperties();
+                        if (subpros.Where(x => x.Name == "Parent").Any() && subpros.Where(x => x.Name == "Children").Any())
+                        {
+                            sbQueryFields.Append($@"
+				{{
+					title: '{label}',
+					key: 'Selected{item.FieldName}IDs',
+					type: 'treeSelect',
+					props: {{
+						treeCheckable: true,
+						items: [],
+						loadData:actions.Get{subtype.Name}List,
+					}}
+				}},");
+                        }
+                        else
+                        {
+                            sbQueryFields.Append($@"
+				{{
+					title: '{label}',
+					key: 'Selected{item.FieldName}IDs',
 					type: 'select',
 					props: {{
 						mode: 'multiple',
@@ -974,8 +1014,9 @@ namespace KnifeZ.Virgo.Mvc
                             sbFields.Append($@"
 				{{
 					title: '{label}',
-					key: '{item.FieldName}',
+					key: 'Selected{item.FieldName}IDs',
 					type: 'treeSelect',
+					isInclude:false,
 					props: {{
 						treeCheckable: true,
 						items: [],
@@ -988,8 +1029,9 @@ namespace KnifeZ.Virgo.Mvc
                             sbFields.Append($@"
 				{{
 					title: '{label}',
-					key: '{item.FieldName}',
+					key: 'Selected{item.FieldName}IDs',
 					type: 'select',
+					isInclude:false,
 					props: {{
 						mode: 'multiple',
 						items: [],

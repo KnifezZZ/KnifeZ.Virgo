@@ -11,6 +11,7 @@ namespace KnifeZ.Virgo.Admin.Api
 {
     [AuthorizeJwtWithCookie]
     [ApiController]
+    [Public]
     [Route("api/_file")]
     [ActionDescription("File")]
     public class FileApiController : BaseApiController
@@ -77,7 +78,7 @@ namespace KnifeZ.Virgo.Admin.Api
         {
             return Ok(fp.GetFileModel(id, KnifeVirgo.ConfigInfo.CreateDC(csName)));
         }
-        [Public]
+
         [HttpGet("[action]/{id}")]
         [ActionDescription("GetFile")]
         public IActionResult GetFile([FromServices] VirgoFileProvider fp, string id, string csName = null)

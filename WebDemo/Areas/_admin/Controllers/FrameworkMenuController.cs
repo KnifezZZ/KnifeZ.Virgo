@@ -152,6 +152,10 @@ namespace KnifeZ.Virgo.Admin.Api
         [HttpGet("GetActionsByModel")]
         public ActionResult GetActionsByModel (string ModelName)
         {
+            if (ModelName == null)
+            {
+                return Ok(new List<ComboSelectListItem>());
+            }
             if (ModelName.StartsWith("MenuKey."))
             {
                 ModelName = Localizer[ModelName];

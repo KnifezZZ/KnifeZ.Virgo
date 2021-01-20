@@ -27,7 +27,7 @@ namespace KnifeZ.Virgo.Admin.Api
     {
         private readonly ILogger _logger;
         private readonly ITokenService _authService;
-        public AccountController(
+        public AccountController (
             ILogger<AccountController> logger,
             ITokenService authService)
         {
@@ -37,7 +37,7 @@ namespace KnifeZ.Virgo.Admin.Api
 
         [AllowAnonymous]
         [HttpPost("[action]")]
-        public async Task<IActionResult> Login([FromForm]string userid, [FromForm]string password, [FromForm]bool rememberLogin = false, [FromForm]bool cookie = true)
+        public async Task<IActionResult> Login ([FromForm] string userid, [FromForm] string password, [FromForm] bool rememberLogin = false, [FromForm] bool cookie = true)
         {
 
             var user = await KnifeVirgo.LoadUserFromDB(null, userid, password);
@@ -72,11 +72,11 @@ namespace KnifeZ.Virgo.Admin.Api
                 forapi.Roles = user.Roles;
                 forapi.Groups = user.Groups;
                 forapi.PhotoId = user.PhotoId;
-                var menus =KnifeVirgo.DC.Set<FunctionPrivilege>()
-                    .Where(x => x.UserId == user.Id || (x.RoleId != null && user.Roles.Select(x=>x.ID).Contains(x.RoleId.Value)))
+                var menus = KnifeVirgo.DC.Set<FunctionPrivilege>()
+                    .Where(x => x.UserId == user.Id || (x.RoleId != null && user.Roles.Select(x => x.ID).Contains(x.RoleId.Value)))
                     .Select(x => x.MenuItem)
                     .Where(x => x.MethodName == null)
-                    .OrderBy(x=>x.DisplayOrder)
+                    .OrderBy(x => x.DisplayOrder)
                     .Select(x => new SimpleMenu
                     {
                         Id = x.ID.ToString().ToLower(),
@@ -112,7 +112,7 @@ namespace KnifeZ.Virgo.Admin.Api
         }
 
 
-        private void LocalizeMenu(List<SimpleMenu> menus)
+        private void LocalizeMenu (List<SimpleMenu> menus)
         {
             if (menus == null)
             {
@@ -132,14 +132,14 @@ namespace KnifeZ.Virgo.Admin.Api
         [HttpPost("[action]")]
         [AllRights]
         [ProducesResponseType(typeof(Token), StatusCodes.Status200OK)]
-        public async Task<Token> RefreshToken(string refreshToken)
+        public async Task<Token> RefreshToken (string refreshToken)
         {
             return await _authService.RefreshTokenAsync(refreshToken);
         }
 
         [AllRights]
         [HttpGet("[action]")]
-        public IActionResult CheckUserInfo()
+        public IActionResult CheckUserInfo ()
         {
             if (KnifeVirgo.LoginUserInfo == null)
             {
@@ -176,7 +176,8 @@ namespace KnifeZ.Virgo.Admin.Api
                             ParentId = item.ParentId?.ToString()?.ToLower(),
                             Text = item.PageName,
                             Url = item.Url,
-                            Icon = item.ICon
+                            Icon = item.ICon,
+                            Name = item.FolderOnly ?item.PageName: Utils.ToFirstLower(item.ClassName.Split(',')[1])
                         });
                     }
                 }
@@ -196,7 +197,7 @@ namespace KnifeZ.Virgo.Admin.Api
 
         [AllRights]
         [HttpPost("[action]")]
-        public IActionResult ChangePassword(ChangePasswordVM vm)
+        public IActionResult ChangePassword (ChangePasswordVM vm)
         {
             if (!ModelState.IsValid)
             {
@@ -219,7 +220,7 @@ namespace KnifeZ.Virgo.Admin.Api
 
         [AllRights]
         [HttpGet("[action]/{id}")]
-        public async Task Logout(Guid? id)
+        public async Task Logout (Guid? id)
         {
             HttpContext.Session.Clear();
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -239,5 +240,7 @@ namespace KnifeZ.Virgo.Admin.Api
         public string Url { get; set; }
 
         public string Icon { get; set; }
+
+        public string Name { get; set; }
     }
 }

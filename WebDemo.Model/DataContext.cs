@@ -11,11 +11,6 @@ namespace WebDemo.Model
     {
         public DbSet<FrameworkUser> FrameworkUsers { get; set; }
 
-        public DbSet<Blog> Blogs { get; set; }
-        public DbSet<BlogCategory> BlogCategories { get; set; }
-        public DbSet<BlogClassification> BlogClassifications { get; set; }
-        public DbSet<BlogClassificationMiddle> BlogClassificationMiddles { get; set; }
-
         public DataContext (CS cs) : base(cs)
         {
         }
@@ -29,7 +24,11 @@ namespace WebDemo.Model
         public override async Task<bool> DataInit (object allModules, bool IsSpa)
         {
             var state = await base.DataInit(allModules, IsSpa);
-            if (state == true)
+            if (!state)
+            {
+                state = !Set<FrameworkUser>().Any();
+            }
+            if (state)
             {
                 var user = new FrameworkUser
                 {
