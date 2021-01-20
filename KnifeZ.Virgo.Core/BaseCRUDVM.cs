@@ -459,9 +459,10 @@ namespace KnifeZ.Virgo.Core
                             List<string> setnames = new List<string>();
                             foreach (var field in FC.Keys)
                             {
-                                if (field.StartsWith("Entity." + pro.Name + "[0]."))
+                                var f = field.ToLower();
+                                if (f.StartsWith("entity." + pro.Name.ToLower() + "[0]."))
                                 {
-                                    string name = field.Replace("Entity." + pro.Name + "[0].", "");
+                                    string name = f.Replace("entity." + pro.Name.ToLower() + "[0].", "");
                                     setnames.Add(name);
                                 }
                             }

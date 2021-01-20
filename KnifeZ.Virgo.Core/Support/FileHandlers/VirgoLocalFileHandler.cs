@@ -89,6 +89,7 @@ namespace KnifeZ.Virgo.Core.Support.FileHandlers
             {
                 data.CopyTo(fileStream);
             }
+            data.Dispose();
             _dc.AddEntity(file);
             _dc.SaveChanges();
             return file;

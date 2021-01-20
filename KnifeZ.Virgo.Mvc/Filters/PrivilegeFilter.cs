@@ -30,11 +30,12 @@ namespace KnifeZ.Virgo.Mvc.Filters
             }
             context.SetVirgoContext();
 
-            //if (controller.KnifeVirgo.ConfigInfo.IsQuickDebug && controller is BaseApiController)
-            //{
-            //    base.OnActionExecuting(context);
-            //    return;
-            //}
+            if (controller.KnifeVirgo.ConfigInfo.IsQuickDebug && controller is BaseApiController)
+            {
+                base.OnActionExecuting(context);
+                return;
+            }
+
             ControllerActionDescriptor ad = context.ActionDescriptor as ControllerActionDescriptor;
 
             var lg = context.HttpContext.RequestServices.GetRequiredService<LinkGenerator>();
@@ -53,7 +54,7 @@ namespace KnifeZ.Virgo.Mvc.Filters
                 u = u.Substring(0, u.Length - 2);
                 if (controller is BaseApiController)
                 {
-                    u = u + "/{id}";
+                    u += "/{id}";
                 }
             }
 

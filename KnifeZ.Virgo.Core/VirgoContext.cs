@@ -95,20 +95,20 @@ namespace KnifeZ.Virgo.Core
                     _loginUserInfo = Cache.Get<LoginUserInfo>(cacheKey);
                     if (_loginUserInfo == null || _loginUserInfo.Id != userId)
                     {
-                        try
-                        {
-                            _loginUserInfo = LoadUserFromDB(userId).Result;
-                        }
-                        catch { }
-                        if (_loginUserInfo != null)
-                        {
-                            Cache.Add(cacheKey, _loginUserInfo);
-                        }
-                        else
-                        {
-                            //HttpContext.ChallengeAsync().Wait();
-                            return null;
-                        }
+                        return null;
+                        //try
+                        //{
+                        //    _loginUserInfo = LoadUserFromDB(userId).Result;
+                        //}
+                        //catch { }
+                        //if (_loginUserInfo != null)
+                        //{
+                        //    Cache.Add(cacheKey, _loginUserInfo);
+                        //}
+                        //else
+                        //{
+                        //    //HttpContext.ChallengeAsync().Wait();
+                        //}
                     }
                 }
                 return _loginUserInfo;
@@ -152,28 +152,26 @@ namespace KnifeZ.Virgo.Core
         /// <returns>用户信息</returns>
         public virtual async Task<LoginUserInfo> LoadUserFromDB (Guid? userId, string itcode = null, string password = null)
         {
-            FrameworkUserBase userInfo = null;
             if (DC == null)
             {
                 return null;
             }
-            if (userId.HasValue)
+            string username = await DC.Set<FrameworkUserBase>().CheckEqual(userId, x => x.ID).Where(x => x.ITCode.ToLower() == itcode.ToLower() && x.Password == Utils.GetMD5String(password)).Select(x => x.ITCode).SingleOrDefaultAsync();
+            return await GetUserInfoByItcode(username);
+        }
+
+        public async Task<LoginUserInfo> GetUserInfoByItcode (string itcode)
+        {
+            if (string.IsNullOrEmpty(itcode))
             {
-                userInfo = await DC.Set<FrameworkUserBase>()
-                                    .Include(x => x.UserRoles)
-                                    .Include(x => x.UserGroups)
-                                    .Where(x => x.ID == userId)
-                                    .SingleOrDefaultAsync();
+                return null;
             }
-            else
-            {
-                userInfo = await DC.Set<FrameworkUserBase>()
+            FrameworkUserBase userInfo = await DC.Set<FrameworkUserBase>()
                                     .Include(x => x.UserRoles)
                                     .Include(x => x.UserGroups)
-                                    .Where(x => x.ITCode.ToLower() == itcode.ToLower() && x.Password == Utils.GetMD5String(password) && x.IsValid)
+                                    .Where(x => x.ITCode.ToLower() == itcode.ToLower() && x.IsValid)
                                     .SingleOrDefaultAsync();
 
-            }
             LoginUserInfo rv = null;
             if (userInfo != null)
             {

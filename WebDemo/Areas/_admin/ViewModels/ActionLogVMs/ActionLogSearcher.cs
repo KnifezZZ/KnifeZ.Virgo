@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Mvc;
 using KnifeZ.Virgo.Core;
 
 namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.ActionLogVMs

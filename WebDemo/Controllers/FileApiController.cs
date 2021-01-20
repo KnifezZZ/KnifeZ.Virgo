@@ -9,9 +9,8 @@ using KnifeZ.Virgo.Mvc;
 
 namespace KnifeZ.Virgo.Admin.Api
 {
-    [AuthorizeJwtWithCookie]
     [ApiController]
-    [Public]
+    [AllRights]
     [Route("api/_file")]
     [ActionDescription("File")]
     public class FileApiController : BaseApiController
@@ -90,7 +89,8 @@ namespace KnifeZ.Virgo.Admin.Api
             {
                 return BadRequest(Localizer["FileNotFound"]);
             }
-            file.DataStream?.CopyToAsync(Response.Body);
+            file.DataStream?.CopyToAsync(Response.Body); 
+            file.DataStream.Dispose();
             return new EmptyResult();
         }
 

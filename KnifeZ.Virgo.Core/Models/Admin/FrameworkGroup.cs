@@ -24,8 +24,8 @@ namespace KnifeZ.Virgo.Core
         [Display(Name = "Remark")]
         public string GroupRemark { get; set; }
 
-        [Display(Name = "User")]
         [JsonIgnore]
+        [Display(Name = "User")]
         public List<FrameworkUserGroup> UserGroups { get; set; }
 
         [NotMapped]

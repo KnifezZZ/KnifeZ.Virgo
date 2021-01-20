@@ -5,6 +5,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using KnifeZ.Virgo.Core.Extensions;
+using KnifeZ.Virgo.Core.Support.FileHandlers;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace KnifeZ.Virgo.Core
 {
@@ -104,9 +106,18 @@ namespace KnifeZ.Virgo.Core
         /// <returns>true代表成功，false代表失败</returns>
         public virtual bool DoBatchDelete ()
         {
+
             bool rv = true;
             //循环所有数据Id
             List<string> idsData = Ids.ToList();
+            var modelType = typeof(TModel);
+            var pros = modelType.GetAllProperties();
+            //如果包含附件，则先删除附件
+            List<Guid> fileids = new List<Guid>();
+            var fa = pros.Where(x => x.PropertyType == typeof(FileAttachment) || typeof(TopBasePoco).IsAssignableFrom(x.PropertyType)).ToList();
+            var isPersist = modelType.IsSubclassOf(typeof(PersistPoco));
+
+
             for (int i = 0; i < idsData.Count; i++)
             {
                 string checkErro = null;
@@ -120,24 +131,62 @@ namespace KnifeZ.Virgo.Core
                 //进行删除
                 try
                 {
-                    var ctor = typeof(TModel).GetConstructor(Type.EmptyTypes);
-                    if (typeof(TModel).IsSubclassOf(typeof(PersistPoco)))
+                    var Entity = DC.Set<TModel>().CheckID(idsData[i]).FirstOrDefault();
+                    if (isPersist)
                     {
-                        var pp = DC.Set<TModel>().CheckID(idsData[i]).FirstOrDefault();
-                        (pp as PersistPoco).IsValid = false;
-                        (pp as PersistPoco).UpdateTime = DateTime.Now;
-                        (pp as PersistPoco).UpdateBy = LoginUserInfo.ITCode;
-                        DC.UpdateProperty(pp, "IsValid");
-                        DC.UpdateProperty(pp, "UpdateTime");
-                        DC.UpdateProperty(pp, "UpdateBy");
+                        (Entity as PersistPoco).IsValid = false;
+                        (Entity as PersistPoco).UpdateTime = DateTime.Now;
+                        (Entity as PersistPoco).UpdateBy = LoginUserInfo.ITCode;
+                        DC.UpdateProperty(Entity, "IsValid");
+                        DC.UpdateProperty(Entity, "UpdateTime");
+                        DC.UpdateProperty(Entity, "UpdateBy");
                     }
                     else
                     {
-                        TModel m = ctor.Invoke(null) as TModel;
 
-                        m.SetPropertyValue("ID", idsData[i]);
-                        DC.Set<TModel>().Attach(m);
-                        DC.DeleteEntity(m);
+                        foreach (var f in fa)
+                        {
+                            if (f.PropertyType == typeof(FileAttachment))
+                            {
+                                string fidfield = DC.GetFKName2(modelType, f.Name);
+                                var fidpro = pros.Where(x => x.Name == fidfield).FirstOrDefault();
+                                var idresult = fidpro.GetValue(Entity);
+                                if (idresult != null)
+                                {
+                                    Guid fid = Guid.Empty;
+                                    if (Guid.TryParse(idresult.ToString(), out fid) == true)
+                                    {
+                                        fileids.Add(fid);
+                                    }
+                                }
+                            }
+                            f.SetValue(Entity, null);
+                        }
+
+                        var fas = pros.Where(x => typeof(IEnumerable<ISubFile>).IsAssignableFrom(x.PropertyType)).ToList();
+                        foreach (var f in fas)
+                        {
+                            var subs = f.GetValue(Entity) as IEnumerable<ISubFile>;
+                            if (subs != null)
+                            {
+                                foreach (var sub in subs)
+                                {
+                                    fileids.Add(sub.FileId);
+                                }
+                                f.SetValue(Entity, null);
+                            }
+                        }
+                        if (typeof(TModel) != typeof(FileAttachment))
+                        {
+                            foreach (var pro in pros)
+                            {
+                                if (pro.PropertyType.GetTypeInfo().IsSubclassOf(typeof(TopBasePoco)))
+                                {
+                                    pro.SetValue(Entity, null);
+                                }
+                            }
+                        }
+                        DC.DeleteEntity(Entity);
                     }
                 }
                 catch (Exception e)
@@ -152,6 +201,11 @@ namespace KnifeZ.Virgo.Core
                 try
                 {
                     DC.SaveChanges();
+                    var fp = KnifeVirgo.HttpContext.RequestServices.GetRequiredService<VirgoFileProvider>();
+                    foreach (var item in fileids)
+                    {
+                        fp.DeleteFile(item.ToString(), DC.ReCreate());
+                    }
                 }
                 catch (Exception e)
                 {
@@ -168,7 +222,7 @@ namespace KnifeZ.Virgo.Core
                     {
                         if (!ErrorMessage.ContainsKey(id))
                         {
-                            ErrorMessage.Add(id, Program._localizer["Rollback"]);
+                            ErrorMessage.Add(id, Core.Program._localizer?["Sys.Rollback"]);
                         }
                     }
                 }
@@ -180,7 +234,7 @@ namespace KnifeZ.Virgo.Core
                         item.BatchError = ErrorMessage.Where(x => x.Key == item.GetID().ToString()).Select(x => x.Value).FirstOrDefault();
                     }
                 }
-                MSD.AddModelError("", Program._localizer["DataCannotDelete"]);
+                MSD.AddModelError("", Core.Program._localizer?["Sys.DataCannotDelete"]);
             }
             return rv;
         }
