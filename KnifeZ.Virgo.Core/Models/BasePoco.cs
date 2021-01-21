@@ -13,27 +13,27 @@ namespace KnifeZ.Virgo.Core
         /// CreateTime
         /// </summary>
         [Display(Name = "CreateTime")]
-        [JsonIgnore]
+        //[JsonIgnore]
         public DateTime? CreateTime { get; set; }
         /// <summary>
         /// CreateBy
         /// </summary>
         [Display(Name = "CreateBy")]
         [StringLength(50, ErrorMessage = "{0}stringmax{1}")]
-        [JsonIgnore]
+        //[JsonIgnore]
         public string CreateBy { get; set; }
         /// <summary>
         /// UpdateTime
         /// </summary>
         [Display(Name = "UpdateTime")]
-        [JsonIgnore]
+        //[JsonIgnore]
         public DateTime? UpdateTime { get; set; }
         /// <summary>
         /// UpdateBy
         /// </summary>
         [Display(Name = "UpdateBy")]
         [StringLength(50, ErrorMessage = "{0}stringmax{1}")]
-        [JsonIgnore]
+        //[JsonIgnore]
         public string UpdateBy { get; set; }
     }
 }

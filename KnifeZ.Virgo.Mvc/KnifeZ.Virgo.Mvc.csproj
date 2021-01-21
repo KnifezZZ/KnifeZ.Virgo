@@ -4,7 +4,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>KnifeZ's .NET5 Frameowrk</Description>
-    <Version>0.1.1</Version>
+    <Version>0.1.2</Version>
     <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://gitee.com/KnifeZ/KnifeZ.Virgo</RepositoryUrl>
     <PackageTags>knifez,mvvm,.net5</PackageTags>
