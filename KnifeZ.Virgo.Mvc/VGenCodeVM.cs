@@ -855,7 +855,6 @@ namespace KnifeZ.Virgo.Mvc
 					key: '{item.FieldName}Id',
 					type: 'treeSelect',
 					props: {{
-						treeCheckable: true,
 						items: [],
 						loadData:actions.Get{subtype.Name}List,
 					}}
