@@ -1,11 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>KnifeZ's .NET5 Frameowrk</Description>
     <Version>0.1.3</Version>
-    <PackageIcon>logo.svg</PackageIcon>
+    <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://gitee.com/KnifeZ/KnifeZ.Virgo</RepositoryUrl>
     <PackageTags>knifez,mvvm,.net5</PackageTags>
     <NeutralLanguage>zh-CN</NeutralLanguage>
@@ -19,6 +19,14 @@
     <EmbeddedResource Remove="GeneratorFiles\**" />
     <None Remove="Controllers\**" />
     <None Remove="GeneratorFiles\**" />
+    <None Include="../../">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="..\KnifeZ.Virgo.Core\Resources\icon.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
