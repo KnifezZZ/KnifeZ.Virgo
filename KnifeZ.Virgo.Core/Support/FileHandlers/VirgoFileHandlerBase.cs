@@ -27,6 +27,7 @@ namespace KnifeZ.Virgo.Core.Support.FileHandlers
 
         public virtual void DeleteFile(IVirgoFile file)
         {
+
         }
 
         public virtual Stream GetFileData(IVirgoFile file)

@@ -88,7 +88,6 @@ namespace KnifeZ.Virgo.Core.Support.FileHandlers
             }
         }
 
-
         public IVirgoFileHandler CreateFileHandler(string saveMode = null, IDataContext dc = null)
         {
             ConstructorInfo ci = null;

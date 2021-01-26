@@ -12,8 +12,6 @@ namespace KnifeZ.Virgo.Core.Support.FileHandlers
     [Display(Name = "database")]
     public class VirgoDataBaseFileHandler : VirgoFileHandlerBase
     {
-        private static string _modeName = "database";
-
         public VirgoDataBaseFileHandler(Configs config, IDataContext dc) : base(config, dc)
         {
         }
@@ -31,12 +29,14 @@ namespace KnifeZ.Virgo.Core.Support.FileHandlers
 
         public override IVirgoFile Upload(string fileName, long fileLength, Stream data, string groupName = null, string subdir = null, string extra = null, string fileContentType = null)
         {
-            FileAttachment file = new FileAttachment();
-            file.FileName = fileName;
-            file.Length = fileLength;
-            file.UploadTime = DateTime.Now;
-            file.SaveMode = _modeName;
-            file.ExtraInfo = extra;
+            FileAttachment file = new FileAttachment
+            {
+                FileName = fileName,
+                Length = fileLength,
+                UploadTime = DateTime.Now,
+                SaveMode = SaveFileModeEnum.Database.ToString(),
+                ExtraInfo = extra
+            };
             var ext = string.Empty;
             if (string.IsNullOrEmpty(fileName) == false)
             {

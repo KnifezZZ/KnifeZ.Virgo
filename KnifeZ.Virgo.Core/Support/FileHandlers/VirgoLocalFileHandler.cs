@@ -13,8 +13,6 @@ namespace KnifeZ.Virgo.Core.Support.FileHandlers
     [Display(Name = "local")]
     public class VirgoLocalFileHandler : VirgoFileHandlerBase
     {
-        private static string _modeName = "local";
-
         public VirgoLocalFileHandler (Configs config, IDataContext dc) : base(config, dc)
         {
         }
@@ -36,7 +34,7 @@ namespace KnifeZ.Virgo.Core.Support.FileHandlers
             file.FileName = fileName;
             file.Length = fileLength;
             file.UploadTime = DateTime.Now;
-            file.SaveMode = _modeName;
+            file.SaveMode = SaveFileModeEnum.Local.ToString();
             file.ExtraInfo = extra;
             var ext = string.Empty;
             if (string.IsNullOrEmpty(fileName) == false)

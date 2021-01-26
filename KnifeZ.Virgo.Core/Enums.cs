@@ -12,7 +12,7 @@ namespace KnifeZ.Virgo.Core
     {
         Local = 0,//本地
         Database = 1,
-        TenOSS = 2,
+        TenCos = 2,
         AliOSS = 3,
     };
 

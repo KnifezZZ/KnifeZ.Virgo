@@ -15,15 +15,13 @@ namespace KnifeZ.Virgo.Core.Support.FileHandlers
     [Display(Name = "AliOss")]
     public class VirgoAliOssFileHandler : VirgoFileHandlerBase
     {
-        private static string _modeName = "AliOss";
-
         public VirgoAliOssFileHandler(Configs config, IDataContext dc) : base(config, dc)
         {
         }
 
         public override Stream GetFileData(IVirgoFile file)
         {
-            var ossSettings = _config.FileUploadOptions.Settings.Where(x => x.Key.ToLower() == "oss").Select(x => x.Value).FirstOrDefault();
+            var ossSettings = _config.FileUploadOptions.Settings.Where(x => x.Key.ToLower() == "alioss").Select(x => x.Value).FirstOrDefault();
             FileHandlerOptions groupInfo = null;
             if (string.IsNullOrEmpty(file.ExtraInfo))
             {
@@ -57,7 +55,7 @@ namespace KnifeZ.Virgo.Core.Support.FileHandlers
             file.FileName = fileName;
             file.Length = fileLength;
             file.UploadTime = DateTime.Now;
-            file.SaveMode = _modeName;
+            file.SaveMode = SaveFileModeEnum.AliOSS.ToString();
             file.ExtraInfo = extra;
             var ext = string.Empty;
             if (string.IsNullOrEmpty(fileName) == false)
@@ -67,7 +65,7 @@ namespace KnifeZ.Virgo.Core.Support.FileHandlers
             }
             file.FileExt = ext;
 
-            var ossSettings = _config.FileUploadOptions.Settings.Where(x => x.Key.ToLower() == "oss").Select(x => x.Value).FirstOrDefault();
+            var ossSettings = _config.FileUploadOptions.Settings.Where(x => x.Key.ToLower() == "alioss").Select(x => x.Value).FirstOrDefault();
             FileHandlerOptions groupInfo = null;
             if (string.IsNullOrEmpty(group))
             {
@@ -120,7 +118,7 @@ namespace KnifeZ.Virgo.Core.Support.FileHandlers
 
         public override void DeleteFile(IVirgoFile file)
         {
-            var ossSettings = _config.FileUploadOptions.Settings.Where(x => x.Key.ToLower() == "oss").Select(x => x.Value).FirstOrDefault();
+            var ossSettings = _config.FileUploadOptions.Settings.Where(x => x.Key.ToLower() == "alioss").Select(x => x.Value).FirstOrDefault();
             FileHandlerOptions groupInfo = null;
             if (string.IsNullOrEmpty(file.ExtraInfo))
             {

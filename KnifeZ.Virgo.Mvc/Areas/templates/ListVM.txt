@@ -17,7 +17,7 @@ namespace $vmnamespace$
     
         public $classname$ListVM ()
         {
-            this.NeedPage = Searcher.Limit > 0;
+            //this.NeedPage = true;
         }
 
         protected override IEnumerable<IGridColumn<$classname$_View>> InitGridHeader()
