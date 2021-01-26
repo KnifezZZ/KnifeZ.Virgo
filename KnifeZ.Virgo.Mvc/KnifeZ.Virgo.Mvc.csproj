@@ -13,45 +13,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Controllers\**" />
-    <Compile Remove="GeneratorFiles\**" />
-    <EmbeddedResource Remove="Controllers\**" />
-    <EmbeddedResource Remove="GeneratorFiles\**" />
-    <None Remove="Controllers\**" />
-    <None Remove="GeneratorFiles\**" />
-    <None Include="../../">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-    <None Include="..\KnifeZ.Virgo.Core\Resources\icon.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="Program.cs" />
-    <Compile Remove="_CodeGenController.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="Areas\templates\BatchVM.txt" />
-    <None Remove="Areas\templates\Controller.txt" />
-    <None Remove="Areas\templates\CurdVM.txt" />
-    <None Remove="Areas\templates\ImportVM.txt" />
-    <None Remove="Areas\templates\ListVM.txt" />
-    <None Remove="Areas\templates\Searcher.txt" />
-    <None Remove="Areas\templates\vue\api\index.txt" />
-    <None Remove="Areas\templates\vue\index.txt" />
-    <None Remove="Areas\templates\vue\views\dialog-form.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Include="Areas\templates\Searcher.txt" />
     <EmbeddedResource Include="Areas\templates\vue\api\index.txt" />
     <EmbeddedResource Include="Areas\templates\vue\index.txt" />
     <EmbeddedResource Include="Areas\templates\vue\views\dialog-form.txt" />
-    <EmbeddedResource Include="Program.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -66,16 +31,17 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Areas\templates\Controller.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Include="Areas\templates\BatchVM.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Include="Areas\templates\CurdVM.txt" />
     <EmbeddedResource Include="Areas\templates\ImportVM.txt" />
     <EmbeddedResource Include="Areas\templates\ListVM.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="C:\Users\Knife\Pictures\icon.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

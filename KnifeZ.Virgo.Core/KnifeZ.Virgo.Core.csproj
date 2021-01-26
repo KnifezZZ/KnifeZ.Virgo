@@ -10,7 +10,7 @@
     <Authors>KnifeZ</Authors>
     <PackageTags>knifez,mvvm,.net5</PackageTags>
     <NeutralLanguage>zh-CN</NeutralLanguage>
-    <PackageReleaseNotes>基于.net5和WTM修改而来的框架，前端采用vue3.0+antd vue。</PackageReleaseNotes>
+    <PackageReleaseNotes>基于.net5和WTM修改而来的框架，前端采用vue3.x+antd vue。</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -45,7 +45,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="../Resources/icon.png">
+    <None Include="C:\Users\Knife\Pictures\icon.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
