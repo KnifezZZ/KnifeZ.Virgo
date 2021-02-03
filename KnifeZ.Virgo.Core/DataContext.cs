@@ -105,7 +105,7 @@ namespace KnifeZ.Virgo.Core
                 var AllModules = allModules as List<SimpleModule>;
                 var roles = new FrameworkRole[]
                 {
-                    new FrameworkRole{ ID = Guid.NewGuid(), RoleCode = "001", RoleName = Program._localizer["Admin"]}
+                    new FrameworkRole{ ID = Guid.NewGuid(), RoleCode = "001", RoleName = CoreProgram.Callerlocalizer["Admin"]}
                 };
 
                 var adminRole = roles[0];

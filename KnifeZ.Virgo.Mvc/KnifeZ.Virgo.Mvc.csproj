@@ -4,7 +4,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>KnifeZ's .NET5 Frameowrk</Description>
-    <Version>0.1.3</Version>
+    <Version>0.1.4</Version>
     <PackageIcon>icon.png</PackageIcon>
     <RepositoryUrl>https://gitee.com/KnifeZ/KnifeZ.Virgo</RepositoryUrl>
     <PackageTags>knifez,mvvm,.net5</PackageTags>
@@ -38,7 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="C:\Users\Knife\Pictures\icon.png">
+    <None Include="..\..\..\KinfeZ\Pictures\icon.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>

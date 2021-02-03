@@ -263,7 +263,7 @@ namespace KnifeZ.Virgo.Mvc.Filters
                             {
                                 if (ctrl.Localizer[pmenu.PageName].ResourceNotFound == true)
                                 {
-                                    pmenu.PageName = Core.Program._localizer[pmenu.PageName];
+                                    pmenu.PageName = Core.CoreProgram.Callerlocalizer[pmenu.PageName];
                                 }
                                 else
                                 {
@@ -275,7 +275,7 @@ namespace KnifeZ.Virgo.Mvc.Filters
                         }
                         if (ctrl.Localizer[menu.PageName].ResourceNotFound == true)
                         {
-                            menu.PageName = Core.Program._localizer[menu.PageName];
+                            menu.PageName = Core.CoreProgram.Callerlocalizer[menu.PageName];
                         }
                         else
                         {
@@ -364,7 +364,7 @@ namespace KnifeZ.Virgo.Mvc.Filters
                 }
                 else
                 {
-                    context.HttpContext.Response.WriteAsync(Mvc.Program._localizer["PageError"]);
+                    context.HttpContext.Response.WriteAsync(MvcProgram.Callerlocalizer["PageError"]);
                 }
             }
             base.OnResultExecuted(context);

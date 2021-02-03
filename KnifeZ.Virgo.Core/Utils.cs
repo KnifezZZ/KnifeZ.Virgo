@@ -32,30 +32,73 @@ namespace KnifeZ.Virgo.Core
             }
         }
 
+        private static List<Assembly> _allAssemblies;
+
         public static List<Assembly> GetAllAssembly()
         {
-            var rv = new List<Assembly>();
-            var path = Assembly.GetEntryAssembly().Location;
-            var dir = new DirectoryInfo(Path.GetDirectoryName(path));
 
-            var dlls = dir.GetFiles("*.dll", SearchOption.AllDirectories);
-            string[] systemdll = new string[]
+            if (_allAssemblies == null)
             {
-                "KnifeZ.Virgo",
-                Assembly.GetEntryAssembly().GetName().Name
-            };
-            foreach (var dll in dlls)
-            {
+                _allAssemblies = new List<Assembly>();
+                string path = null;
+                string singlefile = null;
                 try
                 {
-                    if (systemdll.Any(x => dll.Name.StartsWith(x)) == true)
+                    path = Assembly.GetEntryAssembly()?.Location;
+                }
+                catch (Exception ex) { 
+                    Console.WriteLine(ex.Message + ex.StackTrace); 
+                }
+                if (string.IsNullOrEmpty(path))
+                {
+                    singlefile = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+                    path = Path.GetDirectoryName(singlefile);
+                }
+                var dir = new DirectoryInfo(Path.GetDirectoryName(path));
+
+                var dlls = dir.GetFiles("*.dll", SearchOption.TopDirectoryOnly);
+                string[] systemdll = new string[]
+                {
+                "Microsoft.",
+                "System.",
+                "Swashbuckle.",
+                "ICSharpCode",
+                "Newtonsoft.",
+                "Oracle.",
+                "Pomelo.",
+                "SQLitePCLRaw.",
+                "Aliyun.OSS",
+                "COSXML.dll",
+                "BouncyCastle.",
+                "FreeSql.",
+                "Google.Protobuf.dll",
+                "Humanizer.dll",
+                "IdleBus.dll",
+                "K4os.",
+                "MySql.Data.",
+                "Npgsql.",
+                "NPOI.",
+                "netstandard",
+                "MySqlConnector",
+                "VueCliMiddleware"
+                };
+
+                var filtered = dlls.Where(x => systemdll.Any(y => x.Name.StartsWith(y)) == false);
+                foreach (var dll in filtered)
+                {
+                    try
                     {
-                        rv.Add(AssemblyLoadContext.Default.LoadFromAssemblyPath(dll.FullName));
+                        AssemblyLoadContext.Default.LoadFromAssemblyPath(dll.FullName);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message + ex.StackTrace);
                     }
                 }
-                catch { }
+                var dlllist = AssemblyLoadContext.Default.Assemblies.Where(x => systemdll.Any(y => x.FullName.StartsWith(y)) == false).ToList();
+                _allAssemblies.AddRange(dlllist);
             }
-            return rv;
+            return _allAssemblies;
         }
 
         public static SimpleMenu FindMenu (string url, List<SimpleMenu> menus)
@@ -268,7 +311,7 @@ namespace KnifeZ.Virgo.Core
 
         public static string GetCS(string cs, string mode, Configs config)
         {
-            if (string.IsNullOrEmpty(cs) || config.DBconfigs.Any(x=>x.Key.ToLower() == cs.ToLower()) == false)
+            if (string.IsNullOrEmpty(cs) || config.Connections.Any(x=>x.Key.ToLower() == cs.ToLower()) == false)
             {
                 cs = "default";
             }
@@ -279,7 +322,7 @@ namespace KnifeZ.Virgo.Core
             }
             if (mode?.ToLower() == "read")
             {
-                var reads = config.DBconfigs.Where(x => x.Key.StartsWith(cs + "_")).Select(x=>x.Key).ToList();
+                var reads = config.Connections.Where(x => x.Key.StartsWith(cs + "_")).Select(x=>x.Key).ToList();
                 if (reads.Count > 0)
                 {
                     Random r = new Random();

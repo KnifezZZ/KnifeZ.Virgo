@@ -125,18 +125,18 @@ namespace KnifeZ.Virgo.Core
             if (pi.GetCustomAttributes(typeof(RegularExpressionAttribute), false).FirstOrDefault() is RegularExpressionAttribute dis && !string.IsNullOrEmpty(dis.ErrorMessage))
             {
                 rv = dis.ErrorMessage;
-                if (Core.Program.Buildindll.Any(x => pi.DeclaringType.FullName.StartsWith(x)))
+                if (Core.CoreProgram.Buildindll.Any(x => pi.DeclaringType.FullName.StartsWith(x)))
                 {
-                    if (Program._localizer != null)
+                    if (CoreProgram.Callerlocalizer != null)
                     {
-                        rv = Program._localizer[rv];
+                        rv = CoreProgram.Callerlocalizer[rv];
                     }
                 }
                 else
                 {
-                    if (Program.Callerlocalizer != null)
+                    if (CoreProgram.Callerlocalizer != null)
                     {
-                        rv = Program.Callerlocalizer[rv];
+                        rv = CoreProgram.Callerlocalizer[rv];
                     }
                 }
             }
@@ -158,18 +158,18 @@ namespace KnifeZ.Virgo.Core
             if (pi.GetCustomAttributes(typeof(DisplayAttribute), false).FirstOrDefault() is DisplayAttribute dis && !string.IsNullOrEmpty(dis.Name))
             {
                 rv = dis.Name;
-                if (Core.Program.Buildindll.Any(x => pi.DeclaringType.FullName.StartsWith(x)))
+                if (Core.CoreProgram.Buildindll.Any(x => pi.DeclaringType.FullName.StartsWith(x)))
                 {
-                    if (Program._localizer != null)
+                    if (CoreProgram.Callerlocalizer != null)
                     {
-                        rv = Program._localizer[rv];
+                        rv = CoreProgram.Callerlocalizer[rv];
                     }
                 }
                 else
                 {
-                    if (Program.Callerlocalizer != null)
+                    if (CoreProgram.Callerlocalizer != null)
                     {
-                        rv = Program.Callerlocalizer[rv];
+                        rv = CoreProgram.Callerlocalizer[rv];
                     }
                 }
             }
@@ -534,18 +534,18 @@ namespace KnifeZ.Virgo.Core
                 if (attribs.Count > 0)
                 {
                     rv = ((DisplayAttribute)attribs[0]).GetName();
-                    if (Core.Program.Buildindll.Any(x => field.DeclaringType.FullName.StartsWith(x)))
+                    if (Core.CoreProgram.Buildindll.Any(x => field.DeclaringType.FullName.StartsWith(x)))
                     {
-                        if (Program._localizer != null)
+                        if (CoreProgram.Callerlocalizer != null)
                         {
-                            rv = Program._localizer[rv];
+                            rv = CoreProgram.Callerlocalizer[rv];
                         }
                     }
                     else
                     {
-                        if (Program.Callerlocalizer != null)
+                        if (CoreProgram.Callerlocalizer != null)
                         {
-                            rv = Program.Callerlocalizer[rv];
+                            rv = CoreProgram.Callerlocalizer[rv];
                         }
                     }
                 }
@@ -588,16 +588,16 @@ namespace KnifeZ.Virgo.Core
                     rv = ((DisplayAttribute)attribs[0]).GetName();
                     if (field.DeclaringType.FullName.StartsWith("KnifeZ.Virgo."))
                     {
-                        if (Program._localizer != null)
+                        if (CoreProgram.Callerlocalizer != null)
                         {
-                            rv = Program._localizer[rv];
+                            rv = CoreProgram.Callerlocalizer[rv];
                         }
                     }
                     else
                     {
-                        if (Program.Callerlocalizer != null)
+                        if (CoreProgram.Callerlocalizer != null)
                         {
-                            rv = Program.Callerlocalizer[rv];
+                            rv = CoreProgram.Callerlocalizer[rv];
                         }
                     }
                 }

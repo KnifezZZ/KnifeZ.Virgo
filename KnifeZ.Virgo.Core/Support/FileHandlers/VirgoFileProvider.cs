@@ -13,53 +13,20 @@ namespace KnifeZ.Virgo.Core.Support.FileHandlers
     public class VirgoFileProvider
     {
         public string SaveMode { get; set; }
-        private Dictionary<string, ConstructorInfo> _handlers;
-        private ConstructorInfo _defaultHandler;
-        private Configs _configs;
-        private GlobalData _gd;
+        private static Dictionary<string, ConstructorInfo> _handlers;
+        private static ConstructorInfo _defaultHandler;
+        private VirgoContext KnifeVirgo;
         public static Func<IVirgoFileHandler, string> _subDirFunc;
 
-        public VirgoFileProvider(IOptions<Configs> configs, GlobalData gd)
+        public VirgoFileProvider(VirgoContext context)
         {
-            _configs = configs.Value;
-            _gd = gd;
-            _handlers = new Dictionary<string, ConstructorInfo>();
-            var types = _gd.GetTypesAssignableFrom<IVirgoFileHandler>();
-            int count = 1;
-            foreach (var item in types)
-            {
-                var cons = item.GetConstructor(new Type[] { typeof(Configs), typeof(IDataContext) });
-                var nameattr = item.GetCustomAttribute<DisplayAttribute>();
-                string name = "";
-                if (nameattr == null)
-                {
-                    name = "FileHandler" + count;
-                    count++;
-                }
-                else
-                {
-                    name = nameattr.Name;
-                }
-                name = name.ToLower();
-                if (name == _configs.FileUploadOptions.SaveFileMode.ToString().ToLower())
-                {
-                    _defaultHandler = cons;
-                }
-                _handlers.Add(name, cons);
-            }
-            if (_defaultHandler == null && types.Count > 0)
-            {
-                _defaultHandler = types[0].GetConstructor(new Type[] { typeof(Configs), typeof(IDataContext) });
-            }
+            KnifeVirgo = context;
         }
 
-        public VirgoFileProvider(Configs configs)
+        public static void Init (Configs config, GlobalData gd)
         {
-            _configs = configs;
-            _gd = new GlobalData();
-            _gd.AllAssembly = Utils.GetAllAssembly();
             _handlers = new Dictionary<string, ConstructorInfo>();
-            var types = _gd.GetTypesAssignableFrom<IVirgoFileHandler>();
+            var types = gd.GetTypesAssignableFrom<IVirgoFileHandler>();
             int count = 1;
             foreach (var item in types)
             {
@@ -76,7 +43,7 @@ namespace KnifeZ.Virgo.Core.Support.FileHandlers
                     name = nameattr.Name;
                 }
                 name = name.ToLower();
-                if (name == _configs.FileUploadOptions.SaveFileMode.ToString().ToLower())
+                if (name == config.FileUploadOptions.SaveFileMode.ToString().ToLower())
                 {
                     _defaultHandler = cons;
                 }
@@ -86,6 +53,7 @@ namespace KnifeZ.Virgo.Core.Support.FileHandlers
             {
                 _defaultHandler = types[0].GetConstructor(new Type[] { typeof(Configs), typeof(IDataContext) });
             }
+
         }
 
         public IVirgoFileHandler CreateFileHandler(string saveMode = null, IDataContext dc = null)
@@ -106,11 +74,11 @@ namespace KnifeZ.Virgo.Core.Support.FileHandlers
             }
             if (ci == null)
             {
-                return new VirgoDataBaseFileHandler(_configs, dc);
+                return new VirgoDataBaseFileHandler(KnifeVirgo.ConfigInfo, dc);
             }
             else
             {
-                return ci.Invoke(new object[] { _configs, dc }) as IVirgoFileHandler;
+                return ci.Invoke(new object[] { KnifeVirgo.ConfigInfo, dc }) as IVirgoFileHandler;
             }
         }
 
@@ -119,7 +87,7 @@ namespace KnifeZ.Virgo.Core.Support.FileHandlers
             IVirgoFile rv;
             if (dc == null)
             {
-                dc = _configs.CreateDC();
+                dc = KnifeVirgo.ConfigInfo.CreateDC();
             }
             rv = dc.Set<FileAttachment>().CheckID(id).Select(x => new FileAttachment
             {
@@ -146,7 +114,7 @@ namespace KnifeZ.Virgo.Core.Support.FileHandlers
             FileAttachment file = null;
             if (dc == null)
             {
-                dc = _configs.CreateDC();
+                dc = KnifeVirgo.CreateDC();
             }
             file = dc.Set<FileAttachment>().CheckID(id)
                 .Select(x => new FileAttachment
@@ -176,7 +144,7 @@ namespace KnifeZ.Virgo.Core.Support.FileHandlers
         {
             if (dc == null)
             {
-                dc = _configs.CreateDC();
+                dc = KnifeVirgo.CreateDC();
             }
             string rv = dc.Set<FileAttachment>().CheckID(id).Select(x => x.FileName).FirstOrDefault();
             return rv;
@@ -186,7 +154,7 @@ namespace KnifeZ.Virgo.Core.Support.FileHandlers
         {
             if (dc == null)
             {
-                dc = _configs.CreateDC();
+                dc = KnifeVirgo.CreateDC();
             }
             FileAttachment rv = dc.Set<FileAttachment>().CheckID(id).FirstOrDefault();
             return rv;

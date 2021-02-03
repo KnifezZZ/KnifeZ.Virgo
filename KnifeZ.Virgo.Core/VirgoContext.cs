@@ -59,6 +59,8 @@ namespace KnifeZ.Virgo.Core
 
         public IModelStateService MSD { get; set; }
 
+        public static Func<VirgoContext, string, LoginUserInfo> ReloadUserFunc { get; set; }
+
         #region DataContext
 
         private IDataContext _dc;
@@ -140,7 +142,7 @@ namespace KnifeZ.Virgo.Core
                     var programtype = Assembly.GetEntryAssembly().GetTypes().Where(x => x.Name == "Program").FirstOrDefault();
                     _localizer = _stringLocalizerFactory.Create(programtype);
                 }
-                return _localizer ?? KnifeZ.Virgo.Core.Program._localizer;
+                return _localizer ?? KnifeZ.Virgo.Core.CoreProgram.Callerlocalizer;
             }
         }
         /// <summary>
@@ -309,7 +311,7 @@ namespace KnifeZ.Virgo.Core
             string cs = cskey ?? CurrentCS;
             if (isLog == true)
             {
-                if (ConfigInfo.DBconfigs?.Where(x => x.Key.ToLower() == "defaultlog").FirstOrDefault() != null)
+                if (ConfigInfo.Connections?.Where(x => x.Key.ToLower() == "defaultlog").FirstOrDefault() != null)
                 {
                     cs = "defaultlog";
                 }
@@ -322,7 +324,7 @@ namespace KnifeZ.Virgo.Core
             {
                 cs = "default";
             }
-            var rv = ConfigInfo.DBconfigs.Where(x => x.Key.ToLower() == cs).FirstOrDefault().CreateDC();
+            var rv = ConfigInfo.Connections.Where(x => x.Key.ToLower() == cs).FirstOrDefault().CreateDC();
             rv.IsDebug = ConfigInfo.IsQuickDebug;
             rv.SetLoggerFactory(_loggerFactory);
             return rv;

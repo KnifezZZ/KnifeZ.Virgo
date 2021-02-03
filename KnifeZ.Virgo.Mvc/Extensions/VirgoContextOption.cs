@@ -25,5 +25,7 @@ namespace KnifeZ.Virgo.Mvc
         /// Set the sub directory of uploaded file, if you want to save file in different directories according to datetime or other properties, use this selector
         /// </summary>
         public Func<IVirgoFileHandler, string> FileSubDirSelector { get; set; }
+
+        public Func<VirgoContext, string, LoginUserInfo> ReloadUserFunc { get; set; }
     }
 }

@@ -61,14 +61,14 @@ namespace KnifeZ.Virgo.Core
         public string GetLogString ()
         {
             return $@"
-|-{Core.Program._localizer["ActionTime"]}：{this.ActionTime}
-|-{Core.Program._localizer["Account"]}：{this.ITCode ?? ""}
+|-{Core.CoreProgram.Callerlocalizer["ActionTime"]}：{this.ActionTime}
+|-{Core.CoreProgram.Callerlocalizer["Account"]}：{this.ITCode ?? ""}
 |-IP：{this.IP ?? ""}
-|-{Core.Program._localizer["Module"]}：{this.ModuleName ?? ""}
-|-{Core.Program._localizer["MethodName"]}：{this.ActionName ?? ""}
+|-{Core.CoreProgram.Callerlocalizer["Module"]}：{this.ModuleName ?? ""}
+|-{Core.CoreProgram.Callerlocalizer["MethodName"]}：{this.ActionName ?? ""}
 |-Url：{this.ActionUrl ?? ""}
-|-{Core.Program._localizer["Duration"]}：{this.Duration.ToString("F2") + " s"}
-|-{Core.Program._localizer["Remark"]}：{this.Remark}
+|-{Core.CoreProgram.Callerlocalizer["Duration"]}：{this.Duration.ToString("F2") + " s"}
+|-{Core.CoreProgram.Callerlocalizer["Remark"]}：{this.Remark}
 ";
         }
     }

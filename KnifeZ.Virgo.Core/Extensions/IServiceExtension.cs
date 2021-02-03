@@ -13,11 +13,12 @@ namespace KnifeZ.Virgo.Core.Extensions
 {
     public static class IServiceExtension
     {
+
         public static IServiceCollection AddVirgoContextForConsole (this IServiceCollection services, string jsonFileDir = null, string jsonFileName = null, Func<IVirgoFileHandler, string> fileSubDirSelector = null)
         {
             var configBuilder = new ConfigurationBuilder();
             IConfigurationRoot ConfigRoot = configBuilder.VirgoConfig(null, jsonFileDir, jsonFileName).Build();
-            var virgoConfigs = ConfigRoot.Get<Configs>();
+            var VirgoConfigs = ConfigRoot.Get<Configs>();
             services.Configure<Configs>(ConfigRoot);
             services.AddLogging(builder =>
             {
@@ -27,14 +28,17 @@ namespace KnifeZ.Virgo.Core.Extensions
                        .AddDebug()
                        .AddVirgoLogger();
             });
+            var gd = GetGlobalData();
+            services.AddHttpContextAccessor();
+            services.AddSingleton(gd);
             VirgoFileProvider._subDirFunc = fileSubDirSelector;
             services.TryAddScoped<IDataContext, NullContext>();
             services.AddScoped<VirgoContext>();
-            services.AddSingleton<VirgoFileProvider>();
+            services.AddScoped<VirgoFileProvider>();
             services.AddHttpClient();
-            if (virgoConfigs.Domains != null)
+            if (VirgoConfigs.Domains != null)
             {
-                foreach (var item in virgoConfigs.Domains)
+                foreach (var item in VirgoConfigs.Domains)
                 {
                     services.AddHttpClient(item.Key, x =>
                     {
@@ -45,8 +49,23 @@ namespace KnifeZ.Virgo.Core.Extensions
                 }
             }
             services.AddDistributedMemoryCache();
+            var cs = VirgoConfigs.Connections;
+            foreach (var item in cs)
+            {
+                var dc = item.CreateDC();
+                dc.Database.EnsureCreated();
+            }
+            VirgoFileProvider.Init(VirgoConfigs, gd);
             return services;
         }
 
+        private static GlobalData GetGlobalData ()
+        {
+            GlobalData gd = new GlobalData
+            {
+                AllAssembly = Utils.GetAllAssembly()
+            };
+            return gd;
+        }
     }
 }

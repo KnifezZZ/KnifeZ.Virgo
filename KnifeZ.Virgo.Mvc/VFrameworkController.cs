@@ -14,6 +14,5 @@ namespace KnifeZ.Virgo.Mvc
     public class VFrameworkController : BaseApiController
     {
 
-
     }
 }

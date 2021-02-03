@@ -654,7 +654,7 @@ namespace KnifeZ.Virgo.Core
                 }
                 catch (DbUpdateException)
                 {
-                    MSD.AddModelError("", Program._localizer["DeleteFailed"]);
+                    MSD.AddModelError("", CoreProgram.Callerlocalizer["DeleteFailed"]);
                 }
             }
             //如果是普通的TopBasePoco，则进行物理删除
@@ -688,7 +688,12 @@ namespace KnifeZ.Virgo.Core
                 var fas = pros.Where(x => typeof(IEnumerable<ISubFile>).IsAssignableFrom(x.PropertyType)).ToList();
                 foreach (var f in fas)
                 {
-                    var subs = f.GetValue(Entity) as IEnumerable<ISubFile>;
+                    IEnumerable<ISubFile> subs = f.GetValue(Entity) as IEnumerable<ISubFile>;
+                    if (subs == null)
+                    {
+                        var fullEntity = DC.Set<TModel>().AsQueryable().Include(f.Name).AsNoTracking().CheckID(Entity.ID).FirstOrDefault();
+                        subs = f.GetValue(fullEntity) as IEnumerable<ISubFile>;
+                    }
                     if (subs != null)
                     {
                         foreach (var sub in subs)
@@ -718,7 +723,7 @@ namespace KnifeZ.Virgo.Core
             }
             catch (Exception)
             {
-                MSD.AddModelError("", Program._localizer["DeleteFailed"]);
+                MSD.AddModelError("", CoreProgram.Callerlocalizer["DeleteFailed"]);
             }
         }
 
@@ -771,7 +776,7 @@ namespace KnifeZ.Virgo.Core
             }
             catch (Exception)
             {
-                MSD.AddModelError("", Program._localizer["DeleteFailed"]);
+                MSD.AddModelError("", CoreProgram.Callerlocalizer["DeleteFailed"]);
             }
         }
 
@@ -954,12 +959,12 @@ namespace KnifeZ.Virgo.Core
                         //如果只有一个字段重复，则拼接形成 xxx字段重复 这种提示
                         if (props.Count == 1)
                         {
-                            MSD.AddModelError(GetValidationFieldName(props[0])[0], Program._localizer["DuplicateError", AllName]);
+                            MSD.AddModelError(GetValidationFieldName(props[0])[0], CoreProgram.Callerlocalizer["DuplicateError", AllName]);
                         }
                         //如果多个字段重复，则拼接形成 xx，yy，zz组合字段重复 这种提示
                         else if (props.Count > 1)
                         {
-                            MSD.AddModelError(GetValidationFieldName(props.First())[0], Program._localizer["DuplicateGroupError", AllName]);
+                            MSD.AddModelError(GetValidationFieldName(props.First())[0], CoreProgram.Callerlocalizer["DuplicateGroupError", AllName]);
                         }
                     }
                 }

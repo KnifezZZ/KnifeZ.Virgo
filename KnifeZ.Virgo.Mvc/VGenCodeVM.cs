@@ -343,7 +343,7 @@ namespace KnifeZ.Virgo.Mvc
                 DC.Set<FrameworkMenu>().Add(menu);
                 DC.SaveChanges();
             }
-            return Program._localizer["GenerateSuccess"];
+            return MvcProgram.Callerlocalizer["GenerateSuccess"];
         }
 
         #region 生成模板代码
@@ -1188,11 +1188,11 @@ export const {item.FieldName}Types = [");
                         if (checktype == typeof(FileAttachment))
                         {
                             view.IsImportField = false;
-                            view.FieldDes += $"({Program._localizer["Attachment"]})";
+                            view.FieldDes += $"({MvcProgram.Callerlocalizer["Attachment"]})";
                         }
                         else
                         {
-                            view.FieldDes += $"({Program._localizer["OneToMany"]})";
+                            view.FieldDes += $"({MvcProgram.Callerlocalizer["OneToMany"]})";
                         }
                         view.LinkedType = checktype.AssemblyQualifiedName;
                         view.SubSelectItems = GetLinkFields(checktype.AssemblyQualifiedName);
@@ -1207,7 +1207,7 @@ export const {item.FieldName}Types = [");
                         var middletable = checktype.GetCustomAttributes(typeof(MiddleTableAttribute), false).FirstOrDefault();
                         if (middletable != null)
                         {
-                            view.FieldDes += $"({Program._localizer["ManyToMany"]})";
+                            view.FieldDes += $"({MvcProgram.Callerlocalizer["ManyToMany"]})";
                             view.IsImportField = false;
                             var subpros = checktype.GetProperties();
                             foreach (var spro in subpros)

@@ -19,7 +19,7 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkGroupVMs
             var check = DC.Set<FrameworkUserGroup>().Any(x => x.GroupId == checkid);
             if (check == true)
             {
-                errorMessage = Virgo.Mvc.Program._localizer["CannotDelete", Localizer["Group"]];
+                errorMessage = MvcProgram.Callerlocalizer["CannotDelete", Localizer["Group"]];
                 return false;
             }
             else

@@ -19,13 +19,13 @@ namespace KnifeZ.Virgo.Mvc
             string rv = "";
             if (string.IsNullOrEmpty(self.Description) == false)
             {
-                if (Core.Program.Callerlocalizer[self.Description].ResourceNotFound == true)
+                if (Core.CoreProgram.Callerlocalizer[self.Description].ResourceNotFound == true)
                 {
-                    rv = Core.Program._localizer[self.Description];
+                    rv = Core.CoreProgram.Callerlocalizer[self.Description];
                 }
                 else
                 {
-                    rv = Core.Program.Callerlocalizer[self.Description];
+                    rv = Core.CoreProgram.Callerlocalizer[self.Description];
                 }
             }
             return rv;

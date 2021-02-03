@@ -26,18 +26,18 @@ namespace KnifeZ.Virgo.Core
 
         public void SetLoccalizer (Type controllertype)
         {
-            if (Core.Program.Buildindll.Any(x => controllertype.FullName.StartsWith(x)))
+            if (Core.CoreProgram.Buildindll.Any(x => controllertype.FullName.StartsWith(x)))
             {
-                if (Core.Program._localizer != null)
+                if (Core.CoreProgram.Callerlocalizer != null)
                 {
-                    _localizer = Core.Program._localizer;
+                    _localizer = Core.CoreProgram.Callerlocalizer;
                 }
             }
             else
             {
-                if (Core.Program.Callerlocalizer != null)
+                if (Core.CoreProgram.Callerlocalizer != null)
                 {
-                    _localizer = Core.Program.Callerlocalizer;
+                    _localizer = Core.CoreProgram.Callerlocalizer;
                 }
             }
         }

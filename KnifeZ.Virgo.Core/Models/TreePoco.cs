@@ -9,14 +9,12 @@ namespace KnifeZ.Virgo.Core
     {
         [Display(Name = "Parent")]
         public Guid? ParentId { get; set; }
-
     }
 
     public abstract class TreeBasePoco : BasePoco
     {
         [Display(Name = "Parent")]
         public Guid? ParentId { get; set; }
-
     }
 
     public class TreePoco<T> : TreePoco where T : TreePoco<T>

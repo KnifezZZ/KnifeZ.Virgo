@@ -45,7 +45,7 @@ namespace KnifeZ.Virgo.Mvc
             var models = new List<Type>();
 
             //获取所有模型
-            var pros = KnifeVirgo.ConfigInfo.DBconfigs.SelectMany(x => x.DcConstructor.DeclaringType.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance));
+            var pros = KnifeVirgo.ConfigInfo.Connections.SelectMany(x => x.DcConstructor.DeclaringType.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance));
             if (pros != null)
             {
                 foreach (var pro in pros)

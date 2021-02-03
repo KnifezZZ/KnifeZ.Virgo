@@ -7,6 +7,7 @@ using System.Reflection;
 using KnifeZ.Virgo.Core.Extensions;
 using KnifeZ.Virgo.Core.Support.FileHandlers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 
 namespace KnifeZ.Virgo.Core
 {
@@ -116,9 +117,15 @@ namespace KnifeZ.Virgo.Core
             List<Guid> fileids = new List<Guid>();
             var fa = pros.Where(x => x.PropertyType == typeof(FileAttachment) || typeof(TopBasePoco).IsAssignableFrom(x.PropertyType)).ToList();
             var isPersist = modelType.IsSubclassOf(typeof(PersistPoco));
-
-
-            for (int i = 0; i < idsData.Count; i++)
+            var query = DC.Set<TModel>().AsQueryable();
+            var fas = pros.Where(x => typeof(IEnumerable<ISubFile>).IsAssignableFrom(x.PropertyType)).ToList();
+            foreach (var f in fas)
+            {
+                query = query.Include(f.Name);
+            }
+            query = query.AsNoTracking().CheckIDs(idsData);
+            var entityList = query.ToList();
+            for (int i = 0; i < entityList.Count; i++)
             {
                 string checkErro = null;
                 //检查是否可以删除，如不能删除则直接跳过
@@ -131,7 +138,7 @@ namespace KnifeZ.Virgo.Core
                 //进行删除
                 try
                 {
-                    var Entity = DC.Set<TModel>().CheckID(idsData[i]).FirstOrDefault();
+                    var Entity = entityList[i];
                     if (isPersist)
                     {
                         (Entity as PersistPoco).IsValid = false;
@@ -163,7 +170,6 @@ namespace KnifeZ.Virgo.Core
                             f.SetValue(Entity, null);
                         }
 
-                        var fas = pros.Where(x => typeof(IEnumerable<ISubFile>).IsAssignableFrom(x.PropertyType)).ToList();
                         foreach (var f in fas)
                         {
                             var subs = f.GetValue(Entity) as IEnumerable<ISubFile>;
@@ -174,6 +180,10 @@ namespace KnifeZ.Virgo.Core
                                     fileids.Add(sub.FileId);
                                 }
                                 f.SetValue(Entity, null);
+                            }
+                            else
+                            {
+
                             }
                         }
                         if (typeof(TModel) != typeof(FileAttachment))
@@ -222,7 +232,7 @@ namespace KnifeZ.Virgo.Core
                     {
                         if (!ErrorMessage.ContainsKey(id))
                         {
-                            ErrorMessage.Add(id, Core.Program._localizer?["Sys.Rollback"]);
+                            ErrorMessage.Add(id, Core.CoreProgram.Callerlocalizer?["Sys.Rollback"]);
                         }
                     }
                 }
@@ -234,7 +244,7 @@ namespace KnifeZ.Virgo.Core
                         item.BatchError = ErrorMessage.Where(x => x.Key == item.GetID().ToString()).Select(x => x.Value).FirstOrDefault();
                     }
                 }
-                MSD.AddModelError("", Core.Program._localizer?["Sys.DataCannotDelete"]);
+                MSD.AddModelError("", Core.CoreProgram.Callerlocalizer?["Sys.DataCannotDelete"]);
             }
             return rv;
         }
@@ -272,7 +282,7 @@ namespace KnifeZ.Virgo.Core
                     }
                     if (entity == null)
                     {
-                        ErrorMessage.Add(idsData[i], Program._localizer["DataNotExist"]);
+                        ErrorMessage.Add(idsData[i], CoreProgram.Callerlocalizer["DataNotExist"]);
                         rv = false;
                         break;
                     }
@@ -367,7 +377,7 @@ namespace KnifeZ.Virgo.Core
                     {
                         if (!ErrorMessage.ContainsKey(id))
                         {
-                            ErrorMessage.Add(id, Program._localizer["Rollback"]);
+                            ErrorMessage.Add(id, CoreProgram.Callerlocalizer["Rollback"]);
                         }
                     }
                 }

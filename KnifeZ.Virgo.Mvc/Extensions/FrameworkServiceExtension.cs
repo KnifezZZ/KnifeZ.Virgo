@@ -70,7 +70,7 @@ namespace KnifeZ.Virgo.Mvc
 
         private static List<SimpleMenu> GetAllMenus (List<SimpleModule> allModule, Configs ConfigInfo)
         {
-            var localizer = new ResourceManagerStringLocalizerFactory(Options.Create<LocalizationOptions>(new LocalizationOptions { ResourcesPath = "Resources" }), new Microsoft.Extensions.Logging.LoggerFactory()).Create(typeof(KnifeZ.Virgo.Core.Program));
+            var localizer = new ResourceManagerStringLocalizerFactory(Options.Create<LocalizationOptions>(new LocalizationOptions { ResourcesPath = "Resources" }), new Microsoft.Extensions.Logging.LoggerFactory()).Create(typeof(KnifeZ.Virgo.Core.CoreProgram));
             var menus = new List<SimpleMenu>();
 
             if (ConfigInfo.IsQuickDebug)
@@ -82,7 +82,7 @@ namespace KnifeZ.Virgo.Mvc
                     var modelmenu = new SimpleMenu
                     {
                         ID = Guid.NewGuid(),
-                        PageName = area ?? localizer["DefaultArea"]
+                        PageName = area ?? localizer["Sys.DefaultArea"]
                     };
                     menus.Add(modelmenu);
                     var pages = allModule.Where(x => x.NameSpace != "KnifeZ.Virgo.Admin.Api" && x.Area?.AreaName == area).SelectMany(x => x.Actions).Where(x => x.MethodName.ToLower() == "index").ToList();
@@ -103,10 +103,9 @@ namespace KnifeZ.Virgo.Mvc
             {
                 try
                 {
-                    using (var dc = ConfigInfo.DBconfigs.Where(x => x.Key.ToLower() == "default").FirstOrDefault().CreateDC())
+                    using (var dc = ConfigInfo.Connections.Where(x => x.Key.ToLower() == "default").FirstOrDefault().CreateDC())
                     {
                         menus.AddRange(dc?.Set<FrameworkMenu>()
-                                .Include(x => x.Domain)
                                 .OrderBy(x => x.DisplayOrder)
                                 .Select(x => new SimpleMenu
                                 {
@@ -459,9 +458,16 @@ namespace KnifeZ.Virgo.Mvc
             services.AddSingleton(op.DataPrivileges ?? new List<IDataPrivilege>());
             DataContextFilter._csfunc = op.CsSelector;
             VirgoFileProvider._subDirFunc = op.FileSubDirSelector;
+            VirgoContext.ReloadUserFunc = op.ReloadUserFunc;
             services.TryAddScoped<IDataContext, NullContext>();
             services.AddScoped<VirgoContext>();
-            services.AddSingleton<VirgoFileProvider>();
+            services.AddScoped<VirgoFileProvider>();
+            services.Configure<FormOptions>(y =>
+            {
+                y.ValueCountLimit = 5000;
+                y.ValueLengthLimit = int.MaxValue - 20480;
+                y.MultipartBodyLengthLimit = VirgoConfigs.FileUploadOptions.UploadLimit;
+            });
             return services;
         }
         public static IServiceCollection AddVirgoCrossDomain (this IServiceCollection services)
@@ -504,11 +510,6 @@ namespace KnifeZ.Virgo.Mvc
                 options.Cookie.Name = VirgoConfigs.CookiePre + ".Session";
                 options.IdleTimeout = TimeSpan.FromSeconds(timeout);
             });
-            services.Configure<FormOptions>(y =>
-            {
-                y.ValueLengthLimit = int.MaxValue - 20480;
-                y.MultipartBodyLengthLimit = VirgoConfigs.FileUploadOptions.UploadLimit;
-            });
             return services;
         }
         public static IServiceCollection AddVirgoAuthentication (this IServiceCollection services)
@@ -521,22 +522,6 @@ namespace KnifeZ.Virgo.Mvc
 
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
-                    {
-                        options.Cookie.Name = CookieAuthenticationDefaults.CookiePrefix + AuthConstants.CookieAuthName;
-                        options.Cookie.HttpOnly = true;
-                        options.Cookie.SameSite = SameSiteMode.Strict;
-
-                        options.ClaimsIssuer = cookieOptions.Issuer;
-                        options.SlidingExpiration = cookieOptions.SlidingExpiration;
-                        options.ExpireTimeSpan = TimeSpan.FromSeconds(cookieOptions.Expires);
-                        // options.SessionStore = new MemoryTicketStore();
-
-                        options.LoginPath = cookieOptions.LoginPath;
-                        options.LogoutPath = cookieOptions.LogoutPath;
-                        options.ReturnUrlParameter = cookieOptions.ReturnUrlParameter;
-                        options.AccessDeniedPath = cookieOptions.AccessDeniedPath;
-                    })
                     .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
                     {
                         options.TokenValidationParameters = new TokenValidationParameters
@@ -555,6 +540,22 @@ namespace KnifeZ.Virgo.Mvc
 
                             ValidateLifetime = true
                         };
+                    })
+                    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+                    {
+                        options.Cookie.Name = CookieAuthenticationDefaults.CookiePrefix + AuthConstants.CookieAuthName;
+                        options.Cookie.HttpOnly = true;
+                        options.Cookie.SameSite = SameSiteMode.Strict;
+
+                        options.ClaimsIssuer = cookieOptions.Issuer;
+                        options.SlidingExpiration = cookieOptions.SlidingExpiration;
+                        options.ExpireTimeSpan = TimeSpan.FromSeconds(cookieOptions.Expires);
+                        // options.SessionStore = new MemoryTicketStore();
+
+                        options.LoginPath = cookieOptions.LoginPath;
+                        options.LogoutPath = cookieOptions.LogoutPath;
+                        options.ReturnUrlParameter = cookieOptions.ReturnUrlParameter;
+                        options.AccessDeniedPath = cookieOptions.AccessDeniedPath;
                     });
             return services;
         }
@@ -631,9 +632,9 @@ namespace KnifeZ.Virgo.Mvc
             {
                 options.DataAnnotationLocalizerProvider = (type, factory) =>
                 {
-                    //if (Core.Program.Buildindll.Any(x => type.FullName.StartsWith(x)))
+                    //if (Core.CoreProgram.Buildindll.Any(x => type.FullName.StartsWith(x)))
                     //{
-                    //    return factory.Create(typeof(KnifeZ.Virgo.Core.Program));
+                    //    return factory.Create(typeof(KnifeZ.Virgo.Core.CoreProgram));
                     //}
                     //else
                     //{
@@ -646,25 +647,18 @@ namespace KnifeZ.Virgo.Mvc
 
         public static IApplicationBuilder UseVirgoContext (this IApplicationBuilder app)
         {
-            var configs = app.ApplicationServices.GetRequiredService<IOptions<Configs>>().Value;
+            var configs = app.ApplicationServices.GetRequiredService<IOptionsMonitor<Configs>>().CurrentValue;
             var lg = app.ApplicationServices.GetRequiredService<LinkGenerator>();
             var gd = app.ApplicationServices.GetRequiredService<GlobalData>();
+            var localfactory = app.ApplicationServices.GetRequiredService<IStringLocalizerFactory>();
             //获取所有程序集
-            gd.AllAssembly = Utils.GetAllAssembly().Distinct().ToList();
+            gd.AllAssembly = Utils.GetAllAssembly();
 
             //set Core's _Callerlocalizer to use localizer point to the EntryAssembly's Program class
-            var programType = Assembly.GetEntryAssembly().GetTypes().Where(x => x.Name == "Program").FirstOrDefault();
-            var coredll = gd.AllAssembly.Where(x => x.ManifestModule.Name == "KnifeZ.Virgo.Core.dll").FirstOrDefault();
-            var programLocalizer = new ResourceManagerStringLocalizerFactory(
-                                        Options.Create(
-                                            new LocalizationOptions
-                                            {
-                                                ResourcesPath = "Resources"
-                                            })
-                                            , new Microsoft.Extensions.Logging.LoggerFactory()
-                                        )
-                                        .Create(programType);
-            coredll.GetType("KnifeZ.Virgo.Core.Program").GetProperty("Callerlocalizer").SetValue(null, programLocalizer);
+            var programType = Assembly.GetCallingAssembly()?.GetTypes()?.Where(x => x.Name == "Program").FirstOrDefault();
+            var coredll = gd.AllAssembly.Where(x => x.GetName().Name == "KnifeZ.Virgo.Core.dll" || x.GetName().Name == "KnifeZ.Virgo.Core").FirstOrDefault();
+            var programLocalizer = localfactory.Create(programType);
+            coredll.GetType("KnifeZ.Virgo.Core.CoreProgram").GetProperty("Callerlocalizer").SetValue(null, programLocalizer);
 
 
             var controllers = gd.GetTypesAssignableFrom<IBaseController>();
@@ -713,13 +707,15 @@ namespace KnifeZ.Virgo.Mvc
                     a.Url = u;
                 }
             }
-            var test2 = app.ApplicationServices.GetService<VirgoFileProvider>();
+
+            var test = app.ApplicationServices.GetService<ISpaStaticFileProvider>();
+            VirgoFileProvider.Init(configs, gd);
             using (var scope = app.ApplicationServices.CreateScope())
             {
                 var fixdc = scope.ServiceProvider.GetRequiredService<IDataContext>();
                 if (fixdc is NullContext)
                 {
-                    var cs = configs.DBconfigs;
+                    var cs = configs.Connections;
                     foreach (var item in cs)
                     {
                         var dc = item.CreateDC();
@@ -736,7 +732,7 @@ namespace KnifeZ.Virgo.Mvc
         }
         public static IApplicationBuilder UseVirgoMultiLanguages (this IApplicationBuilder app)
         {
-            var configs = app.ApplicationServices.GetRequiredService<IOptions<Configs>>().Value;
+            var configs = app.ApplicationServices.GetRequiredService<IOptionsMonitor<Configs>>().CurrentValue;
             if (string.IsNullOrEmpty(configs.Languages) == false)
             {
                 List<CultureInfo> supportedCultures = new List<CultureInfo>();
@@ -759,7 +755,7 @@ namespace KnifeZ.Virgo.Mvc
         }
         public static IApplicationBuilder UseVirgoCrossDomain (this IApplicationBuilder app)
         {
-            var configs = app.ApplicationServices.GetRequiredService<IOptions<Configs>>().Value;
+            var configs = app.ApplicationServices.GetRequiredService<IOptionsMonitor<Configs>>().CurrentValue;
             if (configs.CorsOptions.EnableAll == true)
             {
                 if (configs.CorsOptions?.Policy?.Count > 0)
@@ -784,24 +780,6 @@ namespace KnifeZ.Virgo.Mvc
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "KnifeZ.Virgo API V1");
                 });
             }
-            return app;
-        }
-
-        public static IApplicationBuilder UseVue (this IApplicationBuilder app)
-        {
-            var env = app.ApplicationServices.GetService<IWebHostEnvironment>();
-            if (env.IsDevelopment())
-            {
-                //app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
-                //{
-                //    HotModuleReplacement = false,
-                //    ConfigFile = "config/webpack.dev.js",
-                //    ProjectPath = System.IO.Path.Combine(env.ContentRootPath, "ClientApp/")
-
-                //});
-            }
-            app.UseSpaStaticFiles();
-
             return app;
         }
 

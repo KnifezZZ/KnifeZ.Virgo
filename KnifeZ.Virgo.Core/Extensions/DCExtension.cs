@@ -50,19 +50,25 @@ namespace KnifeZ.Virgo.Core.Extensions
             where T : TreePoco
         {
             var dps = knifeVirgo?.LoginUserInfo?.DataPrivileges;
-            var query = baseQuery;
+            var query = baseQuery.AsNoTracking();
 
             //如果没有指定忽略权限，则拼接权限过滤的where条件
             if (ignorDataPrivilege == false)
             {
                 query = AppendSelfDPWhere(query, knifeVirgo, dps);
             }
+            if (typeof(IPersistPoco).IsAssignableFrom(typeof(T)))
+            {
+                var mod = new IsValidModifier();
+                var newExp = mod.Modify(query.Expression);
+                query = query.Provider.CreateQuery<T>(newExp) as IOrderedQueryable<T>;
+            }
 
             //处理后面要使用的expression
-            if (valueField == null)
-            {
-                valueField = x => x.GetID().ToString().ToLower();
-            }
+            //if (valueField == null)
+            //{
+            valueField = x => x.GetID().ToString().ToLower();
+            //}
             Expression<Func<T, string>> parentField = x => x.ParentId.ToString().ToLower();
 
             //定义PE
@@ -180,7 +186,7 @@ namespace KnifeZ.Virgo.Core.Extensions
             where T : TopBasePoco
         {
             var dps = knifeVirgo?.LoginUserInfo?.DataPrivileges;
-            var query = baseQuery;
+            var query = baseQuery.AsNoTracking();
 
             //如果value字段为空，则默认使用Id字段作为value值
             if (valueField == null)
@@ -194,7 +200,7 @@ namespace KnifeZ.Virgo.Core.Extensions
                 query = AppendSelfDPWhere(query, knifeVirgo, dps);
             }
 
-            if (typeof(T).IsSubclassOf(typeof(PersistPoco)))
+            if (typeof(IPersistPoco).IsAssignableFrom(typeof(T)))
             {
                 var mod = new IsValidModifier();
                 var newExp = mod.Modify(query.Expression);
@@ -597,6 +603,28 @@ namespace KnifeZ.Virgo.Core.Extensions
             return baseQuery.Where(Expression.Lambda<Func<T, bool>>(Expression.Equal(peid, Expression.Constant(convertid)), pe));
         }
 
+        public static IQueryable<T> CheckIDs<T> (this IQueryable<T> baseQuery, List<string> val, MemberExpression member = null)
+        {
+            if (val == null)
+            {
+                return baseQuery;
+            }
+            ParameterExpression pe = Expression.Parameter(typeof(T));
+            PropertyInfo idproperty = null;
+            if (member == null)
+            {
+                idproperty = typeof(T).GetSingleProperty("ID");
+            }
+            else
+            {
+                idproperty = typeof(T).GetSingleProperty(member.Member.Name);
+            }
+            Expression peid = Expression.Property(pe, idproperty);
+            var exp = val.GetContainIdExpression(typeof(T), pe, peid).Body;
+            return baseQuery.Where(Expression.Lambda<Func<T, bool>>(exp, pe));
+        }
+
+
         public static IQueryable<T> CheckNotNull<T> (this IQueryable<T> baseQuery, Expression<Func<T, object>> member)
         {
             return baseQuery.CheckNotNull<T>(member.GetPropertyName());
@@ -626,6 +654,10 @@ namespace KnifeZ.Virgo.Core.Extensions
             {
                 return baseQuery;
             }
+            else if (val is string s && string.IsNullOrEmpty(s))
+            {
+                return baseQuery;
+            }
             else
             {
                 if (typeof(IList).IsAssignableFrom(val.GetType()))
@@ -641,12 +673,13 @@ namespace KnifeZ.Virgo.Core.Extensions
 
         public static IQueryable<T> CheckEqual<T> (this IQueryable<T> baseQuery, string val, Expression<Func<T, string>> field)
         {
-            if (val == null || val == "")
+            if (string.IsNullOrEmpty(val))
             {
                 return baseQuery;
             }
             else
             {
+                val = val.Trim();
                 var equal = Expression.Equal(field.Body, Expression.Constant(val));
                 var where = Expression.Lambda<Func<T, bool>>(equal, field.Parameters[0]);
                 return baseQuery.Where(where);
@@ -732,6 +765,7 @@ where S : struct
             }
             else
             {
+                val = val.Trim();
                 Expression exp = null;
                 if (ignoreCase == true)
                 {
@@ -768,7 +802,7 @@ where S : struct
             ParameterExpression pe = Expression.Parameter(typeof(T));
             var idproperty = typeof(T).GetSingleProperty(fieldName);
             Expression pro = Expression.Property(pe, idproperty);
-            Expression tostring = Expression.Call(pro, "ToString", Array.Empty<Type>());
+            Expression tostring = Expression.Call(pro, "ToString", new Type[] { });
             Type proType = typeof(string);
             Expression final = Expression.Call(
                                            typeof(Queryable),
@@ -779,6 +813,7 @@ where S : struct
             var rv = baseQuery.Provider.CreateQuery<string>(final) as IOrderedQueryable<string>;
             return rv;
         }
+
 
 
         public static string GetTableName<T> (this IDataContext self)

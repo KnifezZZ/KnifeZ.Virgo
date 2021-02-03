@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using KnifeZ.Virgo.Core;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Options;
 
 namespace KnifeZ.Virgo.Mvc
@@ -20,20 +21,24 @@ namespace KnifeZ.Virgo.Mvc
             _next = next;
         }
 
-        public async Task InvokeAsync (HttpContext context, IOptions<Configs> configs)
+        public async Task InvokeAsync (HttpContext context, IOptionsMonitor<Configs> configs)
         {
-            context.Request.EnableBuffering();
-            context.Request.Body.Position = 0;
-            StreamReader tr = new StreamReader(context.Request.Body);
-            string body = tr.ReadToEndAsync().Result;
-            context.Request.Body.Position = 0;
-            if (context.Items.ContainsKey("DONOTUSE_REQUESTBODY") == false)
+            context.Features.Get<IHttpMaxRequestBodySizeFeature>().MaxRequestBodySize = configs.CurrentValue.FileUploadOptions.UploadLimit;
+            if (context.Request.ContentLength > 0 && context.Request.ContentLength < 512000)
             {
-                context.Items.Add("DONOTUSE_REQUESTBODY", body);
-            }
-            else
-            {
-                context.Items["DONOTUSE_REQUESTBODY"] = body;
+                context.Request.EnableBuffering();
+                context.Request.Body.Position = 0;
+                StreamReader tr = new StreamReader(context.Request.Body);
+                string body = tr.ReadToEndAsync().Result;
+                context.Request.Body.Position = 0;
+                if (context.Items.ContainsKey("DONOTUSE_REQUESTBODY") == false)
+                {
+                    context.Items.Add("DONOTUSE_REQUESTBODY", body);
+                }
+                else
+                {
+                    context.Items["DONOTUSE_REQUESTBODY"] = body;
+                }
             }
             await _next(context);
             if (context.Response.StatusCode == 404)

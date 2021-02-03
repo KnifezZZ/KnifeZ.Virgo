@@ -205,7 +205,7 @@ namespace KnifeZ.Virgo.Core
                 //【CHECK】上传附件的ID为空
                 if (UploadFileId == null)
                 {
-                    ErrorListVM.EntityList.Add(new ErrorMessage { Message = Program._localizer["PleaseUploadTemplate"] });
+                    ErrorListVM.EntityList.Add(new ErrorMessage { Message = CoreProgram.Callerlocalizer["PleaseUploadTemplate"] });
                     return;
                 }
 
@@ -214,7 +214,7 @@ namespace KnifeZ.Virgo.Core
                 var file = fp.GetFile(UploadFileId, true, DC);
                 if (file == null)
                 {
-                    ErrorListVM.EntityList.Add(new ErrorMessage { Message = Program._localizer["WrongTemplate"] });
+                    ErrorListVM.EntityList.Add(new ErrorMessage { Message = CoreProgram.Callerlocalizer["WrongTemplate"] });
                     return;
                 }
 
@@ -227,7 +227,7 @@ namespace KnifeZ.Virgo.Core
                 string TemplateHiddenName = xssfworkbook.GetSheetAt(1).GetRow(0).Cells[2].ToString();
                 if (ValidityTemplateType && !TemplateHiddenName.Equals(typeof(T).Name))
                 {
-                    ErrorListVM.EntityList.Add(new ErrorMessage { Message = Program._localizer["WrongTemplate"] });
+                    ErrorListVM.EntityList.Add(new ErrorMessage { Message = CoreProgram.Callerlocalizer["WrongTemplate"] });
                     return;
                 }
 
@@ -252,7 +252,7 @@ namespace KnifeZ.Virgo.Core
                 int columnCount = dynamicColumn == null ? ListTemplateProptetys.Count : (ListTemplateProptetys.Count + dynamicColumn.DynamicColumns.Count - 1);
                 if (columnCount != cells.Count)
                 {
-                    ErrorListVM.EntityList.Add(new ErrorMessage { Message = Program._localizer["WrongTemplate"] });
+                    ErrorListVM.EntityList.Add(new ErrorMessage { Message = CoreProgram.Callerlocalizer["WrongTemplate"] });
                     return;
                 }
 
@@ -267,7 +267,7 @@ namespace KnifeZ.Virgo.Core
                     {
                         if (cells[i].ToString().Trim('*') != ListTemplateProptetys[pIndex].ColumnName)
                         {
-                            ErrorListVM.EntityList.Add(new ErrorMessage { Message = Program._localizer["WrongTemplate"] });
+                            ErrorListVM.EntityList.Add(new ErrorMessage { Message = CoreProgram.Callerlocalizer["WrongTemplate"] });
                             return;
                         }
                         pIndex++;
@@ -280,7 +280,7 @@ namespace KnifeZ.Virgo.Core
                         {
                             if (cells[i].ToString().Trim('*') != listDynamicColumns[dclIndex].ColumnName)
                             {
-                                ErrorListVM.EntityList.Add(new ErrorMessage { Message = Program._localizer["WrongTemplate"] });
+                                ErrorListVM.EntityList.Add(new ErrorMessage { Message = CoreProgram.Callerlocalizer["WrongTemplate"] });
                                 break;
                             }
                             i = i + 1;
@@ -356,7 +356,7 @@ namespace KnifeZ.Virgo.Core
             }
             catch
             {
-                ErrorListVM.EntityList.Add(new ErrorMessage { Message = Program._localizer["WrongTemplate"] });
+                ErrorListVM.EntityList.Add(new ErrorMessage { Message = CoreProgram.Callerlocalizer["WrongTemplate"] });
             }
         }
 
@@ -804,12 +804,12 @@ namespace KnifeZ.Virgo.Core
                         //如果只有一个字段重复，则拼接形成 xxx字段重复 这种提示
                         if (props.Count == 1)
                         {
-                            ErrorListVM.EntityList.Add(new ErrorMessage { Message = Program._localizer["DuplicateError", AllName], Index = entity.ExcelIndex });
+                            ErrorListVM.EntityList.Add(new ErrorMessage { Message = CoreProgram.Callerlocalizer["DuplicateError", AllName], Index = entity.ExcelIndex });
                         }
                         //如果多个字段重复，则拼接形成 xx，yy，zz组合字段重复 这种提示
                         else if (props.Count > 1)
                         {
-                            ErrorListVM.EntityList.Add(new ErrorMessage { Message = Program._localizer["DuplicateGroupError", AllName], Index = entity.ExcelIndex });
+                            ErrorListVM.EntityList.Add(new ErrorMessage { Message = CoreProgram.Callerlocalizer["DuplicateGroupError", AllName], Index = entity.ExcelIndex });
                         }
                     }
                 }
@@ -906,7 +906,7 @@ namespace KnifeZ.Virgo.Core
                     (item as PersistPoco).IsValid = true;
                 }
                 //如果是SqlServer数据库，而且没有主子表功能，进行Bulk插入
-                if (ConfigInfo.DBconfigs.Where(x => x.Key == (CurrentCS ?? "default")).FirstOrDefault().DbType == DBTypeEnum.SqlServer && !HasSubTable && UseBulkSave == true)
+                if (ConfigInfo.Connections.Where(x => x.Key == (CurrentCS ?? "default")).FirstOrDefault().DbType == DBTypeEnum.SqlServer && !HasSubTable && UseBulkSave == true)
                 {
                     ListAdd.Add(item);
                 }
@@ -1092,11 +1092,11 @@ namespace KnifeZ.Virgo.Core
                         //根据State判断修改或删除操作，输出不同的错误信息
                         if (ent.State == EntityState.Deleted)
                         {
-                            ErrorListVM.EntityList.Add(new ErrorMessage { Index = errorId, Message = Program._localizer["DataCannotDelete"] });
+                            ErrorListVM.EntityList.Add(new ErrorMessage { Index = errorId, Message = CoreProgram.Callerlocalizer["DataCannotDelete"] });
                         }
                         else if (ent.State == EntityState.Modified)
                         {
-                            ErrorListVM.EntityList.Add(new ErrorMessage { Index = errorId, Message = Program._localizer["EditFailed"] });
+                            ErrorListVM.EntityList.Add(new ErrorMessage { Index = errorId, Message = CoreProgram.Callerlocalizer["EditFailed"] });
                         }
                         else
                         {

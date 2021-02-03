@@ -30,14 +30,14 @@ namespace KnifeZ.Virgo.Core
         {
             if (_configs.Value != null)
             {
-                cs = _configs.Value.DBconfigs.Where(x => x.Key.ToLower() == "defaultlog").FirstOrDefault();
+                cs = _configs.Value.Connections.Where(x => x.Key.ToLower() == "defaultlog").FirstOrDefault();
                 if (cs == null)
                 {
-                    cs = _configs.Value.DBconfigs.Where(x => x.Key.ToLower() == "default").FirstOrDefault();
+                    cs = _configs.Value.Connections.Where(x => x.Key.ToLower() == "default").FirstOrDefault();
                 }
                 if (cs == null)
                 {
-                    cs = _configs.Value.DBconfigs.FirstOrDefault();
+                    cs = _configs.Value.Connections.FirstOrDefault();
                 }
                 logConfig = _logConfig.Value;
             }
@@ -107,14 +107,13 @@ namespace KnifeZ.Virgo.Core
                     {
                         ll = ActionLogTypesEnum.Exception;
                     }
-
                     log = new ActionLog
                     {
                         Remark = formatter?.Invoke(state, exception),
                         CreateTime = DateTime.Now,
                         ActionTime = DateTime.Now,
-                        ActionName = "VirgoLog",
-                        ModuleName = "VirgoLog",
+                        ActionName = "System Log",
+                        ModuleName = "System Log",
                         LogType = ll
                     };
                 }

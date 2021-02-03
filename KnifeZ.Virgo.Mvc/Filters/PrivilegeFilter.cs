@@ -88,7 +88,7 @@ namespace KnifeZ.Virgo.Mvc.Filters
                 {
                     if (controller is ControllerBase c2)
                     {
-                        context.Result = c2.BadRequest(Mvc.Program._localizer["DebugOnly"]);
+                        context.Result = c2.BadRequest(MvcProgram.Callerlocalizer["DebugOnly"]);
                     }
                 }
                 return;
@@ -114,7 +114,7 @@ namespace KnifeZ.Virgo.Mvc.Filters
                         {
                             ContentResult cr = new ContentResult()
                             {
-                                Content = Mvc.Program._localizer["NeedLogin"],
+                                Content = MvcProgram.Callerlocalizer["NeedLogin"],
                                 ContentType = "text/html",
                                 StatusCode = 401
                             };
@@ -163,7 +163,7 @@ namespace KnifeZ.Virgo.Mvc.Filters
                             {
                                 ContentResult cr = new ContentResult()
                                 {
-                                    Content = Mvc.Program._localizer["NoPrivilege"],
+                                    Content = MvcProgram.Callerlocalizer["NoPrivilege"],
                                     ContentType = "text/html",
                                     StatusCode = 403
                                 };
