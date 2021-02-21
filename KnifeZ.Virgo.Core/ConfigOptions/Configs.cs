@@ -208,31 +208,6 @@ namespace KnifeZ.Virgo.Core
 
         #endregion
 
-        #region DFS Config
-
-        private DFS _dfsServer;
-
-        /// <summary>
-        /// DFS Config
-        /// </summary>
-        public DFS DFSServer
-        {
-            get
-            {
-                if (_dfsServer == null)
-                {
-                    _dfsServer = new DFS();
-                }
-                return _dfsServer;
-            }
-            set
-            {
-                _dfsServer = value;
-            }
-        }
-
-        #endregion
-
         #region FileOptions
 
         private FileUploadOptions _fileUploadOptions;
@@ -258,35 +233,6 @@ namespace KnifeZ.Virgo.Core
             set
             {
                 _fileUploadOptions = value;
-            }
-        }
-
-        #endregion
-
-        #region UIOptions
-
-        private UIOptions _uiOptions;
-
-        /// <summary>
-        /// UIOptions
-        /// </summary>
-        public UIOptions UiOptions
-        {
-            get
-            {
-                if (_uiOptions == null)
-                {
-                    _uiOptions = new UIOptions();
-                    if (_uiOptions.PageSize == 0)
-                    {
-                        _uiOptions.PageSize = DefaultConfigConsts.DEFAULT_PAGESIZE;
-                    }
-                }
-                return _uiOptions;
-            }
-            set
-            {
-                _uiOptions = value;
             }
         }
 

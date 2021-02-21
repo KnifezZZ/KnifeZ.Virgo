@@ -150,10 +150,12 @@ namespace WebDemo
         /// <returns>data privileges list</returns>
         public List<IDataPrivilege> DataPrivilegeSettings ()
         {
-            List<IDataPrivilege> pris = new List<IDataPrivilege>();
-            //Add data privilege to specific type
-            //指定哪些模型需要数据权限
-            pris.Add(new DataPrivilegeInfo<FrameworkDomain>("域权限", m => m.Name));
+            List<IDataPrivilege> pris = new List<IDataPrivilege>
+            {
+                //Add data privilege to specific type
+                //指定哪些模型需要数据权限
+                new DataPrivilegeInfo<FrameworkDomain>("域权限", m => m.Name)
+            };
             return pris;
         }
 

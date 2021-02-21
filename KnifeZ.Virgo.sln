@@ -22,6 +22,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleAppDemo", "ConsoleAppDemo\ConsoleAppDemo.csproj", "{7C60FE9F-28E6-4BB0-978A-C4C07C945E23}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +50,10 @@ Global
 		{42FC9D7F-452B-43BB-AE20-A02C68BB0429}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42FC9D7F-452B-43BB-AE20-A02C68BB0429}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42FC9D7F-452B-43BB-AE20-A02C68BB0429}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C60FE9F-28E6-4BB0-978A-C4C07C945E23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C60FE9F-28E6-4BB0-978A-C4C07C945E23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C60FE9F-28E6-4BB0-978A-C4C07C945E23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C60FE9F-28E6-4BB0-978A-C4C07C945E23}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -58,6 +64,7 @@ Global
 		{C65EDB7F-FDF9-4068-AD67-450EE0159A7E} = {303E3E4E-98CF-47C9-89E3-2884CA97DF2C}
 		{6EF6D0AC-719F-4DD0-8AF1-954DED149BA6} = {303E3E4E-98CF-47C9-89E3-2884CA97DF2C}
 		{42FC9D7F-452B-43BB-AE20-A02C68BB0429} = {303E3E4E-98CF-47C9-89E3-2884CA97DF2C}
+		{7C60FE9F-28E6-4BB0-978A-C4C07C945E23} = {303E3E4E-98CF-47C9-89E3-2884CA97DF2C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {39846794-E652-4F66-9AC2-087EAADF6C9E}

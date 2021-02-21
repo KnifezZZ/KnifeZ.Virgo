@@ -6,8 +6,7 @@
     <Version>0.1.4</Version>
     <Description>KnifeZ's .NET5 Frameowrk</Description>
     <RepositoryUrl>https://gitee.com/KnifeZ/KnifeZ.Virgo</RepositoryUrl>
-	  <PackageIconUrl>https://www.knifez18.com/img/icon.png</PackageIconUrl>
-    <PackageIcon></PackageIcon>
+    <PackageIcon>icon.png</PackageIcon>
     <Authors>KnifeZ</Authors>
     <PackageTags>knifez,mvvm,.net5</PackageTags>
     <NeutralLanguage>zh-CN</NeutralLanguage>
@@ -44,4 +43,12 @@
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
     <PackageReference Include="Tencent.QCloud.Cos.Sdk" Version="5.4.17" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="..\..\..\KinfeZ\Pictures\icon.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </Resource>
+  </ItemGroup>
+
 </Project>

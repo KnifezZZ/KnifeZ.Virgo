@@ -96,13 +96,13 @@ namespace KnifeZ.Virgo.Core
         /// SaveChangesAsync
         /// </summary>
         /// <returns></returns>
-        Task<int> SaveChangesAsync (bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken));
+        Task<int> SaveChangesAsync (bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// SaveChangesAsync
         /// </summary>
         /// <returns></returns>
-        Task<int> SaveChangesAsync (CancellationToken cancellationToken = default(CancellationToken));
+        Task<int> SaveChangesAsync (CancellationToken cancellationToken = default);
 
         #endregion
 
@@ -139,6 +139,6 @@ namespace KnifeZ.Virgo.Core
         object CreateCommandParameter (string name, object value, ParameterDirection dir);
 
         void SetLoggerFactory (ILoggerFactory factory);
-        void Dispose ();
+        //void Dispose();
     }
 }
