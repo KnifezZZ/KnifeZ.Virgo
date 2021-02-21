@@ -11,7 +11,7 @@ namespace KnifeZ.Virgo.Core
     public enum SaveFileModeEnum
     {
         Local = 0,//本地
-        Database = 1,
+        //Database = 1,
         TenCos = 2,
         AliOSS = 3,
     };
