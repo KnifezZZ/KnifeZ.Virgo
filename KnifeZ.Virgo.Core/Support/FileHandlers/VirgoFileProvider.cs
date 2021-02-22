@@ -74,7 +74,7 @@ namespace KnifeZ.Virgo.Core.Support.FileHandlers
             }
             if (ci == null)
             {
-                return new VirgoDataBaseFileHandler(KnifeVirgo.ConfigInfo, dc);
+                return new VirgoLocalFileHandler(KnifeVirgo.ConfigInfo, dc);
             }
             else
             {
