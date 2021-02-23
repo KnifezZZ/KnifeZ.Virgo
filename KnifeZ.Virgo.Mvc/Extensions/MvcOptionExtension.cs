@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Text.Unicode;
 using System.Threading.Tasks;
+using KnifeZ.Extensions.DatabaseAccessor;
 using KnifeZ.Virgo.Core;
 using KnifeZ.Virgo.Core.Json;
 using KnifeZ.Virgo.Mvc.Binders;
@@ -52,7 +53,8 @@ namespace KnifeZ.Virgo.Mvc.Extensions
             options.JsonSerializerOptions.IgnoreNullValues = true;
             options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowReadingFromString;
             options.JsonSerializerOptions.Converters.Add(new StringIgnoreLTGTConverter());
-            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            //枚举字段转string
+            //options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             options.JsonSerializerOptions.Converters.Add(new DateRangeConverter());
         }
         public static void UseKnifeApiOptions (this ApiBehaviorOptions options)

@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using KnifeZ.Virgo.Core;
+using KnifeZ.Extensions;
 
 namespace KnifeZ.Virgo.Mvc.Binders
 {

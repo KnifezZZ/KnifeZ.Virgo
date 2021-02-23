@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using KnifeZ.Extensions.DatabaseAccessor;
 using KnifeZ.Virgo.Core.ConfigOptions;
 
 namespace KnifeZ.Virgo.Core
@@ -12,18 +13,18 @@ namespace KnifeZ.Virgo.Core
     {
         #region ConnectionStrings
 
-        private List<CS> _connectStrings;
+        private List<ConnectionStrings> _connectStrings;
 
         /// <summary>
         /// ConnectionStrings
         /// </summary>
-        public List<CS> Connections
+        public List<ConnectionStrings> Connections
         {
             get
             {
                 if (_connectStrings == null)
                 {
-                    _connectStrings = new List<CS>();
+                    _connectStrings = new List<ConnectionStrings>();
                 }
                 return _connectStrings;
             }
@@ -223,7 +224,7 @@ namespace KnifeZ.Virgo.Core
                 {
                     _fileUploadOptions = new FileUploadOptions()
                     {
-                        UploadLimit = DefaultConfigConsts.DEFAULT_UPLOAD_LIMIT,
+                        UploadLimit = GlobalConstants.DEFAULT_UPLOAD_LIMIT,
                         SaveFileMode = SaveFileModeEnum.Local,
                         Settings = new Dictionary<string, List<FileHandlerOptions>>()
                     };

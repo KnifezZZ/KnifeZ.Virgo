@@ -1,4 +1,5 @@
-﻿using KnifeZ.Virgo.Core;
+﻿using KnifeZ.Extensions.DatabaseAccessor;
+using KnifeZ.Virgo.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using System;
@@ -13,7 +14,7 @@ namespace ConsoleAppDemo
     public class DataContext : FrameworkContext
     {
 
-        public DataContext(CS cs) : base(cs)
+        public DataContext(ConnectionStrings cs) : base(cs)
         {
         }
 

@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Text;
+using KnifeZ.Extensions.DatabaseAccessor;
 using KnifeZ.Virgo.Core.Extensions;
 using KnifeZ.Virgo.Core.Models;
 

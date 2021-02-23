@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using KnifeZ.Extensions.DatabaseAccessor;
 using Microsoft.Extensions.Caching.Distributed;
 
 namespace KnifeZ.Virgo.Core

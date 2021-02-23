@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Aliyun.OSS;
+using KnifeZ.Extensions.DatabaseAccessor;
 using KnifeZ.Virgo.Core.ConfigOptions;
 using KnifeZ.Virgo.Core.Extensions;
 using KnifeZ.Virgo.Core.Models;

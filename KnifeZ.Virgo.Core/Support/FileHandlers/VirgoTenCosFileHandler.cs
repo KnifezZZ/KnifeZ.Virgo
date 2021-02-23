@@ -9,6 +9,7 @@ using COSXML;
 using COSXML.Auth;
 using COSXML.Model.Object;
 using COSXML.Utils;
+using KnifeZ.Extensions.DatabaseAccessor;
 using KnifeZ.Virgo.Core.ConfigOptions;
 using KnifeZ.Virgo.Core.Models;
 

@@ -1,3 +1,4 @@
+using KnifeZ.Extensions.DatabaseAccessor;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -23,7 +24,7 @@ namespace KnifeZ.Virgo.Core
 
     public class VirgoLoggerProvider : ILoggerProvider
     {
-        private CS cs = null;
+        private ConnectionStrings cs = null;
         private LoggerFilterOptions logConfig;
 
         public VirgoLoggerProvider (IOptions<Configs> _configs, IOptions<LoggerFilterOptions> _logConfig)
@@ -53,10 +54,10 @@ namespace KnifeZ.Virgo.Core
     public class VirgoLogger : ILogger
     {
         private readonly string categoryName;
-        private CS cs;
+        private ConnectionStrings cs;
         private LoggerFilterOptions logConfig;
 
-        public VirgoLogger (string categoryName, CS cs, LoggerFilterOptions logConfig)
+        public VirgoLogger (string categoryName, ConnectionStrings cs, LoggerFilterOptions logConfig)
         {
             this.categoryName = categoryName;
             this.cs = cs;

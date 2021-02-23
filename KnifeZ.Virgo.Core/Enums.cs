@@ -1,11 +1,6 @@
 namespace KnifeZ.Virgo.Core
 {
     /// <summary>
-    /// 数据库类型
-    /// </summary>
-    public enum DBTypeEnum { SqlServer, MySql, PgSql, Memory, SQLite, Oracle }
-
-    /// <summary>
     /// 上传图片存储方式
     /// </summary>
     public enum SaveFileModeEnum
@@ -54,8 +49,6 @@ namespace KnifeZ.Virgo.Core
     /// </summary>
     public enum UploadTypeEnum { AllFiles, ImageFile, ZipFile, ExcelFile, WordFile, PDFFile, TextFile }
     public enum ComponentRenderMode { Normal, Declare, Get, Reference }
-
-    public enum SortDir { Asc, Desc }
 
     public enum BackgroudColorEnum
     {

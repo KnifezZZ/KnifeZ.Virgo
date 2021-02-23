@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using KnifeZ.Extensions;
+using System.Collections.Generic;
 
 namespace KnifeZ.Virgo.Core
 {

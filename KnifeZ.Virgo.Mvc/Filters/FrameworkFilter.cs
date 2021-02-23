@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using KnifeZ.Virgo.Core.Support.Json;
 using Microsoft.Extensions.DependencyInjection;
 using KnifeZ.Virgo.Core.Json;
+using KnifeZ.Extensions;
 
 namespace KnifeZ.Virgo.Mvc.Filters
 {

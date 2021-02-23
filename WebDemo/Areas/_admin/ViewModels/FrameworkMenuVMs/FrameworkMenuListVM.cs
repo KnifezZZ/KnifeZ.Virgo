@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using KnifeZ.Extensions;
 using KnifeZ.Virgo.Core;
 using KnifeZ.Virgo.Core.Extensions;
 

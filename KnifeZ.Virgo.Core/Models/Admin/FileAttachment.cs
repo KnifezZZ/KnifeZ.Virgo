@@ -1,3 +1,4 @@
+using KnifeZ.Extensions;
 using KnifeZ.Virgo.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using System;

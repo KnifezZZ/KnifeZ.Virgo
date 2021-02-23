@@ -9,6 +9,7 @@ using KnifeZ.Virgo.Core.Extensions;
 using KnifeZ.Virgo.Core.Support.Json;
 using KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkRoleVMs;
 using KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkUserVms;
+using KnifeZ.Extensions;
 
 namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
 {

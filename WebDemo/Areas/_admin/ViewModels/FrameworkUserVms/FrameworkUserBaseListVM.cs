@@ -6,6 +6,7 @@ using System.Linq;
 using System.Xml.Serialization;
 using KnifeZ.Virgo.Core;
 using KnifeZ.Virgo.Core.Extensions;
+using KnifeZ.Extensions;
 
 namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkUserVms
 {

@@ -1,0 +1,9 @@
+D:\GitSource\KnifeZ.Unity\KnifeZ.Extensions\obj\Release\netstandard2.0\KnifeZ.Extensions.csprojAssemblyReference.cache
+D:\GitSource\KnifeZ.Unity\KnifeZ.Extensions\obj\Release\netstandard2.0\KnifeZ.Extensions.AssemblyInfoInputs.cache
+D:\GitSource\KnifeZ.Unity\KnifeZ.Extensions\obj\Release\netstandard2.0\KnifeZ.Extensions.AssemblyInfo.cs
+D:\GitSource\KnifeZ.Unity\KnifeZ.Extensions\obj\Release\netstandard2.0\KnifeZ.Extensions.csproj.CoreCompileInputs.cache
+D:\GitSource\KnifeZ.Unity\KnifeZ.Extensions\bin\Release\netstandard2.0\KnifeZ.Extensions.deps.json
+D:\GitSource\KnifeZ.Unity\KnifeZ.Extensions\bin\Release\netstandard2.0\KnifeZ.Extensions.dll
+D:\GitSource\KnifeZ.Unity\KnifeZ.Extensions\bin\Release\netstandard2.0\KnifeZ.Extensions.pdb
+D:\GitSource\KnifeZ.Unity\KnifeZ.Extensions\obj\Release\netstandard2.0\KnifeZ.Extensions.dll
+D:\GitSource\KnifeZ.Unity\KnifeZ.Extensions\obj\Release\netstandard2.0\KnifeZ.Extensions.pdb

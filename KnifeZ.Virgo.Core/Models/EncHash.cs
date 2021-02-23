@@ -1,4 +1,5 @@
-﻿using System;
+﻿using KnifeZ.Extensions;
+using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KnifeZ.Virgo.Core

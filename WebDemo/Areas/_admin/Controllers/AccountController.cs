@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using KnifeZ.Extensions;
 using KnifeZ.Virgo.Core;
 using KnifeZ.Virgo.Core.Extensions;
 using KnifeZ.Virgo.Mvc;
@@ -143,7 +144,7 @@ namespace KnifeZ.Virgo.Admin.Api
         {
             if (KnifeVirgo.LoginUserInfo == null)
             {
-                return BadRequest();
+                return BadRequest("登录认证过期，请重新登录");
             }
             else
             {

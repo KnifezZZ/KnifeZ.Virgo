@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using KnifeZ.Extensions;
 using KnifeZ.Virgo.Core;
 using KnifeZ.Virgo.Core.Attributes;
 using KnifeZ.Virgo.Core.Extensions;

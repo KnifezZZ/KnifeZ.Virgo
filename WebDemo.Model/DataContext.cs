@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using KnifeZ.Extensions.DatabaseAccessor;
 using KnifeZ.Virgo.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
@@ -11,7 +12,7 @@ namespace WebDemo.Model
     {
         public DbSet<FrameworkUser> FrameworkUsers { get; set; }
 
-        public DataContext (CS cs) : base(cs)
+        public DataContext (ConnectionStrings cs) : base(cs)
         {
         }
 

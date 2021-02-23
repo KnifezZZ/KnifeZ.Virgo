@@ -14,7 +14,7 @@ using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using KnifeZ.Virgo.Core;
 using KnifeZ.Virgo.Core.Auth;
-using KnifeZ.Virgo.Core.Extensions;
+using KnifeZ.Extensions;
 using KnifeZ.Virgo.Core.Support.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http;

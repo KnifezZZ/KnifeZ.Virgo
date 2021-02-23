@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using KnifeZ.Virgo.Core;
-using KnifeZ.Virgo.Core.Extensions;
+using KnifeZ.Extensions;
 using KnifeZ.Virgo.Core.Support.Json;
 using System.Text.Json.Serialization;
 

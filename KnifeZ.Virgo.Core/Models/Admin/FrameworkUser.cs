@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Microsoft.EntityFrameworkCore;
 using KnifeZ.Virgo.Core.Support.Json;
+using KnifeZ.Extensions;
 
 namespace KnifeZ.Virgo.Core
 {

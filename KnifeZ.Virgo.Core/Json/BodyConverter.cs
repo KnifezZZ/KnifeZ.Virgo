@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using KnifeZ.Virgo.Core.Extensions;
+using KnifeZ.Extensions;
 
 namespace KnifeZ.Virgo.Core.Json
 {

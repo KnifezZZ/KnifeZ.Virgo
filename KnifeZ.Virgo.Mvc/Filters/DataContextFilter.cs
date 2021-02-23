@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using KnifeZ.Virgo.Core;
+using KnifeZ.Extensions.DatabaseAccessor;
 
 namespace KnifeZ.Virgo.Mvc.Filters
 {

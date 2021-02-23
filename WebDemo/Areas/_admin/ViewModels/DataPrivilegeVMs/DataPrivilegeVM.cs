@@ -6,6 +6,7 @@ using KnifeZ.Virgo.Core;
 using KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkGroupVMs;
 using KnifeZ.Virgo.Core.Extensions;
 using System.Threading.Tasks;
+using KnifeZ.Extensions;
 
 namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.DataPrivilegeVMs
 {

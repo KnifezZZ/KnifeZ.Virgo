@@ -9,6 +9,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using KnifeZ.Virgo.Core.Extensions;
+using KnifeZ.Extensions;
 
 namespace KnifeZ.Virgo.Core
 {

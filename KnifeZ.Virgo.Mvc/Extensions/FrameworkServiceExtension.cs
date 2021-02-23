@@ -7,6 +7,8 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
+using KnifeZ.Extensions;
+using KnifeZ.Extensions.DatabaseAccessor;
 using KnifeZ.Virgo.Core;
 using KnifeZ.Virgo.Core.Auth;
 using KnifeZ.Virgo.Core.Extensions;

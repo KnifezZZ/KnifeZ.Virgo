@@ -1,3 +1,14 @@
+using KnifeZ.Extensions;
+using KnifeZ.Virgo.Core.Extensions;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
+using Npgsql;
+using NpgsqlTypes;
+using NPOI.HSSF.Util;
+using NPOI.SS.UserModel;
+using NPOI.SS.Util;
+using NPOI.XSSF.UserModel;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,20 +19,8 @@ using System.IO.Compression;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Data.SqlClient;
-using Npgsql;
-using NpgsqlTypes;
-using NPOI.HSSF.UserModel;
-using NPOI.HSSF.Util;
-using NPOI.SS.UserModel;
-using NPOI.SS.Util;
-using NPOI.XSSF.UserModel;
-using KnifeZ.Virgo.Core.Extensions;
 using System.Text.Json.Serialization;
-using MySqlConnector;
+using System.Text.RegularExpressions;
 
 namespace KnifeZ.Virgo.Core
 {
@@ -166,7 +165,7 @@ namespace KnifeZ.Virgo.Core
 
             //创建表头样式
             ICellStyle headerStyle = book.CreateCellStyle();
-            headerStyle.FillBackgroundColor = ExportTitleBackColor == null ? HSSFColor.LightBlue.Index : ExportTitleBackColor.Value;
+            headerStyle.FillBackgroundColor = ExportTitleBackColor == null ? HSSFColor.LightBlue.Index: ExportTitleBackColor.Value;
             headerStyle.FillPattern = FillPattern.SolidForeground;
             headerStyle.FillForegroundColor = ExportTitleBackColor == null ? HSSFColor.LightBlue.Index : ExportTitleBackColor.Value;
             headerStyle.BorderBottom = BorderStyle.Thin;
@@ -176,7 +175,7 @@ namespace KnifeZ.Virgo.Core
             IFont font = book.CreateFont();
             font.FontName = "Calibri";
             font.FontHeightInPoints = 12;
-            font.Color = ExportTitleFontColor == null ? HSSFColor.Black.Index : ExportTitleFontColor.Value;
+            font.Color = ExportTitleFontColor == null ? HSSFColor.White.Index : ExportTitleFontColor.Value;
             headerStyle.SetFont(font);
 
             ICellStyle cellStyle = book.CreateCellStyle();
@@ -668,7 +667,7 @@ namespace KnifeZ.Virgo.Core
                         }
                         if (Searcher.Limit == 0)
                         {
-                            Searcher.Limit = ConfigOptions.DefaultConfigConsts.DEFAULT_PAGESIZE;
+                            Searcher.Limit = GlobalConstants.DEFAULT_PAGESIZE;
                         }
                         //根据返回数据的数量，以及预先设定的每页行数来设定数据量和总页数
                         Searcher.Count = count;

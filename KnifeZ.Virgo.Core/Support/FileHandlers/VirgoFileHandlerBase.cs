@@ -6,6 +6,7 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using KnifeZ.Virgo.Core.Extensions;
 using KnifeZ.Virgo.Core.Models;
+using KnifeZ.Extensions.DatabaseAccessor;
 
 namespace KnifeZ.Virgo.Core.Support.FileHandlers
 {

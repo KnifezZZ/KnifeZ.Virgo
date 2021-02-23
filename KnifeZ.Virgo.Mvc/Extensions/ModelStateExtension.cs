@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using KnifeZ.Virgo.Core;
+using KnifeZ.Extensions;
 
 namespace KnifeZ.Virgo.Mvc
 {

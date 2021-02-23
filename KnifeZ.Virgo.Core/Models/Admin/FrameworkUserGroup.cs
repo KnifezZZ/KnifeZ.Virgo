@@ -1,5 +1,6 @@
 ﻿using System;
 using KnifeZ.Virgo.Core.Attributes;
+using KnifeZ.Extensions;
 
 namespace KnifeZ.Virgo.Core
 {

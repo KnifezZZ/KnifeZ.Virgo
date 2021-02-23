@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using KnifeZ.Virgo.Core.Extensions;
 using KnifeZ.Virgo.Core.Support.Json;
 using System.Text.Json.Serialization;
+using KnifeZ.Extensions.DatabaseAccessor;
 
 namespace KnifeZ.Virgo.Core
 {

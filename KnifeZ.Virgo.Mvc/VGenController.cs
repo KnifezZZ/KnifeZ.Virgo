@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using KnifeZ.Virgo.Core;
-using KnifeZ.Virgo.Core.Extensions;
+using KnifeZ.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

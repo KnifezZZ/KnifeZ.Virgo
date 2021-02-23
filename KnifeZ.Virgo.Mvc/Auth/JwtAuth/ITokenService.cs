@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using KnifeZ.Extensions.DatabaseAccessor;
 using KnifeZ.Virgo.Core;
 
 namespace KnifeZ.Virgo.Mvc.Auth

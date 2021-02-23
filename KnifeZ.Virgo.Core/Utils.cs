@@ -14,6 +14,7 @@ using System.Text.RegularExpressions;
 using KnifeZ.Virgo.Core.Extensions;
 using KnifeZ.Virgo.Core.Support;
 using KnifeZ.Virgo.Core.Support.Json;
+using KnifeZ.Extensions;
 
 namespace KnifeZ.Virgo.Core
 {

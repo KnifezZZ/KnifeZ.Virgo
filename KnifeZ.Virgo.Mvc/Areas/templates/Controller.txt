@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
+using KnifeZ.Extensions;
 using KnifeZ.Virgo.Core;
 using KnifeZ.Virgo.Core.Extensions;
 using KnifeZ.Virgo.Mvc;

@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>KnifeZ.Extensions</id>
+    <version>0.0.1</version>
+    <authors>KnifeZ</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>KnifeZ‘s component package</description>
+    <dependencies>
+      <group targetFramework=".NETStandard2.1">
+        <dependency id="Microsoft.Extensions.Caching.Abstractions" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Configuration" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Configuration.Abstractions" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Hosting.Abstractions" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.Collections.Immutable" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.ComponentModel.Annotations" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.Runtime.Loader" version="4.3.0" exclude="Build,Analyzers" />
+        <dependency id="System.Text.Json" version="5.0.1" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="D:\GitSource\KnifeZ.Virgo\KnifeZ.Extensions\KnifeZ.Extensions\bin\Debug\netstandard2.1\KnifeZ.Extensions.dll" target="lib\netstandard2.1\KnifeZ.Extensions.dll" />
+  </files>
+</package>
