@@ -10,6 +10,7 @@ using KnifeZ.Virgo.Core.Json;
 using KnifeZ.Virgo.Core.Support.FileHandlers;
 using KnifeZ.Virgo.Mvc;
 using KnifeZ.Virgo.Mvc.Extensions;
+using KnifeZ.Virgo.Mvc.Filters;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -25,54 +26,47 @@ namespace WebDemo
 {
     public class Startup
     {
-        public IConfigurationRoot ConfigRoot { get; }
         public Startup (IWebHostEnvironment env)
         {
             var configBuilder = new ConfigurationBuilder();
-            ConfigRoot = configBuilder.VirgoConfig(env).Build();
+            ConfigRoot = configBuilder.AddKnifeJsonConfig(env).Build();
         }
-
-        public IConfiguration Configuration { get; }
+        /// <summary>
+        /// 可配置路径的Configuration
+        /// </summary>
+        public IConfigurationRoot ConfigRoot { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices (IServiceCollection services)
         {
-
-            services.AddDistributedMemoryCache();
-            services.AddVirgoSession(3600);
-            services.AddVirgoCrossDomain();
-            services.AddVirgoAuthentication();
-            services.AddVirgoHttpClient();
-            services.AddVirgoSwagger(new OpenApiInfo
+            services.AddSwaggerGen(c =>
             {
-                Title = "WebDemo Api",
-                Version = "v1"
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebDemo API", Version = "v1" });
+                c.UseSwaggerSecurityOptions();
             });
+
+            services.AddVirgoService(
+                config: ConfigRoot, options: options =>
+               {
+                   options.DataPrivileges = DataPrivilegeSettings();
+               });
+
             services.AddVirgoMultiLanguages();
 
             services.AddMvc(options =>
             {
-                options.UseKnifeMvcOptions();
+                options.UseVirgoMvcOptions();
             })
             .AddJsonOptions(options =>
             {
-                options.UseKnifeJsonOptions();
+                options.UseVirgoJsonOptions();
             })
-            .SetCompatibilityVersion(CompatibilityVersion.Latest)
             .ConfigureApiBehaviorOptions(options =>
             {
-                options.UseKnifeApiOptions();
+                options.UseVirgoApiOptions();
             })
             .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
             .AddVirgoDataAnnotationsLocalization(typeof(Program));
-
-            services.AddVirgoContext(ConfigRoot, options =>
-            {
-                options.DataPrivileges = DataPrivilegeSettings();
-                options.CsSelector = CSSelector;
-                options.FileSubDirSelector = SubDirSelector;
-                options.ReloadUserFunc = ReloadUser;
-            });
 
         }
 
@@ -83,7 +77,7 @@ namespace WebDemo
 
             if (configs == null)
             {
-                throw new InvalidOperationException("Can not find Configs service, make sure you call AddVirgoContext at ConfigService");
+                throw new InvalidOperationException("Can not find Configs service, make sure you call AddVirgoService at ConfigService");
             }
 
             if (env.IsDevelopment())
@@ -95,24 +89,17 @@ namespace WebDemo
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "WebDemo API V1");
                 });
             }
-
-            app.UseStaticFiles();
-            app.UseFileServer();
             //自动跳转https
             app.UseHttpsRedirection();
-
-
             app.UseRouting();
-
+            
+            app.UseVirgoService();
             app.UseVirgoMultiLanguages();
-            app.UseVirgoCrossDomain();
 
             app.UseAuthorization();
             app.UseAuthentication();
-            app.UseSession();
 
-            app.UseVirgoSwagger(false);
-            app.UseVirgo();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
@@ -124,27 +111,9 @@ namespace WebDemo
                     pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapFallbackToFile("index.html");
             });
-
-            app.UseVirgoContext();
-        }
-
-
-        /// <summary>
-        /// Wtm will call this function to dynamiclly set connection string
-        /// 框架会调用这个函数来动态设定每次访问需要链接的数据库
-        /// </summary>
-        /// <param name="context">ActionContext</param>
-        /// <returns>Connection string key name</returns>
-        public string CSSelector (ActionExecutingContext context)
-        {
-            //To override the default logic of choosing connection string,
-            //change this function to return different connection string key
-            //根据context返回不同的连接字符串的名称
-            return null;
         }
 
         /// <summary>
-        /// Set data privileges that system supports
         /// 设置系统支持的数据权限
         /// </summary>
         /// <returns>data privileges list</returns>
@@ -157,33 +126,6 @@ namespace WebDemo
                 new DataPrivilegeInfo<FrameworkDomain>("域权限", m => m.Name)
             };
             return pris;
-        }
-
-        /// <summary>
-        /// Set sub directory of uploaded files
-        /// 动态设置上传文件的子目录
-        /// </summary>
-        /// <param name="fh">IWtmFileHandler</param>
-        /// <returns>subdir name</returns>
-        public string SubDirSelector (IVirgoFileHandler fh)
-        {
-            if (fh is VirgoLocalFileHandler)
-            {
-                return DateTime.Now.ToString("yyyy-MM-dd");
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Custom Reload user process when cache is not available
-        /// 设置自定义的方法重新读取用户信息，这个方法会在用户缓存失效的时候调用
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="account"></param>
-        /// <returns></returns>
-        public LoginUserInfo ReloadUser (VirgoContext context, string account)
-        {
-            return null;
         }
     }
 }

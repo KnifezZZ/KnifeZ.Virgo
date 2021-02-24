@@ -13,13 +13,40 @@ using KnifeZ.Virgo.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace KnifeZ.Virgo.Mvc.Extensions
 {
     public static class MvcOptionExtension
     {
-        public static void UseKnifeMvcOptions (this MvcOptions options)
+        public static void UseSwaggerSecurityOptions(this SwaggerGenOptions options)
+        {
+            var bearer = new OpenApiSecurityScheme()
+            {
+                Description = "JWT Bearer",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey
+
+            };
+            options.AddSecurityDefinition("Bearer", bearer);
+            var sr = new OpenApiSecurityRequirement();
+            sr.Add(new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            }, Array.Empty<string>());
+            options.AddSecurityRequirement(sr);
+            options.SchemaFilter<SwaggerFilter>();
+        }
+
+        public static void UseVirgoMvcOptions (this MvcOptions options)
         {
             // ModelBinderProviders
             options.ModelBinderProviders.Insert(0, new StringBinderProvider());
@@ -46,7 +73,7 @@ namespace KnifeZ.Virgo.Mvc.Extensions
         }
 
 
-        public static void UseKnifeJsonOptions (this JsonOptions options)
+        public static void UseVirgoJsonOptions (this JsonOptions options)
         {
             options.JsonSerializerOptions.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(UnicodeRanges.All);
             options.JsonSerializerOptions.PropertyNamingPolicy = null;
@@ -57,7 +84,7 @@ namespace KnifeZ.Virgo.Mvc.Extensions
             //options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             options.JsonSerializerOptions.Converters.Add(new DateRangeConverter());
         }
-        public static void UseKnifeApiOptions (this ApiBehaviorOptions options)
+        public static void UseVirgoApiOptions (this ApiBehaviorOptions options)
         {
             options.SuppressModelStateInvalidFilter = true;
             options.InvalidModelStateResponseFactory = (a) =>

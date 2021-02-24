@@ -18,7 +18,7 @@ namespace KnifeZ.Virgo.Core.Extensions
         public static IServiceCollection AddVirgoContextForConsole (this IServiceCollection services, string jsonFileDir = null, string jsonFileName = null, Func<IVirgoFileHandler, string> fileSubDirSelector = null)
         {
             var configBuilder = new ConfigurationBuilder();
-            IConfigurationRoot ConfigRoot = configBuilder.VirgoConfig(null, jsonFileDir, jsonFileName).Build();
+            IConfigurationRoot ConfigRoot = configBuilder.AddKnifeJsonConfig(null, jsonFileDir, jsonFileName).Build();
             var VirgoConfigs = ConfigRoot.Get<Configs>();
             services.Configure<Configs>(ConfigRoot);
             services.AddLogging(builder =>
@@ -36,19 +36,9 @@ namespace KnifeZ.Virgo.Core.Extensions
             services.TryAddScoped<IDataContext, NullContext>();
             services.AddScoped<VirgoContext>();
             services.AddScoped<VirgoFileProvider>();
-            services.AddHttpClient();
-            if (VirgoConfigs.Domains != null)
-            {
-                foreach (var item in VirgoConfigs.Domains)
-                {
-                    services.AddHttpClient(item.Key, x =>
-                    {
-                        x.BaseAddress = new Uri(item.Value.Url);
-                        x.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
-                        x.DefaultRequestHeaders.Add("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; SV1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)");
-                    });
-                }
-            }
+
+            services.AddVirgoHttpClient(VirgoConfigs);
+
             services.AddDistributedMemoryCache();
             var cs = VirgoConfigs.Connections;
             foreach (var item in cs)
@@ -67,6 +57,25 @@ namespace KnifeZ.Virgo.Core.Extensions
                 AllAssembly = Utils.GetAllAssembly()
             };
             return gd;
+        }
+
+
+        public static IServiceCollection AddVirgoHttpClient(this IServiceCollection services,Configs configs)
+        {
+            services.AddHttpClient();
+            if (configs.Domains != null)
+            {
+                foreach (var item in configs.Domains)
+                {
+                    services.AddHttpClient(item.Key, x =>
+                    {
+                        x.BaseAddress = new Uri(item.Value.Url);
+                        x.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
+                        x.DefaultRequestHeaders.Add("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; SV1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)");
+                    });
+                }
+            }
+            return services;
         }
     }
 }

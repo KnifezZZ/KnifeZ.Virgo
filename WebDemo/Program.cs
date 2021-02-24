@@ -18,13 +18,7 @@ namespace WebDemo
         }
 
         public static IHostBuilder CreateHostBuilder (string[] args) =>
-            Host.CreateDefaultBuilder(args).ConfigureLogging((hostingContext, logging) =>
-            {
-                logging.ClearProviders();
-                logging.AddConsole();
-                logging.AddDebug();
-                logging.AddVirgoLogger();
-            })
+            Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();

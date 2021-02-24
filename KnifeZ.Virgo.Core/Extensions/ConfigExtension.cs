@@ -18,12 +18,12 @@ namespace KnifeZ.Virgo.Core.Extensions
         /// <param name="jsonFileDir"></param>
         /// <param name="jsonFileName"></param>
         /// <returns></returns>
-        public static IConfigurationBuilder VirgoConfig(this IConfigurationBuilder configBuilder, IHostEnvironment env, string jsonFileDir=null, string jsonFileName = null)
+        public static IConfigurationBuilder AddKnifeJsonConfig(this IConfigurationBuilder configBuilder, IHostEnvironment env, string jsonFileDir=null, string jsonFileName = null)
         {
             IConfigurationBuilder rv = configBuilder;
             if (string.IsNullOrEmpty(jsonFileDir))
             {
-                rv = rv.Virgo_SetCurrentDictionary();
+                rv = rv.SetCurrentDictionary();
             }
             else
             {
@@ -50,7 +50,7 @@ namespace KnifeZ.Virgo.Core.Extensions
         }
 
 
-        public static IConfigurationBuilder Virgo_SetCurrentDictionary(this IConfigurationBuilder cb)
+        public static IConfigurationBuilder SetCurrentDictionary(this IConfigurationBuilder cb)
         {
             CurrentDirectoryHelpers.SetCurrentDirectory();
 

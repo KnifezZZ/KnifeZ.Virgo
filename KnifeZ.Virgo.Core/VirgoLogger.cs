@@ -14,6 +14,11 @@ namespace KnifeZ.Virgo.Core
 {
     public static class VirgoLoggerExtensions
     {
+        /// <summary>
+        /// 添加一个名为“Virgo”的日志记录器
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <returns></returns>
         public static ILoggingBuilder AddVirgoLogger (this ILoggingBuilder builder)
         {
             builder.AddConfiguration();

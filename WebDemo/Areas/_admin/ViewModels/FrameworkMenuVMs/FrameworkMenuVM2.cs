@@ -47,24 +47,20 @@ namespace KnifeZ.Virgo.Mvc.Admin.ViewModels.FrameworkMenuVMs
                 {
                     Entity.ClassName = SelectedModule;
                 }
-                var urls = SimpleModules.Where(x => x.FullName == SelectedModule && x.IsApi == true).SelectMany(x => x.Actions).Where(x => x.IgnorePrivillege == false).Select(x => x.Url).ToList();
+                //var urls = SimpleModules.Where(x => x.FullName == SelectedModule && x.IsApi == true).SelectMany(x => x.Actions).Where(x => x.IgnorePrivillege == false);
                 if (SelectedActionIDs==null||!SelectedActionIDs.Any())
                 {
-                    SelectedActionIDs = DC.Set<FrameworkMenu>().Where(x => urls.Contains(x.Url) && x.IsInside == true && x.FolderOnly == false).Select(x => x.MethodName).ToList();
+                    SelectedActionIDs = DC.Set<FrameworkMenu>().Where(x => x.ClassName == SelectedModule && x.MethodName!=null).Select(x => x.MethodName).ToList();
                 }
             }
         }
 
         public override void Validate ()
         {
-            if (SelectedModule != "")
+            if (!string.IsNullOrEmpty(SelectedModule))
             {
                 Entity.IsInside = true;
                 Entity.Url = "/" + SelectedModule.Split(',')[1].ToLower();
-            }
-            else
-            {
-                Entity.IsInside = false;
             }
             if (Entity.IsInside == true && Entity.FolderOnly == false)
             {

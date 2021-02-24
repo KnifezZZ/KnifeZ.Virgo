@@ -37,6 +37,7 @@ using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.DependencyModel.Resolution;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -54,7 +55,7 @@ namespace KnifeZ.Virgo.Mvc
                 if (_virgoconfigs == null)
                 {
                     ConfigurationBuilder cb = new ConfigurationBuilder();
-                    _virgoconfigs = cb.VirgoConfig(null).Build().Get<Configs>();
+                    _virgoconfigs = cb.AddKnifeJsonConfig(null).Build().Get<Configs>();
                 }
                 return _virgoconfigs;
             }
@@ -456,6 +457,7 @@ namespace KnifeZ.Virgo.Mvc
             services.Configure<Configs>(config);
             var gd = GetGlobalData();
             services.AddHttpContextAccessor();
+
             services.AddSingleton(gd);
             services.AddSingleton(op.DataPrivileges ?? new List<IDataPrivilege>());
             DataContextFilter._csfunc = op.CsSelector;
@@ -472,48 +474,7 @@ namespace KnifeZ.Virgo.Mvc
             });
             return services;
         }
-        public static IServiceCollection AddVirgoCrossDomain (this IServiceCollection services)
-        {
-            services.AddCors(options =>
-            {
-                if (VirgoConfigs.CorsOptions?.Policy?.Count > 0)
-                {
-                    foreach (var item in VirgoConfigs.CorsOptions.Policy)
-                    {
-                        string[] domains = item.Domain?.Split(',');
-                        options.AddPolicy(item.Name,
-                           builder =>
-                           {
-                               builder.WithOrigins(domains)
-                               .AllowAnyHeader()
-                               .AllowAnyMethod()
-                               .AllowCredentials();
-                           });
-                    }
-                }
-                else
-                {
-                    options.AddPolicy("_donotusedefault",
-                        builder =>
-                        {
-                            builder.SetIsOriginAllowed((a) => true)
-                            .AllowAnyHeader()
-                            .AllowAnyMethod()
-                            .AllowCredentials();
-                        });
-                }
-            });
-            return services;
-        }
-        public static IServiceCollection AddVirgoSession (this IServiceCollection services, int timeout)
-        {
-            services.AddSession(options =>
-            {
-                options.Cookie.Name = VirgoConfigs.CookiePre + ".Session";
-                options.IdleTimeout = TimeSpan.FromSeconds(timeout);
-            });
-            return services;
-        }
+
         public static IServiceCollection AddVirgoAuthentication (this IServiceCollection services)
         {
             services.AddSingleton<ITokenService, TokenService>();
@@ -562,53 +523,6 @@ namespace KnifeZ.Virgo.Mvc
             return services;
         }
 
-        public static IServiceCollection AddVirgoHttpClient (this IServiceCollection services)
-        {
-            services.AddHttpClient();
-            if (VirgoConfigs.Domains != null)
-            {
-                foreach (var item in VirgoConfigs.Domains)
-                {
-                    services.AddHttpClient(item.Key, x =>
-                    {
-                        x.BaseAddress = new Uri(item.Value.Url);
-                        x.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
-                        x.DefaultRequestHeaders.Add("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; SV1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)");
-                    });
-                }
-            }
-            return services;
-        }
-
-        public static IServiceCollection AddVirgoSwagger (this IServiceCollection services,OpenApiInfo apiInfo)
-        {
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc(apiInfo.Version, apiInfo);
-                var bearer = new OpenApiSecurityScheme()
-                {
-                    Description = "JWT Bearer",
-                    Name = "Authorization",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.ApiKey
-
-                };
-                c.AddSecurityDefinition("Bearer", bearer);
-                var sr = new OpenApiSecurityRequirement();
-                sr.Add(new OpenApiSecurityScheme
-                {
-                    Reference = new OpenApiReference
-                    {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer"
-                    }
-                }, Array.Empty<string>());
-                c.AddSecurityRequirement(sr);
-                c.SchemaFilter<SwaggerFilter>();
-            });
-            return services;
-        }
-
         public static IServiceCollection AddVirgoMultiLanguages (this IServiceCollection services)
         {
             services.AddLocalization(options => options.ResourcesPath = "Resources");
@@ -645,6 +559,177 @@ namespace KnifeZ.Virgo.Mvc
                 };
             });
             return builder;
+        }
+        /// <summary>
+        /// 添加KnifeZ.Virgo注入服务
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="config">ConfigRoot</param>
+        /// <param name="sessionTimeOut">session过期时间</param>
+        /// <param name="options">VigroContext可配置项</param>
+        /// <returns></returns>
+        public static IServiceCollection AddVirgoService(this IServiceCollection services, 
+            IConfigurationRoot config, 
+            int sessionTimeOut = 3600, 
+            Action<VirgoContextOption> options = null)
+        {
+            //日志记录配置
+            services.AddLogging(logging =>
+            {
+                logging.ClearProviders();
+                logging.AddConfiguration(config.GetSection("Logging"));
+                logging.AddConsole();
+                logging.AddDebug();
+                logging.AddVirgoLogger();
+            });
+            // 注册分布式内存缓存
+            services.AddDistributedMemoryCache();
+            //session设置
+            services.AddSession(options =>
+            {
+                options.Cookie.Name = VirgoConfigs.CookiePre + ".Session";
+                options.IdleTimeout = TimeSpan.FromSeconds(sessionTimeOut);
+            });
+            //跨域处理
+            services.AddCors(options =>
+            {
+                if (VirgoConfigs.CorsOptions?.Policy?.Count > 0)
+                {
+                    foreach (var item in VirgoConfigs.CorsOptions.Policy)
+                    {
+                        string[] domains = item.Domain?.Split(',');
+                        options.AddPolicy(item.Name,
+                           builder =>
+                           {
+                               builder.WithOrigins(domains)
+                               .AllowAnyHeader()
+                               .AllowAnyMethod()
+                               .AllowCredentials();
+                           });
+                    }
+                }
+                else
+                {
+                    options.AddPolicy("_donotusedefault",
+                        builder =>
+                        {
+                            builder.SetIsOriginAllowed((a) => true)
+                            .AllowAnyHeader()
+                            .AllowAnyMethod()
+                            .AllowCredentials();
+                        });
+                }
+            });
+            services.AddVirgoAuthentication();
+            services.AddVirgoContext(config,options);
+            return services;
+        }
+
+        public static IApplicationBuilder UseVirgoService(this IApplicationBuilder app)
+        {
+
+            var configs = app.ApplicationServices.GetRequiredService<IOptionsMonitor<Configs>>().CurrentValue;
+            if (configs.CorsOptions.EnableAll == true)
+            {
+                if (configs.CorsOptions?.Policy?.Count > 0)
+                {
+                    app.UseCors(configs.CorsOptions.Policy[0].Name);
+                }
+                else
+                {
+                    app.UseCors("_donotusedefault");
+                }
+            }
+
+            app.UseStaticFiles();
+            app.UseFileServer();
+
+            app.UseSession();
+
+            app.UseVirgo();
+
+            var lg = app.ApplicationServices.GetRequiredService<LinkGenerator>();
+            var gd = app.ApplicationServices.GetRequiredService<GlobalData>();
+            var localfactory = app.ApplicationServices.GetRequiredService<IStringLocalizerFactory>();
+            //获取所有程序集
+            gd.AllAssembly = Utils.GetAllAssembly();
+
+            //set Core's _Callerlocalizer to use localizer point to the EntryAssembly's Program class
+            var programType = Assembly.GetCallingAssembly()?.GetTypes()?.Where(x => x.Name == "Program").FirstOrDefault();
+            var coredll = gd.AllAssembly.Where(x => x.GetName().Name == "KnifeZ.Virgo.Core.dll" || x.GetName().Name == "KnifeZ.Virgo.Core").FirstOrDefault();
+            var programLocalizer = localfactory.Create(programType);
+            coredll.GetType("KnifeZ.Virgo.Core.CoreProgram").GetProperty("Callerlocalizer").SetValue(null, programLocalizer);
+
+
+            var controllers = gd.GetTypesAssignableFrom<IBaseController>();
+            gd.AllModule = GetAllModules(controllers);
+            gd.AllAccessUrls = GetAllAccessUrls(controllers);
+
+            gd.SetMenuGetFunc(() =>
+            {
+                var menus = new List<SimpleMenu>();
+                var cache = app.ApplicationServices.GetRequiredService<IDistributedCache>();
+                var menuCacheKey = "FFMenus";
+                if (cache.TryGetValue(menuCacheKey, out List<SimpleMenu> rv) == false)
+                {
+                    var data = GetAllMenus(gd.AllModule, configs);
+                    cache.Add(menuCacheKey, data, new DistributedCacheEntryOptions() { AbsoluteExpirationRelativeToNow = new TimeSpan(1, 0, 0) });
+                    menus = data;
+                }
+                else
+                {
+                    menus = rv;
+                }
+
+                return menus;
+            });
+            foreach (var m in gd.AllModule)
+            {
+                foreach (var a in m.Actions)
+                {
+                    string u = null;
+                    if (a.ParasToRunTest != null && a.ParasToRunTest.Any(x => x.ToLower() == "id"))
+                    {
+                        u = lg.GetPathByAction(a.MethodName, m.ClassName, new { id = 0, area = m.Area?.AreaName });
+                    }
+                    else
+                    {
+                        u = lg.GetPathByAction(a.MethodName, m.ClassName, new { area = m.Area?.AreaName });
+                    }
+                    if (u != null && u.EndsWith("/0"))
+                    {
+                        u = u.Substring(0, u.Length - 2);
+                        if (m.IsApi == true)
+                        {
+                            u = u + "/{id}";
+                        }
+                    }
+                    a.Url = u;
+                }
+            }
+
+            var test = app.ApplicationServices.GetService<ISpaStaticFileProvider>();
+            VirgoFileProvider.Init(configs, gd);
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                var fixdc = scope.ServiceProvider.GetRequiredService<IDataContext>();
+                if (fixdc is NullContext)
+                {
+                    var cs = configs.Connections;
+                    foreach (var item in cs)
+                    {
+                        var dc = item.CreateDC();
+                        dc.DataInit(gd.AllModule, true).Wait();
+                    }
+                }
+                else
+                {
+                    fixdc.DataInit(gd.AllModule, true).Wait();
+                }
+
+            }
+
+            return app;
         }
 
         public static IApplicationBuilder UseVirgoContext (this IApplicationBuilder app)
@@ -752,35 +837,6 @@ namespace KnifeZ.Virgo.Mvc
                 });
                 System.Threading.Thread.CurrentThread.CurrentCulture = supportedCultures[0];
                 System.Threading.Thread.CurrentThread.CurrentUICulture = supportedCultures[0];
-            }
-            return app;
-        }
-        public static IApplicationBuilder UseVirgoCrossDomain (this IApplicationBuilder app)
-        {
-            var configs = app.ApplicationServices.GetRequiredService<IOptionsMonitor<Configs>>().CurrentValue;
-            if (configs.CorsOptions.EnableAll == true)
-            {
-                if (configs.CorsOptions?.Policy?.Count > 0)
-                {
-                    app.UseCors(configs.CorsOptions.Policy[0].Name);
-                }
-                else
-                {
-                    app.UseCors("_donotusedefault");
-                }
-            }
-            return app;
-        }
-        public static IApplicationBuilder UseVirgoSwagger (this IApplicationBuilder app, bool showInDebugOnly = true)
-        {
-            var configs = app.ApplicationServices.GetRequiredService<IOptions<Configs>>().Value;
-            if (configs.IsQuickDebug == true || showInDebugOnly == false)
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "KnifeZ.Virgo API V1");
-                });
             }
             return app;
         }

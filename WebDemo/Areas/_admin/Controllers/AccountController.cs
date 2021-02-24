@@ -105,6 +105,14 @@ namespace KnifeZ.Virgo.Admin.Api
             }
             else // jwt auth
             {
+                // 在上面注册AddAuthentication时，指定了默认的Scheme，在这里便可以不再指定Scheme。
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, 
+                    KnifeVirgo.LoginUserInfo.CreatePrincipal(),
+                    new AuthenticationProperties
+                    {
+                        IsPersistent = true,
+                        ExpiresUtc = DateTimeOffset.UtcNow.Add(TimeSpan.FromDays(15))
+                    });
                 var authService = HttpContext.RequestServices.GetService(typeof(ITokenService)) as ITokenService;
 
                 var token = await authService.IssueTokenAsync(KnifeVirgo.LoginUserInfo);
