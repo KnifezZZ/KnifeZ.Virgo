@@ -5,3 +5,7 @@
 */bin/
 */obj/
 .vs/
+/KnifeZ.Extensions/KnifeZ.Extensions/bin/
+/KnifeZ.Extensions/KnifeZ.Extensions/obj/
+/KnifeZ.Extensions/KnifeZ.Extensions.DatabaseAccessor/bin/
+/KnifeZ.Extensions/KnifeZ.Extensions.DatabaseAccessor/obj/

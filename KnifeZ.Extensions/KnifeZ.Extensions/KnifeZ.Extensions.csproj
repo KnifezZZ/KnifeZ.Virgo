@@ -3,9 +3,9 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.0.1</Version>
+    <Version>0.1.0</Version>
     <Authors>KnifeZ</Authors>
-    <Description>KnifeZ‘s component package</Description>
+    <Description>KnifeZ‘s 通用拓展库</Description>
   </PropertyGroup>
 
   <ItemGroup>

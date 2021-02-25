@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>0.1.0</Version>
+    <Authors>KnifeZ</Authors>
+    <Description>KnifeZ‘s 通用拓展库-数据库访问组件</Description>
   </PropertyGroup>
 
   <ItemGroup>
