@@ -20,13 +20,13 @@ namespace KnifeZ.Virgo.Mvc
                 if (item.Value.ValidationState == ModelValidationState.Invalid)
                 {
                     var name = item.Key;
-                    if (name.ToLower().StartsWith(" ") == false)
+                    if (name.ToLower().StartsWith(" "))
                     {
-                        mse.Form.Add(name, item.Value.Errors.FirstOrDefault()?.ErrorMessage);
+                        mse.Message.Add(item.Value.Errors.FirstOrDefault()?.ErrorMessage);
                     }
                     else
                     {
-                        mse.Message.Add(item.Value.Errors.FirstOrDefault()?.ErrorMessage);
+                        mse.Form.Add(name, item.Value.Errors.FirstOrDefault()?.ErrorMessage);
                     }
                 }
             }
